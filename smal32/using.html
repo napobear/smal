@@ -1,0 +1,259 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual, Using SMAL</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>10. Using SMAL32</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="index.html">
+      
+      the SMAL Manual
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2>Index</H2>
+
+<OL>
+<LI> <A href="using.html#command">Command Line Arguments</A>
+<LI> <A href="using.html#listing">Interpreting SMAL32 listings</A>
+<LI> <A href="using.html#dump">Interpreting SMAL32 symbol table dumps</A>
+</OL>
+
+<HR>
+
+<H2><A NAME=command>10.1. Command Line Arguments</A></H2>
+<P>
+On Unix systems (including Linux), SMAL32 is invoked by typing the command
+<PRE>
+    smal32 [ -L ][ -D ][ -P &lt;number&gt; ][ -U &lt;directory&gt; ] &lt;filename&gt;
+</PRE>
+<P>
+Where <TT>&lt;filename&gt;</TT> is the name of the assembly language file to be
+processed.  Typically, the file name will end with the suffix <TT>.a</TT>
+indicating that it is an assembly language file (in fact, SMAL32 does not
+care what file name suffix is used).  If no other versions of SMAL are in
+use, the name <TT>smal</TT> is frequently defined as an alias for
+<TT>smal32</TT>; this alias may also specify defaults for one or more of
+the command-line options.
+<P>
+The loadable or linkable object code resulting from the assembly will
+be produced on a file with a name based on <TT>&lt;filename&gt;</TT>, with any
+suffix such as <TT>.a</TT> or <TT>.txt</TT> removed.  Regardless of whether
+a suffix was removed, a new suffix is added, <TT>.o</TT> (for object).
+For example, the command <TT>smal32&nbsp;file.a</TT> will produce an
+object file named <TT>file.o</TT>.
+<P>
+The assembly listing will be produced on a file with names based on
+&lt;filename&gt;, with suffix removal above, and with the suffix <TT>.l</TT>
+(for listing) appended.
+For example, the command <TT>smal32&nbsp;code</TT> will produce a listing file
+named <TT>code.l</TT>.
+<P>
+The <TT>-L</TT> command-line option suppresses generation of a listing.
+This will generally be used when the SMAL assembler is used as a linker,
+since the listing produced by linkage is generally near-useless.
+<P>
+The <TT>-D</TT> command-line option causes SMAL to dump the contents of the
+symbol table at the end of the assembly process.  The dump, if produced,
+will be on a file named with a <TT>.d</TT> suffix and the same prefix as
+was used for the object and
+listing files (see <A HREF="using.html#dump">Section 10.3</A>).
+For example, the command <TT>smal32&nbsp;-D&nbsp; file.txt</TT> will
+produce a dump file named <TT>file.d</TT>.
+<P>
+The <TT>-P</TT> command-line option sets the number of lines per page
+in SMAL listings.  This defaults to 60 and must be larger than 5 to allow
+room for page titles and subtitles.
+<P>
+The <TT>-U</TT> command-line option sets the name of the directory to search
+for files to be included by the <TT>USE</TT> assembler directive
+(see <A HREF="misc.html#insertion">Section 7.1</A>).
+By default, only the directory containing the source file will be searched.
+<P>
+When SMAL32 is run, any errors that preclude assembly, such as improperly
+formed command line arguments, will cause SMAL to exit and output a diagnostic
+message prior to attemtpting to open or create any files.  Any assembly
+errors will be noted in the listing and also noted with diagnostic error
+messages.
+The notes on assembly errors included in the listing contain the same
+diagnostic message, augmented by underlining the offending parts of the
+input line.
+<P>&nbsp;
+
+<H2><A NAME=listing>10.2. Interpreting SMAL32 Listings</A></H2>
+<P>
+Each line of a SMAL listing file contains 4 fields; these are, from left to
+right, the location counter, the generated object code, the source line number
+and the assembly language source.  Here is a fragment of a typical
+listing:
+<PRE>
++000082: 01  02  03         84        B     1, #2, 1+(5-3)
++000085: 00000001           85        W     1, #2, 1+(5-3)
+         00000002
+         00000003
++000091: 41  27  22  5A     86        ASCII "A'", '"Z'
++000095: 41  27  22  5A     87        ASCII "A'", ('"'), ('X'+2)
+</PRE>
+<P>
+Note that lines in listing files are long.  If the source file is composed
+using an editing window 80 characters wide, as many coding standards recommend,
+you will need to open the listing in a significantly wider window.  If the
+text of the source file is legible when printed on standrd letter-sized paper
+in portrait mode, the assembly listing generated from the same source will
+generally need to be printed in landscape mode to fit on the same size paper.
+<P>
+The location counter at the start of the above fragment was relocatable
+82<SUB>16</SUB>.  The leading plus in front of any value in the first two fields
+indicates that that value is relocatable; that is, that some constant, known
+to the loader, will be added to it.  For the location counter, the value to be
+added is the relocation base &mdash; the location in memory where the loading of
+this object file begins.  The relocation base is also added to the addresses
+of other parts of the same relocatable block of code.  For external symbols
+and common blocks, the value to be added is the address of that external
+symbol or common block.
+<P>
+The location counter value is only given at the start of each line of
+assembly code and only when that line actually caused object code to be
+generated; consecutive bytes, halfwords, triple bytes and words will be
+shown without showing the value of the location counter again, so long
+as these are loaded consecutively in memory.
+<P>
+The second field above contains the object code generated, listed in
+hexadecimal, again, with a leading plus used to indicate relocation.
+In this example, the first line (line 84) generated 3 bytes of absolute
+object code, while the second line (line 85) generated 3 words of object
+code.  All object code that would not fit on a line is printed on successive
+lines.
+<P>
+The third field is the source line number, printed in decimal; lines 84 through
+87 are included above.  The source code is set off from the line number by
+two spaces.
+<P>
+All error messages resulting from assembling a line of code are listed
+after that line (and after any generated object code).  In addition,
+the offending parts of the input line are underlined, to the extent
+that the assembler is able to identify the source of the problem.
+The listing of a line containing errors is given below:
+<PRE>
++0000C0: 00000000           12       W 0, UNFUNC(1)+UNDEF)
+         00000001
+unbalanced parentheses                    ======    ======
+undefined symbol
+invalid function
+</PRE>
+<P>
+Note in this example that the order of the error messages and the order
+of the errors on the input line is not necessarily the same.  Furthermore,
+the underlining of the undefined identifier <TT>UNDEF</TT> has run into the
+underlining of the unbalanced parenthesis, so that it looks like only two
+errors are underlined.
+<P>
+When attempting to print an assembly listing, it is important to set the
+printer's font to a monospaced font such as Courier.  That particular font
+is the classic typewriter font that was imitated by many first and
+second generation computer printers, while the VT100 font, if it is available,
+imitates the typical fonts found on third-generation display screens and
+terminal windows.  Generally, font names containing <TT>mono</TT> or
+<TT>Mono</TT> as part of the name or as a name modifier are monospaced.
+
+<H2><A NAME=dump>10.3. Interpreting SMAL32 Symbol Table Dumps</A></H2>
+<P>
+The symbol table dump produced by the SMAL32 <TT>-D</TT> option consists of the
+contents of the symbol table, one line per symbol, in almost random
+order.  Standard sort programs can be run on the dump file to sort it
+in either numerical order by definition or alphabetical order by symbol,
+depending on the use to be made of it.  The definiton file is formatted
+as legal SMAL code, so inserting a definiton file into another program
+will sometimes suffice to give the same symbols the same definitons they
+had in the first program.
+<P>
+Note that the linker shell script given in
+<A HREF="linker.html#simple">Section 8.7</A>
+includes example code to automatically sort the dump.
+
+</BODY>
+</HTML>

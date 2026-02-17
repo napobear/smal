@@ -1,0 +1,624 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual, Basic Syntax</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>2. Basic Syntax</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="index.html">
+      
+      the SMAL Manual
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2>Index</H2>
+
+<OL>
+<LI> <A href="basic.html#labels">Labels</A>
+<LI> <A href="basic.html#directives">Directives</A>
+<LI> <A href="basic.html#expressions">Expressions</A>
+<LI> <A href="basic.html#terms"> Terms</A>
+<LI> <A href="basic.html#values"> Values</A>
+<LI> <A href="basic.html#functions"> Functions</A>
+</OL>
+
+<HR>
+
+<P>
+At the syntactic level, a SMAL32
+<A NAME=programs>programs</A> consists of a sequence of
+<A NAME=lines>lines,</A> each of which may contain any number of labels,
+an assembly directive, and a comment.
+Each of these fields is optional, and each may begin anywhere on the line,
+as long as they appear in the required order.
+Comments are defined at the lexical level and so are not formally treated
+here.
+<PRE>
+&lt;program&gt; ::= { &lt;line&gt; } &lt;end of file&gt;
+&lt;line&gt; ::= { &lt;label&gt; } [ &lt;directive&gt; ] &lt;line end&gt;
+</PRE>
+<P>
+Unlike some older assembly languages, indenting and
+blank lines are allowed.
+
+<H2><A NAME=labels>2.1. Labels</A></H2>
+<P>
+A label is an indentifier followed by a colon.
+The effect of using a
+particular identifier as a label is that the value of that identifier
+is set to the value of the assembly location counter and it becomes illegal
+to alter that value in any way.  The location counter determines where in
+memory the assembled code will be put; it is initialized to
+relocatable zero and is incremented once per byte assembled.
+See <A HREF="storage.html">Chapter 3</A>.
+<PRE>
+&lt;label&gt; ::= &lt;identifier&gt; :
+</PRE>
+<P>
+Any attempt to redefine a label will result
+in a "multiple label definition" error.  If the value of the location counter
+differs between the two passes of the assembler, for example, as the result
+of a macro expanding differently on the two passes, a "label differed in pass
+1" error will result.
+The following are legal lines of SMAL code containing labels:
+<PRE>
+    FIRST:
+    ANOTHER :    ;COMMENT
+      AGAIN:
+</PRE>
+<P>
+Note the lack of column restrictions and the use of optional spaces
+between identifier and colon.
+<P>&nbsp;
+
+<H2><A NAME=directives>2.2. Directives</A></H2>
+<P>
+There are two kinds of assembler directives:  The first takes the form of an
+<A NAME=assignments>assignment</A> statement and is used to assign values to
+identifiers.  The second takes the form of a symbolic directive name
+or instruction name followed by appropriate
+operands.
+<PRE>
+&lt;directive&gt; ::= &lt;assignment&gt; | &lt;symbolic directive&gt;
+</PRE>
+<P>
+The forms of each of the symbolic directives will be documented in later
+sections.
+In general, each begins with an identifier which is either an op-code name
+or the name of some assembly operation.  If an illegal identifier is used
+in this context, an "invalid directive" error will result.
+Directive names are not reserved words; that is, the name of a directive may
+be used as a label without any conflict of meaning.
+On systems allowing the use of both upper and lower case, directive
+names must be in upper case.
+<P>
+The assignment directive assigns the value of an arbitrary expression to
+an identifier.
+<PRE>
+&lt;assignment&gt; ::= &lt;identifier&gt; = [ : ] &lt;expression&gt;
+</PRE>
+<P>
+Assignments take two forms.  Identifiers defined using <TT>=</TT>
+(a simple equals sign) may be redefined at will but must not be used
+elsewhere as a label.
+Identifiers defined using <TT>=:</TT> must (like labels) have a single point
+of definition and may not be redefined.
+The following lines of legal SMAL32 code demonstrate the use of assignment:
+<PRE>
+    NEG1 = -1
+    SIXTEENTHOUSAND=:8000+8000
+    L:     THISLOC = L
+</PRE>
+<P>
+Note that spaces are ignored before and after the equals sign, and that
+labels may be used on the same line as an assignment.  The symbols
+<TT>SIXTEENTHOUSAND</TT> and <TT>L</TT> may not be redefined, while
+<TT>NEG1</TT> and <TT>THISLOC</TT> may be redefined.
+The following lines demonstrate illegal assignments:
+<PRE>
+    MULDEF: MULDEF = 6
+    A = B
+    B = A
+</PRE>
+<P>
+In the first case, the error is that an identifier used in a label cannot
+be assigned to.  In the second and third cases, the definition is circular.
+<P>
+A special form of the assignment directive is used to modify the location
+counter.  This is used, for example, to set the assembly
+<A NAME=origin>origin</A>.
+<PRE>
+&lt;assignment&gt; ::= . = &lt;expression&gt;
+</PRE>
+<P>
+Here, the special symbol "." (period) is used as if it were an identifier
+standing for the location counter.
+See <A HREF="storage.html">Chapter 3</A>.
+The location counter can be set to any value, absolute
+or relocatable, but the value must resolve to a legal memory address by the
+time the program is loaded.
+<P>
+If some part of a program is to be loaded at an absolute memory address,
+assign an absolute value to the location counter, for example, a numeric
+constant.  Code to be loaded in a common area may be loaded by first
+assigning the common name to the location counter, and code to be stored
+at a fixed address relative to an external symbol may be loaded by first
+assigning that address to the location counter.
+<P>
+By default, the location counter is initialized to relocatable zero, and
+it is incremented once for each byte assembled.
+The following lines of legal SMAL code demonstrate the use of assignments
+to the location counter:
+<P>
+<PRE>
+    BLOCK: .=.+5 ; BLOCK labels 5 bytes of uninitialized memory
+                 ; other code may go here
+    A = .
+    . = BLOCK
+                 ; code here may initialize BLOCK
+    . = A
+</PRE>
+<P>
+In the first line above, the location counter is incremented by 5 bytes.
+The remainder of the lines demonstrate how the current value of the location
+counter can be saved, changed to a different area, for example, a location
+named <TT>BLOCK</TT>, and then restored to where it was originally.
+Note that the assignment <TT>A=:.</TT> and the <A HREF="basic.html#labels">label</A>
+<TT>A:</TT> define the symbol <TT>A</TT> identically.
+<P>
+The following lines illustrate one approach to halfword and word
+<A NAME=align>alignment</A>, applicable only in absolute assembly mode:
+<PRE>
+    . = .+(.&amp;1)  ; align to a halfword boundary
+    . = .+(.&amp;2)  ; then align to a word boundary
+</PRE>
+<P>
+The first adds one to the location counter if the counter is odd, forcing an
+even value.  The second operates similarly on the next least significant bit.
+Both must be used, in this order, to align to a 32 bit boundary.
+<P>
+Alignment in relocatable object code relies on the linker's cooperation in
+aligning the entire object code block on an appropriate boundary.  Assuming
+that the linker aligns each object file to a word boundary, the following
+lines will align the following section of the object file to a word boundary:
+<PRE>
+    . = .+(ABS(.)&amp;1)  ; align to a halfword boundary
+    . = .+(ABS(.)&amp;2)  ; then align to a word boundary
+</PRE>
+<P>
+These are ugly, but in practice, an <TT>ALIGN</TT> macro can be used to hide
+this.
+(See <A HREF="macro.html#examples">Section 6.4</A>.)
+
+<H2><A NAME=expressions>2.3. Expressions</A></H2>
+<P>
+Expressions are composed of a sequence of terms separated by binary
+operators.  There is no operator precidence hierarchy, so the terms
+are evaluated and combined in a strict left to right order unless
+parentheses are used to alter the order of evaluation.
+(see <A HREF="basic.html#values">Section 2.5</A>.)
+<PRE>
+&lt;expression&gt; ::= &lt;term&gt; { &lt;binary operator&gt; &lt;term&gt; }
+</PRE>
+<P>
+The allowed binary operators are:
+<PRE STYLE="line-height:1.2em;">
+&lt;binary operator&gt; ::= + | - | * | /
+                    | &lt; | &gt; | &lt; = | &gt; = | =
+                    | & | ! | |
+                    | &lt; &lt; | &gt; &gt; | &gt; &gt; &gt;
+</PRE>
+<P>
+These stand for, respectively, the arithmetic operations of addition,
+subtraction, multiplication and division, the comparison operations less
+than, greater than, less than or equal, greater than or equal, and equal to,
+the boolean operations and and or, and the operatons left and right shift.
+Right shifts are either signed or unsigned.
+The following lines of legal SMAL32 code demonstrate the use of expressions:
+<PRE>
+    FOUR     =  3 - 2 + 3
+    MINUSTWO = 3 - (2 + 3)
+    TRUE     = 5 = (3 + 2)
+    NONSENSE =   5 = 3+2
+</PRE>
+<P>
+In the final example, the value of <TT>NONSENSE</TT> is not the same as
+<TT>TRUE</TT> because of left to right evaluation.  Spaces (or the lack of
+spaces) around operators have no effect on the value.
+<P>
+The arithmetic operations are computed using 32 bit
+binary numbers.  When adding or subtracting, these may be treated
+as either signed two's complement values or as unsigned values.
+Overflow and underflow are not detected because it is impossible for the
+assembler to determine which operands were intended to be signed or whether
+or not the result should be interpreted as signed.
+The following rules govern the type of the result when adding
+or subtracting values of various types:
+<PRE>
+       absolute + absolute    ==&gt; absolute
+       absolute + relocatable ==&gt; relocatable
+    relocatable + absolute    ==&gt; relocatable
+    relocatable + relocatable ==&gt; error
+       absolute - absolute    ==&gt; absolute
+       absolute - relocatable ==&gt; error
+    relocatable - absolute    ==&gt; relocatable
+    relocatable - relocatable ==&gt; absolute or error
+</PRE>
+<P>
+Note that, in the last case, the difference of two relocatable values
+will only be defined if both are relocated relative to the same relocation
+base.  A "misuse of relocation" error will result whenever an illegal
+combination of operands is used.
+<P>
+For multiplication and division, the operands are interpreted as signed
+two's complement 32-bit values and only the least significant 32 bits of
+the result are given.
+This means that any operands over
+2,147,483,647 will be interpreted as negative numbers.
+<P>
+The
+<A NAME=comparison>comparison</A> operations are computed using 32 bit
+signed two's complement numbers.
+As a result, operands over 2,147,483,647 will be treated as being
+negative.
+The results of the comparison operations will
+be -1, 0 and 1, corresponding respectively to true, false and incomparable.
+It is illegal to compare values of different types; thus, absolute
+values may only be compared with other absolute values, and relocatable
+values are only comparable if they are relocated relative to the same base.
+Comparing incomprable values will give a
+"misuse of relocation" error and a value of 1.  Spaces are
+allowed between the characters of multi-character operators, so
+<TT>&gt;=</TT> and <TT>&gt;&nbsp;=</TT> are the same.
+<P>
+The
+<A NAME=boolean>boolean</A> <I>and</I> <TT>&amp;</TT> and <I>or</I>
+<TT>!</TT> (also <TT>|</TT>)
+operators are computed by applying
+the basic operation to pairs of corresponding bits of the operands to
+produce each bit of the result, so <TT>10&amp;12</TT> (which is
+<TT>2#1010&amp;2#1100</TT>) gives 8 (which is 1000<SUB>2</SUB>).
+Similarly <TT>10!12</TT> gives 14 (which is 1110<SUB>2</SUB>).
+ Thus, these may be used for bit setting and
+testing as well as for combining results from comparison operations in a
+boolean expression.  These operations may only be applied to absolute values;
+using them with relocatable values will give a "misuse of relocation"
+error.
+<P>
+The
+<A NAME=shift>shift</A> operators return the shifted value of their left
+operand, shifted as many places as indicated by their right operand.
+If the shift count is zero or negative, no shift will be done.
+Both operands must be absolute; a "misuse of relocation" error will
+result if relocatable values are used.
+Note that the operator symbols
+consist of 2 or 3 lexemes; thus, left shift may be written
+<TT>&gt;&gt;</TT> or <TT>&gt;&nbsp;&gt;</TT> with no
+change in meaning.
+For right shifts, <TT>&gt;&gt;</TT> is a signed shift operaiton, so
+<TT>-2&gt;&gt;1</TT> has the value FFFFFFFF<SUB>16</SUB> or -1.
+Signed shifts preserve the sign of the operand.
+The unsigned right shift
+<TT>&gt;&gt;&gt;</TT> will always produce a positive result for nonzero
+shift counts, so <TT>-2&gt;&gt;&gt;1</TT> has the value 7FFFFFFF<SUB>16</SUB> or
+2,147,483,647.
+
+<H2><A NAME=terms>2.4. Terms</A></H2>
+<P>
+The terms of an expression consist of an optional unary operatior preceding
+a value.  Thus, unary operators may be included before any operand used
+in an expression.
+<PRE>
+&lt;term&gt; ::= [ &lt;unary operator&gt; ] &lt;value&gt;
+&lt;unary operator&gt; ::= + | - | \ | ~
+</PRE>
+<P>
+The allowed unary operators are a leading plus sign, a leading minus sign, and
+a leading not sign <TT>\</TT> (also <TT>~</TT>).
+The following examples demonstrate legal use of terms in SMAL32 expressions:
+<PRE>
+    TRUE = ( +1 = 1 )
+    FALSE = \ TRUE
+    FALSE = ~ TRUE
+    THREE   = - 3 - - 6
+    NEGNINE = -(3 - - 6)
+</PRE>
+<P>
+The final two examples demonstrate that unary operators have a higher
+precedence than binary operators.
+<P>
+The unary plus operator is always legal and has no effect on the associated
+value.
+<P>
+The unary minus operator is used to negate the given value by taking the
+two's complement.  It may only be applied to absolute values; it's use
+with relocatable values will result in a "misuse of relocation" error.
+<P>
+The unary not operator is used to take the one's complement of the given value.
+As such, it may be used for bit manipulation or to invert the sense of a
+boolean value resulting, for example, from a comparison operation.
+As with unary minus, unary not may only be applied to absolute values.
+Note that unary not, when applied to the result of an illegal comparison,
+returns a value which is neither true nor false.
+<P>
+Note that <TT>-A</TT> is the same as <TT>~A+1</TT>.
+
+<H2><A NAME=values>2.5. Values</A></H2>
+<P>
+The values used to compose the terms of expressions may either be simple
+values such as identifiers, numbers, strings, and references to the current
+value of the
+location counter, or they may be complex forms such as parenthesized
+expressions and predefined functions.
+<PRE>
+&lt;value&gt; ::= &lt;identifier&gt;
+          | &lt;number&gt;
+          | &lt;quoted string&gt;
+          | .
+          | ( &lt;expression&gt; )
+          | &lt;function&gt;
+</PRE>
+<P>
+When an identifier is used as a value, it must have a value assigned to
+it somewhere in the program.  Simple forward references are allowed, and
+are processed using two passes.  Thus, if an expression contains a forward
+reference to some symbol, that symbol must have been defined by the end of
+the first pass for that reference to be valid.
+References to undefined identifiers will result in an "undefined symbol"
+error.
+When a dot is used as a value
+in an expression, it is taken to stand for the current value of the
+location counter.
+An "unbalanced parentheses" error will be raised if the parentheses on an
+expression do not balance.
+<P>
+When a quoted string is used as a value in a term of an expression,
+the ASCII values of the characters will be used.  If the string contains
+only one character, it will be stored in the least significant 8 bits
+of the value.  If the string contains more characters, the rightmost will be
+stored in the least significant 8 bits of the value.
+Unused bits of the value will be set to zero.  Using
+a string longer than 4 characters as a value will result in a
+"value out of bounds" error.
+<BR>&nbsp;
+
+<H2><A NAME=functions>2.6. Functions</A></H2>
+<P>
+Special functions are provided to test whether or not a symbol is defined,
+to test
+whether it is a forward reference, to test the type of an expression,
+and to test the length of a text fragment.  These functions are used almost
+exclusively in the context of conditional assembly and macros.
+<PRE>
+&lt;function&gt; ::= DEF ( &lt;identifier&gt; )
+             | FWD ( &lt;identifier&gt; )
+             | TYP ( &lt;expression&gt; )
+             | ABS ( &lt;expression&gt; )
+             | REL ( &lt;expression&gt; )
+             | LEN ( &lt;balanced string&gt; )
+</PRE>
+<P>
+Note that the form of the argument lists for these functions depends on the
+particular function used.  An "invalid function" error will result if any
+other identifier is used in a context where a function name is allowed.
+Function names are not reserved words; the use of an identifier as a function
+name is determined by the fact that it is followed by a begin parenthesis.
+On systems allowing both upper and lower case letters, function names must
+be in upper case.
+<P>
+The <TT>DEF</TT> function returns true (-1) if its argument has been defined
+previously
+in the text of the program, either as a label or as the object of an
+assignment.  Otherwise, if the argument is an identifier which has not
+been previously defined, it returns false (0).  A "symbolic name expected"
+error will be raised if the argument is not an identifier; in this case,
+the value returned will be ambiguous (+1).
+The following fragment of a SMAL32 assembler listing
+(see <A HREF="using.html#listing">Section 10.2</A>)
+demonstrates the use of
+the <TT>DEF</TT> function:
+<PRE>
+                             1  DEF   =     0
++000000: 00000000            2        W     DEF(UNDEF)
++000004: FFFFFFFF            3        W     DEF ( DEF )
+                             4  UNDEF = 0
+</PRE>
+<P>
+Note that spaces have no effect, and that the <TT>DEF</TT> function responds
+to whether or not its argument was previously defined in the text and thus
+will return true only if it is defined earlier.
+Thus, <TT>DEF</TT> will always have the same effect during both passes of the
+assembler.
+<P>
+The <TT>FWD</TT> function has the same form and syntactic requirements as the
+<TT>DEF</TT>
+function, but it returns true when there is an unresolved forward reference
+to the argument.  Thus, <TT>FWD</TT> will be false before the first reference
+to the argument and false after the argument is defined, but true between
+a reference to the argument and the later definition.
+The following fragment of a SMAL32 assembler listing demonstrates the use
+of the <TT>FWD</TT> function.
+<PRE>
++000000: 00000000            1        W     FWD(FWD)
+                             2  REF   =     FWD
++000004: FFFFFFFF            3        W     FWD(FWD)
+                             4  FWD   =     0
++000008: 00000000            5        W     FWD(FWD)
+</PRE>
+<P>
+Note that the use of an identifier as an argument to the <TT>DEF</TT> or
+<TT>FWD</TT>
+function does not constitute a reference to that identifier from the point
+of view of the <TT>FWD</TT> function.
+<P>
+The <TT>TYP</TT> function returns, as an absolute integer, the type of its
+argument.  As a general rule, the particular value returned by <TT>TYP</TT>
+will be meaningless, except that it will be the same for all values relocated
+relative to the same relocation base.  The only exception to this rule is
+that the <TT>TYP</TT> applied to any absolute expression will return zero.
+The following fragment of an assembler listing demonstrates the
+use of the <TT>TYP</TT> function:
+<PRE>
+                             1        EXT   X
++000000: 00000000            2  L:    W     TYP(0)
++000004: FFFFFFFF            3        W     TYP(.) = TYP(L)
++000008: 00000000            4        W     TYP(X) = TYP(L)
+</PRE>
+<P>
+Note the use of comparisons with the <TT>TYP</TT> function to see if the
+different expressions are in fact comparable.
+The <TT>TYP</TT> function operates by evaluating the expression given as an
+argument, thus, use of an as yet undefined identifier as an argument to it
+constitutes a forward reference to that identifier.
+<P>
+The <TT>ABS</TT> function returns, as an absolute integer, the value of the
+expression relative to its relocation base.  For absolute symbols,
+<TT>ABS</TT> is the identity function.  For external symbols and common
+names, <TT>ABS</TT> returns 0.  For
+values computed by the addition of constants to external symbols, <TT>ABS</TT>
+returns the added constant.  The following fragment of an assembler listing
+demonstrates the use of the <TT>ABS</TT> function:
+<PRE>
+                             1        EXT   X
++000000: 00000000            2        W     ABS(X)
++000004: 00000004            3  L:    W     ABS(L)
++000008: 00000005            4        W     ABS(5)
++00000C: 00000009            5        W     ABS(L+5)
++000010: 00000005            6        W     ABS(X+5)
++000014:+00000000            7        W     L-ABS(L)
+</PRE>
+<P>
+The final example above illustrates how any relocation base can be computed:
+the relocation base is the difference between a relocatable symbol and the
+absolute value of that symbol.  For expressions relocated relative to external
+symbols or common names, this difference has the same value as that external
+symbol or common name.
+<P>
+The <TT>REL</TT> function converts the value of an expression to a relocatable
+value relocated relative to the default relocation base.  The following
+example assembly listing illustrates the use of the <TT>REL</TT> function.
+<PRE>
++000018:+00000000            8        W     REL(0)
++00001C:+00000000            9        W     .-ABS(.)
++000020:+00000021           10        W     REL(ABS(.)+1)
++000024:+00000025           11        W     .+1
+</PRE>
+<P>
+The first two lines above both compute the first relocatable address, the
+default relocation base itself.  The final two lines compute similar
+relocatable values but the values are relocatable for different reasons;
+the final line uses a relocatable value because the location counter was
+relocatable, while the line before it cancels the relocatability of the
+location counter with the <TT>ABS</TT> function and then adds relocatability
+back in to the sum with the <TT>REL</TT> function.
+<P>
+The <TT>LEN</TT> function returns, as an absolute integer, the length, in
+characters, of its argument.  This is useful for testing, for example,
+whether a macro parameter is present or absent.
+The only constraint on the parameter to the <TT>LEN</TT>
+function is that it must
+be lexically valid (contain no illegal numbers or strings), and if
+it contains any parentheses, they must be properly balanced.
+The length of the parameter will not be interpreted as including any
+spaces before or after the parameter, but it will include any spaces
+within the parameter.
+The following fragment of an assembler listing demonstrates the use
+of the <TT>LEN</TT> function:
+<PRE>
++000000: 00000000            1        W     LEN()
++000004: 00000001            2        W     LEN(0)
++000008: 00000002            3        W     LEN('')
++00000C: 00000004            4        W     LEN( A  B )
++000010: 00000006            5        W     LEN("A  B")
++000014: 00000007            6        W     LEN(0 (0) 0)
+</PRE>
+<P>
+Note that <TT>LEN</TT>, when applied to quoted strings, includes the quote
+marks in its count.
+<P>
+</BODY>
+</HTML>

@@ -1,0 +1,465 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual, Macro Assembly</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>6. Macro Assembly</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="index.html">
+      
+      the SMAL Manual
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2>Index</H2>
+
+<OL>
+<LI> <A href="macro.html#definition">Macro Definitions</A>
+<LI> <A href="macro.html#formals">Macro Formal Parameters</A>
+<LI> <A href="macro.html#calls">Macro Calls</A>
+<LI> <A href="macro.html#examples">Examples</A>
+</OL>
+
+<HR>
+
+<P>
+The SMAL macro facilities allow assembly-time control structures comparable
+to the procedure structures of many high level languages.
+A macro is a named block of text which is assembled into the program wherever
+its name occurs in the context of a macro call.
+If a macro is defined as having formal parameters, the corresponding actual
+parameters are substituted for the formal parameters within the body of the
+macro before it is assembled.
+<P>
+Note:  Macros control how the assembler sees your code.  They do not control
+the execution of the assembled machine code.
+<P>
+<H2><A NAME=definition>6.1 Macro Definitions</A></H2>
+<P>
+Each macro definition begins with a <TT>MACRO</TT> directive and ends with an
+<TT>ENDMAC</TT> directive.  The <TT>MACRO</TT> directive is followed by the
+name of the macro and its formal parameter list.
+<PRE>
+&lt;symbolic directive&gt; ::= MACRO &lt;identifier&gt; [ &lt;formal list&gt; ]
+                       | ENDMAC
+</PRE>
+<P>
+The semantics of a macro declaration are most easily described in terms of
+macro blocks which begin with a <TT>MACRO</TT> directive and end with an
+<TT>endmac</TT> directive.  The body of the block between the two is saved
+by the assembler and assembled as a result of each call to the macro.
+<PRE>
+&lt;macro block&gt; ::= MACRO &lt;identifier&gt; [ &lt;formal list&gt; ] &lt;line end&gt;
+                { &lt;line&gt; }
+                  ENDMAC
+</PRE>
+<P>
+Note that any labels on the line containing the <TT>MACRO</TT> directive are
+not interpreted as having anything to do with the macro but are processed
+as normal labels.  Labels on the line containing the <TT>ENDMAC</TT>
+directive are completely ignored!
+If a macro block is not properly terminated with an <TT>ENDMAC</TT> directive,
+a "missing endmac" error will result.
+The following fragment of valid SMAL32 code illustrates
+the definition of a simple
+parameterless macro:
+<PRE>
+    MACRO ZO
+      W 0
+      W -1
+    ENDMAC
+</PRE>
+<P>
+A call to this macro can be used to put the two word sequence 0, -1 in memory.
+<P>
+Macro definitions may contain other macro definitions, but these do not
+create local macros, as might be expected by anology with
+high level languages.  Instead, the internal macro definition will be
+processed by the assembler each time the containing macro is called.
+Thus, a macro may be used to create a number of other macros constructed
+from the values of its parameters.
+
+<H2><A NAME=formals>6.2. Macro Formal Parameters</A></H2>
+<P>
+The formal parameter list on a macro definition gives the names
+of each parameter and the parameter passing mode.  Forml parameter
+names are identifiers.
+There may be a limit on the number of formal parameters
+allowed; if this is exceded, a "too many macro parameters" error will be
+raised.  All versions of SMAL support at least 8 parameters.
+<PRE>
+&lt;formal list&gt; ::= &lt;formal parameter&gt; { , &lt;formal parameter&gt; }
+&lt;formal parameter&gt; ::= &lt;identifier&gt;
+                     | ( &lt;identifier&gt; )
+                     | = &lt;identifier&gt;
+</PRE>
+<P>
+The three macro parameter modes are:
+<UL>
+<LI> Name mode: The formal parameter
+is declared by just its name.  The text of the actual parameter will be
+passed.
+<LI> List mode: The formal parameter name
+is surrounded by parentheses.  The actual parameter must be parenthesized,
+so it may contain commas.  The parentheses themselves are not passed.
+<LI> Value mode: The formal parameter
+name is preceded by an equals sign.  The actual parameter must be an
+expression (see <A HREF="basic.html#expressions">Section 2.3</A>);
+the value of that expression, converted to text, will be passed.
+</UL>
+<P>
+The treatment of actual parameters in
+each of these modes will be discussed in
+<A HREF="macro.html#calls">Section 6.3</A>.
+<P>
+The following fragment of a SMAL assembly listing illustrates
+the definition of a simple macro
+with one parameter passed by name:
+<PRE>
+    MACRO WZO TEXT
+      W TEXT
+      ZO
+    ENDMAC
+</PRE>
+<P>
+Note that the above macro contains a call to the macro <TT>ZO</TT>
+defined in the previous example.
+<P>
+Within the macro body, each occurance of any macro formal parameter name
+is identified.  This includes formal parameters embedded in comments and
+character strings.  The only time that a formal
+parameter will not be identified is when it is embedded in a larger
+identifier.  For example, if <TT>A</TT> and <TT>B</TT> are formal parameters,
+neither of them will be identified in the string <TT>AB</TT>.  If <TT>AB</TT>
+is to be seen as the
+<A NAME=concat>concatenation</A> of two parameters,
+an apostrophe should be inserted
+between them, as in <TT>A'B</TT>.  Within a macro body, single
+apostrophes will be deleted, and strings of two or more apostrophes will
+be shortened by one.  Thus, special care must
+be taken when using apostrophes as single quotes around quoted strings
+in macros.
+
+<H2><A NAME=calls>6.3. Macro Calls</A></H2>
+<P>
+A macro call takes the form of a symbolic directive which begins with
+the name of a previously defined macro, followed by a list of actual
+parameters.
+<PRE>
+&lt;symbolic directive&gt; ::= &lt;identifier&gt; &lt;actual list&gt;
+&lt;actual list&gt; ::= &lt;actual parameter&gt; { , &lt;actual parameter&gt; }
+&lt;actual parameter&gt; ::= [ &lt;by name&gt; | &lt;by list&gt; | &lt;by value&gt; ]
+</PRE>
+<P>
+The first step in processing a macro call is to store the text of each
+actual parameter, according to the parameter passing rules associated
+with that parameter type.
+Individual parameters may be omitted or blank, in which case, no text is
+passed.  In all cases, the number of actual parameters must be less than
+or equal to the number of formal parameters.  Missing actual parameters are
+passed as empty strings.
+The following rules apply:
+<UL>
+<LI>
+Name mode:  The actual parameter
+may be any text which does not include commas unless the commas are
+parenthesized and as long as any parentheses in the text are balanced.
+The entire text of a name parameter will be passed with no changes other than
+to remove leading and trailing blanks.
+<P>
+<LI>
+<A NAME=list>list</A> mode:  The actual parameter must be
+parenthesized and may contain any lexically valid text as long as the
+parentheses in it are balanced.  A substring specification is allowed
+after the end parenthesis of the actual parameter; this consists of two
+expressions (see <A HREF="basic.html#expressions">Section 2.3</A>);
+set off from the parameter and each other by colons.
+<PRE>
+&lt;by list&gt; ::= ( &lt;balanced string&gt; ) [ &lt;substring&gt; ]
+&lt;substring&gt; ::= : [ &lt;expression&gt; ] [ : &lt;expression&gt; ]
+</PRE>
+<P>
+If the substring specification is absent, the entire actual parameter is
+passed, minus enclosing parentheses.
+The first expression in the substring
+specification gives the index of the first character in
+the parameter to be passed (the default is one, the character
+right after the opening parenthesis).
+The second expression gives how many characters from the parameter are
+to be passed (the default is "up to but not
+including the closing parenthesis").
+Substring specification should be used with care because it may introduce
+strings with unbalanced parentheses.
+<P>
+<LI>
+Value mode: The actual parameter must be an expression
+(see <A HREF="basic.html#expressions">Section 2.3</A>).
+<PRE>
+&lt;by value&gt; ::= &lt;expression&gt;
+</PRE>
+<P>
+The expression will be evaluated.
+If the value is absolute, the text of the unsigned
+decimal representation of the value will be passed.  This means that
+-1 will be passed as <TT>4294967295</TT>.
+As a result, identifiers to be constructed by appending the value of the
+parameter to a letter.
+If the value relocatable, a short expression with the same value will be
+passed.
+</UL>
+<P>
+Macros will not be expanded when there are errors in the
+actual parameter list.
+After actual parameters processing, macro expansion proceeds by
+assembling the macro body.  As the body is assembled, formal
+parameters in the body are
+replaced with the actual parameter text.
+If the resulting text for any line is longer than the implementation defined
+line length limit, the error "text too long for line" will result.
+During expansion, other macro calls may be
+processed, even recursive calls.
+
+<H2><A NAME=examples>6.4. Examples</A></H2>
+<P>
+The following SMAL32 assembly listing fragments
+(see <A NAME="using.html#listing">Section 10.2</A>)
+show the correct use of macros.
+The first example demonstrates the use of each parameter
+passing mode:
+<PRE>
+                            29        MACRO TT    NAME,=NUMBER, ( LIST )
+                            30          NAME  NUMBER
+                            31          LIST
+                            32        ENDMAC
+                            33
+                            34        TT    W,5+4,(COMMON A,5)
++000026: 00000009           34          W  9
+                            34          COMMON A,5
+                            34  END
+                            35
+                            36        TT W,1,(BIW -25):3
++00002A: 00000001           36          W  1
++00002E: FFFFFFE7           36          W -25
+                            36  END
+                            37
+                            38        TT W, 1 + A + 1, ("; NONESUCH"):2:6
++000032:+00000002           38          W  A+2
+                            38          ; NONE
+                            38  END
+</PRE>
+<P>
+All lines produced by macro expansion are listed after the
+call, with the same line number as the call.
+Normally, macro expansion listing is suppressed, but
+it can be turned on using the <TT>LIST</TT> directive
+(see <A HREF="misc.html#listing">Section 7.4</A>).
+<TT>END</TT> directives mark the end of each macro.
+<P>
+In the first call to <TT>TT</TT>, the expression
+<TT>5+4</TT> was evaluated and the value <TT>9</TT> was
+substituted in the macro body.
+In the second call, the expression <TT>1</TT> was evaluated and
+passed as <TT>1</TT>.  In the third call, the value of
+<TT>1&nbsp;+&nbsp;A&nbsp;+&nbsp;1</TT> could
+not be converted to a number because the value is relative to the common name
+<TT>A</TT>;
+the string that was passed, <TT>A+2</TT>, is the result of evaluating the
+expression and then constructing a new string from the value.
+<P>
+The following macro shows how to package halfword and word
+<A NAME=align>alignment</A> in SMAL:
+<PRE>
+                             3  MACRO ALIGN =x
+                             4    IF x &gt; 1
+                             5      IF (x &amp; 1) = 1
+                             6        ERROR odd parameter to ALIGN
+                             7      ELSE
+                             8        ALIGN (x&gt;&gt;1)
+                             9        .=.+(ABS(.)&amp;(x&gt;&gt;1))
+                            10      ENDIF
+                            11    ENDIF
+                            12  ENDMAC
+                            13
+                            14        ALIGN 1     ; no operation
++000000: 01                 15        B     1
+                            16        ALIGN 2     ; align to a halfword boundary
++000002: 0002               17        H     2
+                            18        ALIGN 4     ; align to a word boundary
++000004: 00000003           19        W     3
+                            20        ALIGN 3     ; an improper alignment
+                            20        ERROR odd parameter to ALIGN
+error message
+</PRE>
+<P>
+If the location counter (see <A HREF="storage.html">Chapter 3</A>)
+is absolute, this macro aligns to any power of 2; in relocatable code,
+it can only align to the nearest word unless
+alignment directives are included in the linker control file
+(see <A HREF="linker.html">Chapter 8</A>)
+to align the relocation process.
+Here, conditional and recursive macro assembly were used.
+This example also uses the <TT>ERROR</TT> directive
+(see <A HREF="misc.html#errors">Section 7.7</A>)
+to report an imporper macro parameter.
+<P>
+The following two macros demonstrate the use of value parameters and
+concatenation for
+<A NAME=labgen>automatic label generation</A>.
+The macro <TT>CATNUM</TT> simply concatenates its three parameters,
+where the middle parameter is an expression.  This is
+used by the second macro, <TT>USER</TT>, to construct new symbols
+using a counter, <TT>LAB</TT>,
+which is incremented once for each call.
+<P>
+<PRE>
+                            40  MACRO CATNUM (PART1),=NUM,(PART2)
+                            41    PART1'NUM'PART2
+                            42  ENDMAC
+                            43
+                            44  LAB = 1
+                            45  MACRO USER
+                            46    LAB = LAB + 1
+                            47    CATNUM (L),LAB,(:)
+                            48    W 0
+                            49    CATNUM (W L),LAB
+                            50  ENDMAC
+                            51
+                            52  USER
+                            52    LAB = LAB + 1
+                            52    CATNUM (L),LAB,(:)
+                            52    L2:
+                            52  END
++000036: 00000000           52    W 0
+                            52    CATNUM (W L),LAB
++00003A:+00000036           52    W L2
+                            52  END
+                            52  END
+                            53
+                            54  USER
+                            54    LAB = LAB + 1
+                            54    CATNUM (L),LAB,(:)
+                            54    L3:
+                            54  END
++00003E: 00000000           54    W 0
+                            54    CATNUM (W L),LAB
++000042:+0000003E           54    W L3
+                            54  END
+                            54  END
+</PRE>
+<P>
+Note that the symbol <TT>LAB</TT> could have been initialized in the
+macro <TT>USER</TT>
+instead of in the main program.  To do this, the initialization would have
+to be assembled conditionally depending on whether or not <TT>LAB</TT> had been
+previously defined.
+<P>
+The last example illustrates a macro similar to the built in
+<TT>ASCII</TT> directive:
+<PRE>
+                            19  MACRO TEXT S,(PART1),(PART2)
+                            20    IF LEN(S) &gt; 0
+                            21      TEXT ,(S):2:1,(S):3:LEN(S)-3
+                            22    ELSEIF LEN(''PART1'') &gt; 2
+                            23      B ''PART1''
+                            24      TEXT ,(PART2):1:1,(PART2):2
+                            25    ENDIF
+                            26  ENDMAC
+                            27
++00003E: 43  41  4C  43     28        TEXT  "CALCULATE"
+         55  4C  41  54
+         45
+</PRE>
+<P>
+This example demonstrates the combination of conditional and macro assembly,
+the use of substring parameters, the use of the function <TT>LEN</TT>
+to detect missing
+parameters, and the use of recursion.  Note also the use of
+doubled single quotes within the macro definition which result in single
+quotes at expansion time.
+
+</BODY>
+</HTML>

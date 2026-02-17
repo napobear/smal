@@ -1,0 +1,244 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual, Installation and Maintenance</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>11. SMAL Installation and Maintenance</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="index.html">
+      
+      the SMAL Manual
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2>Index</H2>
+
+<OL>
+<LI> <A href="install.html#general">General</A>
+<LI> <A href="install.html#install">Installation</A>
+<LI> <A href="install.html#efficie">Efficiency</A>
+<LI> <A href="install.html#adding">Adding Operations</A>
+</OL>
+
+<HR>
+
+<H2><A name=general>11.1. General</A></H2>
+<P>
+The SMAL32 assembler was originally written in Pascal with the intent that
+it be easily transportable.  The current version is written in C, the
+result of passing the original through <TT>ptoc</TT>, a widely available
+Pascal to C converter.  The code was then minimally edited to free it from
+the <TT>ptoc</TT> runtime library, and further edited in the years that
+followed to add new features.  The revision history at the head of the source
+file documents this history.
+The following sections introduce the problems which will be encountered in
+installing it on a new machine, and in removing machine
+independence in order to
+improve efficiency.
+<P>
+The SMAL32 assembler is a two-pass assembler where the function
+<TT>onepass()</TT> is called twice, once to assemble each pass.
+The assembler uses a top-down parsing model with one lexeme of lookahead,
+where the lexical analyzer is advanced one lexeme by each call to
+<TT>nextlex()</TT>.  There are two symbol tables, <TT>optab</TT> which holds
+opcodes, including macro names, and <TT>symtab</TT> holding labels and other
+defined symbols.  Both tables are hashed, and the actual text of identifiers
+and strings is stored in <TT>strpool</TT>, the string pool.  The string pool
+and opcode tables are initialized before the first call to <TT>onepass()</TT>.
+On first encounter with any opcode name or symbol, new entries are added to
+the appropriate table and to the string pool.  The string pool is filled from
+the low end up to <TT>poolpos</TT> with text of symbols.  The high end of the
+string pool, down to <TT>poolsp</TT>, holds a stack that is used for macro
+actual parameters.
+
+<H2><A name=install>11.2. Installation</A></H2>
+<P>
+The interface between the assembler and the file system of the host machine
+will probably have to be changed if the assembler is moved out of the Unix
+environment.  In order for
+the <TT>USE</TT> directive (see <A HREF="misc.html#insertion">Section 7.1</A>)
+to be properly executed, the assembler must run in an environment where it
+has direct access to the file system.
+<P>
+<TT>getfiles()</TT> is used to encapsulate the problem of
+getting the name of the source file from the user and using this to synthesize
+the names of the object and listing files.  These textual file names are stored
+in the global variables <TT>infile[0]</TT>, <TT>outfile</TT>, and
+<TT>objfile</TT>, which are used, respectively, to open the text files
+<TT>inp[0]</TT>, <TT>output</TT>, and <TT>obj</TT>.
+The text files <TT>inp[1]</TT> to <TT>inp[3]</TT> are opened by
+<TT>insert()</TT>,
+which is called whenever a <TT>USE</TT> directive is encountered.
+The text files <TT>inp[i]</TT> can thus be considered to be a short stack
+of files used for input.  If more levels of nested <TT>USE</TT> directives are
+to be allowed, this stack must be enlarged, using the defined constant
+<TT>maxgetl</TT>.
+<P>
+All matters concerning listing generation are encapsulated within the
+<TT>listline()</TT> and <TT>newpage()</TT>; these will require
+changes if the system being used does not respond to an ASCII FF
+character to initiate a form feed in printed listings.  Typical changes
+might include the introduction of Fortran-style carriage control characters
+at the start of each listing line, or the printing of sequences of blank
+lines instead of special page feed characters.
+<P>
+In addition to converting the SMAL32 assembler to use the appropriate file
+system, the sizes of the various static data structures must be specified.
+These are all set with defined constants, but the
+values of the constants in the machine independent version are all set
+low enough that the static data structures are easily filled for testing
+purposes.  The constants <TT>symsize</TT>, <TT>opcodes</TT>,
+and <TT>linelen</TT> may be set as large as desired with no change to other
+parts of the assembler.
+The constant <TT>poolsize</TT> is limited to 32767 by the code for
+<TT>pushint()</TT> and <TT>popint()</TT>, which are used to push and pop
+pointers into the string pool on the stack within the pool.
+A number of other constants can be modified to do such things as change the
+listing format or change the number of allowed macro parameters.  Limits on the
+values of these constants are documented in comments on their definitions.
+<P>
+In some environments, it may be reasonable to add an <TT>EBCDIC</TT> directive
+and a supporting translation array in order to allow use of the
+EBCDIC character set.  When this is done,
+quoted strings should retain their ASCII interpretation as values
+unless some special new quote mark (perhaps <TT>`</TT>) is used to
+indicate an EBCDIC interpretation.
+
+<H2><A NAME=efficie>11.3. Efficiency</A></H2>
+<P>
+The machine independent version of the SMAL32 assembler was written to be
+easily moved to a new machine, but this does not imply that it will run
+efficiently in that environment.  In fact, transportability and efficiency
+are in direct conflict, especially in the areas of bit packing and
+integer arithmetic.  If efficiency becomes an issue, the following steps
+outline the order in which different changes to the assembler should be made
+to remove machine independance and speed things up:
+<P>
+The lexical analysis routine <TT>number()</TT> used to parse numeric
+constants has a significant amount of cumbersome code to allow it to
+detect and report 32-bit using a 32-bit unsigned arithmetic model that
+ignores overflow.  If the SMAL assembler is moved to on a machine with a
+larger word size, this code can be significantly simplified.  
+
+<H2><A NAME=adding>11.4. Adding Operations</A></H2>
+<P>
+To add additional directives or machine instruction symbolic opcodes
+to the assembler, note the following:
+<P>
+a) Each symbolic opcode or directive for which there is a distinct assembly
+rule has its own opcode type that must be included in the enumerated type
+<TT>optypes</TT>.  (Instructions that share the same assembly format may
+share an opcode type.)
+<P>
+b) Each symbolic opcode or directive must be included in the opcode table;
+this is done by including a line in <TT>opinit()</TT> calling the
+procedure <TT>op()</TT> to make the definition and bind the symbolic name
+to an opcode type and an opcode value.
+<P>
+c) For each opcode type, there must be an entry in the case added in
+<TT>onepass()</TT> to parse the operand field of opcodes of that type
+and generate appropriate object code.  The code generated may depend on
+values in the operand field and on the value associated with the opcode
+itself.
+<P>
+d) Operand field parsing is supported by
+<TT>expresbal()</TT> to parse an expression and force balanced
+parentheses, <TT>getcomma()</TT> to read and skip a required comma, and
+<TT>nextlex()</TT> to read the next lexeme.
+<P>
+e) Object code is generated by calls to
+<TT>putobj()</TT>, specifying the format of the value being generated,
+the absolute value to be generated, and the
+relocation base to be used (both of the latter are provided by the
+expression parsing routines).
+If new formats are added, it will be necessary to modify
+both <TT>putobj()</TT> and the listing routine <TT>listline()</TT>
+to handle the new formats;
+in each case, there are case statements depending on the format.
+
+</BODY>
+</HTML>

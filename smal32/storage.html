@@ -1,0 +1,303 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual, Data Storage Directives</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>3. Data Storage Directives</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="index.html">
+      
+      the SMAL Manual
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2>Index</H2>
+
+<OL>
+<LI> <A href="storage.html#byte">Storing Bytes</A>
+<LI> <A href="storage.html#half">Storing Halfwords</A>
+<LI> <A href="storage.html#trip">Storing Three-quarter Words</A>
+<LI> <A href="storage.html#word">Storing Words</A>
+<LI> <A href="storage.html#text">Storing Text</A>
+</OL>
+
+<HR>
+
+<P>
+SMAL32 supports several directives to store data in memory;
+it is important to remember that all of these are used to store constant
+values in memory at assembly time.  That is, ultimately, the only thing
+an assembler does.  The program is a sequence of constant-valued machine
+instructions, and the the initial values of global variables are additional
+assembly-time constants.  Newcomers to assembly language
+programming frequently confuse assembly-time storage directives with
+machine instructions for updating the values of variables at run time.
+<P>
+All of the data storage directives operate relative to the
+<I>location counter</I>, the memory address where the next byte is to be
+assembled into memory.  The location counter may be an absolute address, or
+it may be relative to some relocation base (an external symbol, see
+<A HREF="external.html">Chapter 4</A>) known to
+the linker (See <A HREF="linker.html">Chapter 8</A>).
+<P>
+When data is assembled into memory, the location counter is incremented by
+one for each byte assembled, and the programmer may also adjust the
+location counter directly (See <A HREF="basic.html#directives">Section 2.2</A>).
+
+<H2><A NAME="byte">3.1. Storing Bytes</A></H2>
+<PRE>
+&lt;symbolic directive&gt; ::= B &lt;expression&gt; { , &lt;expression&gt; }
+</PRE>
+<P>
+The <TT>B</TT> directive assembles a byte (8 bits) into memory,
+incrementing the assembly location counter by 1.  Therefore,
+successive <TT>B</TT> directives load data into
+successive bytes of memory.  <TT>B</TT> directives are most commonly used to
+initialize character variables and individual components of arrays of
+characters.
+If multiple operands are included, the additional operands are treated
+as if they were processed by new <TT>B</TT> directives on following lines.
+<P>
+The following fragment of an assembly listing demonstrates the use of this
+directive for various purposes:
+<PRE>
+ 00000D: 01                  8        B     1
+ 00000E: 02  03              9        B     2, A
+ 000010: 0A                 10        B     10
+                            11  A     =     3
+ 000011: 10                 12        B     #10
+ 000012: 20                 13        B     " "
+ 000013: 41  42  43  00     14        B     "A", "B", "C", 0
+</PRE>
+
+<H2><A NAME="half">3.2. Storing Halfwords</A></H2>
+<PRE>
+&lt;symbolic directive&gt; ::= H &lt;expression&gt; { , &lt;expression&gt; }
+</PRE>
+<P>
+The <TT>H</TT> directive assembles a halfword (16 bits) into memory,
+incrementing the location counter by 2.  Therefore, successive
+<TT>H</TT> directives load data into successive halfwords of memory.
+<TT>H</TT> directives are most commonly used to initialize short integer
+variables and individual components of arrays of short integers.
+If multiple operands are included, the additional operands are treated
+as if they were processed by new <TT>H</TT> directives on following lines.
+<P>
+The following fragment of an assembly listing demonstrates the use of this
+directive for various purposes:
+<PRE>
+                            15  .     =     .+(ABS(.)&amp;1)  ; align 2
+ 000018: 0001               16        H     1
+ 00001A: 0002  0003         17        H     2, B
+ 00001E: 0400               18        H     1024
+                            19  B     =     2#11
+ 000020: FFFF               20        H     -1
+ 000022: 4120  0000         21        H     "A ", 0
+ 000026: 0041               22        H     "A"
+</PRE>
+<P>
+When storing halfwords, the <TT>H</TT> directive <I>does not</I>
+force alignment of the location counter to an even address.  The programmer
+must force alignment if it is needed.  Line 15 illustrates this.
+On most computers, access to aligned halfwords, those that
+begin on even addresses, is faster than access to non-aligned ones.
+On some machines, variables stored at non-aligned addresses are
+difficult to load or store.
+(See <A HREF="basic.html#directives">Section 2.2</A> and the
+<TT>ALIGN</TT> macro in <A HREF="macro.html#examples">Section 6.4</A>.)
+
+<P>
+Programmers should use extreme care when using quoted strings
+(see <A HREF="notation.html#quotes">Section 1.5</A>) as arguments
+to the <TT>H</TT> directive.
+This works only
+for one and 2 character strings.  Furthermore, the values stored
+by the <TT>H</TT> directive may differ from the values
+stored by a sequence of <TT>B</TT> directives or by an ASCII directive.
+This will cause trouble when the SMAL assembler is used on computers where
+the low byte of each halfword is considered to be the first byte of that
+halfword.
+<BR>&nbsp;
+
+<H2><A NAME="trip">3.3. Storing Three-quarter Words</A></H2>
+<PRE>
+&lt;symbolic directive&gt; ::= T &lt;expression&gt; { , &lt;expression&gt; }
+</PRE>
+<P>
+The <TT>T</TT> directive assembles a three-quarter word (24 bit) quantity
+into memory, incrementing the assembly location counter by 3.  This directive
+is included for completeness.  When storing three-quarter words, beware that
+the <TT>T</TT> directive <I>does not</I> force any alignment of the location
+counter prior to assembling its operand, and that the assembly of
+three-byte objects into memory usually guarantee that the location
+counter <I>will not be</I> aligned afterwards.
+
+<H2><A NAME="word">3.4. Storing Words</A></H2>
+<PRE>
+&lt;symbolic directive&gt; ::= W &lt;expression&gt; { , &lt;expression&gt; }
+</PRE>
+<P>
+The <TT>W</TT> directive assembles a word (32 bits) into memory, incrementing
+the assembly location counter by 4.  Therefore, successive <TT>W</TT>
+directives load data into successive words of memory.  <TT>W</TT> directives
+are most commonly used to initialize integer variables and individual
+components of arrays of integers.
+If multiple operands are included, the additional operands are treated
+as if they were processed by new <TT>W</TT> directives on following lines.
+<P>
+Note that the location counter changes occur after expression is
+evaluated, so that, for example, <TT>W&nbsp;.</TT> will store a pointer to
+itself, not a pointer to the following word.
+<P>
+The following fragment of an assembly listing demonstrates the use of the
+<TT>W</TT> directive:
+<PRE>
+                            23  .     =     .+(ABS(.)&amp;1)  ; align 2
+                            24  .     =     .+(ABS(.)&amp;2)  ; align 4
+ 000028: 00000001           25  C:    W     1
+ 00002C: 0000002C           26        W     ., C
+ 000030: 00000028
+ 000034: FFFFFFFF           27        W     #FFFFFFFF
+ 000038: FFFFFFFF           28        W     32#3VVVVVV
+ 00003C: FFFFFFFF           39        W     -1
+ 000040: 30313233           30        W     "0123"
+</PRE>
+<P>
+When storing words, note that the W directive <I>does not</I> force
+alignment of the location counter to an whole-word address.  Thus, all of
+the warnings given above for halfwords apply here as well.
+(See <A HREF="basic.html#directives">Section 2.2</A> and the
+<TT>ALIGN</TT> macro in <A HREF="macro.html#examples">Section 6.4</A>.)
+<P>
+Programmers should use extreme care when using quoted strings
+(see <A HREF="notation.html#quotes">Section 1.5</A>) as arguments
+to the <TT>W</TT> directive.
+This works only for one through 4 character strings.  Furthermore, the
+values stored by the <TT>W</TT> directive may differ from the values
+stored by a sequence of <TT>B</TT> directives or by an <TT>ASCII</TT>
+directive.  This will cause trouble when the SMAL assembler is used on
+computers where the low byte of each word is considered to be the first
+byte of that word.
+
+<H2><A NAME="text">3.5. Storing Text</A></H2>
+<PRE>
+&lt;symbolic directive&gt; ::= ASCII &lt;quoted string&gt; { , &lt;expression&gt; }
+</PRE>
+<P>
+The <TT>ASCII</TT> directive assembles the consecutive ASCII characters
+of a quoted string
+(see <A HREF="notation.html#quotes">Section 1.5</A>)
+into consecutive bytes if a series of <TT>B</TT>
+directives had been used, one per character.  Arguments to an <TT>ASCII</TT>
+directive following the initial quoted string may be additional quoted strings
+or expressions; if the latter, they are evaluated and treated as if they
+occurred as arguments to a <TT>B</TT> directive.
+<P>
+The following sample assembly listing demonstrates the use of this
+directive:
+<PRE>
+ 000044: 61                 31        ASCII "a"
+ 000045: 62  63             32        ASCII "bc"
+ 000047: 64  65  66         33        ASCII "def"
+ 00004A: 67  68  69  00     34        ASCII "g", "hi", 0
+</PRE>
+<P>
+Use of the <TT>ASCII</TT> directives usually leaves the loction counter
+unaligned unless care is taken to store multiples of 4 bytes or multiples
+of 2 halfwords.
+(See <A HREF="basic.html#directives">Section 2.2</A> and the
+<TT>ALIGN</TT> macro in <A HREF="macro.html#examples">Section 6.4</A>.)
+<P>
+Note that use of quoted strings constants as arguments to <TT>W</TT> or
+<TT>H</TT> directives will not necessarily produce the same result in
+memory as would result from using the <TT>ASCII</TT> directive.  This will
+cause trouble when the SMAL assembler is used on computers where the low
+byte of each word or halfword is considered to be the first byte of that
+halfword.
+
+</BODY>
+</HTML>

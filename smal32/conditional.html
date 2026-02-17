@@ -1,0 +1,241 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual, Conditional Assembly</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>5. Conditional Assembly</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="index.html">
+      
+      the SMAL Manual
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2>Index</H2>
+
+<OL>
+<LI> <A href="conditional.html#simple">Simple Conditionals</A>
+<LI> <A href="conditional.html#else">Else Clauses</A>
+<LI> <A href="conditional.html#example">Another Example</A>
+</OL>
+
+<HR>
+
+<P>
+SMAL supports structured conditional assembly facilities which provide
+an assembly-time control structure comparable to the if-then-else
+statements of many high level languages.  It is important to
+remember that these conditional constructs <I>are not</I> run-time control
+structures!  Instead, they control which text will be processed by the
+assembler and which will be ignored.
+
+<H2><A name="simple">5.1. Simple Conditionals</A></H2>
+<PRE>
+&lt;symbolic directive&gt; ::= IF &lt;expression&gt;
+                       | ENDIF
+</PRE>
+<P>
+The basic conditional directives <TT>IF</TT> and <TT>ENDIF</TT> are used
+to bracket
+code that will be included in the assembly source if the
+expression
+(see <A HREF="basic.html#expressions">Section 2.3</A>)
+on the <TT>IF</TT> statement evaluates to true (-1) and excluded
+from the assembly source of the expression evaluates to false (not -1).
+<P>
+The code between the <TT>IF</TT> and the <TT>ENDIF</TT> can be described as
+a conditional
+block.  Conditional blocks may be nested arbitrarily.
+A "missing endif" error will be raised if an if block is not correctly
+terminated before the end of a macro, text insertion, or program.
+<P>
+Labels should not be used on the <TT>IF</TT> and <TT>ENDIF</TT>
+directives,
+but they are allowed.  If used, labels will be treated
+as part of the immediately preceding sequence of lines.  Thus, the label
+on an <TT>IF</TT> directive will be processed as if it was outside the
+conditional block and the label on an <TT>ENDIF</TT> directive will be
+processed as part of the body of the conditional block.
+<P>
+The following fragment of a SMAL32 assembler listing
+(see <A HREF="using.html#listing">Section 10.2</A>)
+illustrates a valid use
+of the basic conditional assembly directives:
+<PRE>
+                             4  VER   =:    3
+                             5        IF    VER &lt; 5
++000000: 00000000            6    LOWV: W     0
+                             7        ENDIF
+</PRE>
+<P>
+The above example might be used to declare and initialize the variable
+<TT>LOWV</TT> to zero, in the case where that variable is only used in
+versions of the program with <TT>VERSION</TT> less than 5.  If the constant
+<TT>VERSION</TT> is set to any value greater than 5, the variable
+<TT>LOWV</TT> will not exist.
+<P>
+Note:  <TT>IF</TT> controls what is assembled.  It does not control
+the execution of assembled code.
+
+<H2><A name="else">5.2. Else Clauses</A></H2>
+<PRE>
+&lt;symbolic directive&gt; ::= ELSEIF &lt;expression&gt;
+                       | ELSE
+</PRE>
+In a simple conditional block, the body of the block is either assembled
+or ignored, depending on the value tested by the <TT>IF</TT> directive.
+More complex conditional blocks may be constructed by using the <TT>ELSEIF</TT>
+and <TT>ELSE</TT> directives to introduce alternative bodies of code.
+<P>
+The code following an <TT>ELSEIF</TT> directive will only be assembled if the
+corresponding boolean expression evaluated to true (-1).
+The lines within an elseif or else block will only be assembled if no previous
+if or elseif block within that conditional block was assembled.
+No more than one sub-block within a conditional
+block will ever be assembled.  Only if none of the <TT>IF</TT> or
+<TT>ELSEIF</TT> conditions
+are true will the code after the <TT>ELSE</TT> directive be assembled.
+It is inappropriate to use labels on the <TT>ELSEIF</TT> or <TT>ELSE</TT>
+directives, but as is the case with <TT>IF</TT> and <TT>ENDIF</TT>,
+they are allowed.
+<P>
+The following fragment of a SMAL32 assembler listing
+(see <A HREF="using.html#listing">Section 10.2</A>)
+illustrates a valid uses
+of these conditional assembly directives:
+<PRE>
+                             8        IF    VER &lt; 2
+                             9    STR:  ASCII "SIMPLE  VERSION "
+                            10        ELSEIF VER &lt; 4
++000004: 4D  45  44  49     11    STR:  ASCII "MEDIUM  VERSION "
+         55  4D  20  20
+         56  45  52  53
+         49  4F  4E  20
+                            12        ELSE ;VER &gt;= 4
+                            13    STR:  ASCII "COMPLEX VERSION "
+                            14        ENDIF
++000014: 00                 15        B     0
+</PRE>
+<P>
+In this listing, you can see that the <TT>ASCII</TT> directive
+(see <A HREF="storage.html#text">Section 3.5</A>
+on line 11 was assembled, while those on lines 9 and 13 were ignored.
+The multiple definitions on the label <TT>STR</TT>
+(see <A HREF="basic.html#labels">Section 2.1</A>
+did not cause a problem
+because the assembler ignored the definitions on lines 9 and 13.
+<P>
+The above example might be used to create the part of the title string
+of a program which depends on the value of <TT>VER</TT>.   The example shown
+was assembled with <TT>VER</TT> set to 3, so the midddle alternative was
+assembled.  When the conditional block is long, and particularly when
+there are multiple <TT>ELSEIF</TT> conditions, it is useful to comment the
+<TT>ELSE</TT> directive to document the assertion which is known to be true
+for that clause, as illustrated here.
+
+<H2><A name="example">5.3. Another Example</A></H2>
+<P>
+The following extended example is equivalent to the previous one,
+but it uses nested conditional blocks instead of an <TT>ELSEIF</TT>:
+<PRE>
+                            16  STR1: IF    VER &lt; 2
+                            17          ASCII "SIMPLE  "
+                            18        ELSE
+                            19          IF    VER &lt; 4
++000015: 4D  45  44  49     20            ASCII "MEDIUM  "
+         55  4D  20  20
+                            21          ELSE
+                            22            ASCII "COMPLEX "
+                            23          ENDIF
+                            24        ENDIF
++00001D: 56  45  52  53     25        ASCII "VERSION "
+         49  4F  4E  20
++000025: 00                 26        B     0
+</PRE>
+<P>
+</BODY>
+</HTML>

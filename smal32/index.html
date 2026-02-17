@@ -1,0 +1,230 @@
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>Symbolic Macro Assembly Language</H1>
+    
+    
+     <H2>SMAL32, the 32-bit version</H2>
+    
+    <P>
+    
+     Part of <A HREF="http://homepage.cs.uiowa.edu/~dwjones/cross/">
+      
+      the Cross Development Support Tool Collection
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2>Index</H2>
+
+<UL>
+<LI> <A href="index.html#copyright">copyright notice</A>
+<LI> <A href="index.html#abstract">abstract</A>
+<LI> <A href="index.html#acknowledgement">acknowledgement</A>
+<LI> <A href="index.html#introduction">introduction</A>
+</UL>
+<OL>
+<LI> <A href="notation.html">Notation and Lexical Rules</A>
+<LI> <A href="basic.html">Basic Syntax</A>
+<LI> <A href="storage.html">Data Storage Directives</A>
+<LI> <A href="external.html">External Symbols</A>
+<LI> <A href="conditional.html">Conditional Assembly</A>
+<LI> <A href="macro.html">Macro Assembly</A>
+<LI> <A href="misc.html">Miscelaneious Assembly Directives</A>
+<LI> <A href="linker.html">The SMAL Linker</A>
+<LI> <A href="loader.html">The SMAL Loader and Object Sublanguages</A>
+<LI> <A href="using.html">Using SMAL</A>
+<LI> <A href="install.html">SMAL Installation and Maintenance</A>
+</OL>
+<P>
+<A href="appendix.html">Appendices</A>
+<UL>
+<LI> <A href="appendix.html#directives">Index of Assembly Directives</A>
+<LI> <A href="appendix.html#index">Alphabetical Index</A>
+</UL>
+
+<HR>
+
+<H3> <A name=copyright>&#169; Copyright 1996; revised 2024</A> </H3>
+<BLOCKQUOTE>
+<SMALL>
+Permission to copy this material without fee is granted,
+provided that this copyright notice is
+included in the copy, and that authorship is attributed to Douglas W. Jones
+and any other authors whose revisions are included in the copy.
+</SMALL>
+<P>
+<SMALL>
+ACM CR Categories and Subject Descriptors: D.3.2
+[Programming Languages]: Language
+Classifications - macro and assembly languages;
+D.4.9 [Operating Systems]: Systems Programs and Utilities - linkers;
+loaders
+</SMALL>
+</BLOCKQUOTE>
+<P>
+<HR>
+<P>
+<H2> <A name=abstract>Abstract</A> </H2>
+<P>
+SMAL32 is a symbolic macro assembly language for 32 bit computers.
+The assembler has no built-in knowledge of any machine's instruction set.
+In addition to providing
+the basic assembly functions the SMAL32 assembler provides a powerful
+macro facility and a linkage editor facility supporting separate assembly,
+subprogram libraries, and shared common blocks.  Assembler and linker
+output may be either absolute or relocatable, and the object language is
+encoded in an easily interpreted textual form.
+<P>
+SMAL32 is a variant of Machine Independent SMAL,
+originally developed at the University of Iowa as a tool for teaching
+and research.
+Assemblers in the SMAL family are
+written in highly machine independent Pascal or C, and have been successfully
+transported between a number of Pascal and C implementations.
+<P>
+<HR>
+<P>
+<H2> <A name=acknowledgement>Acknowledgement</A> </H2>
+<P>
+Thanks are due to all of my students in
+Introduction to Systems Software, and Introduction to Computer Architecture who
+have worked with various versions of the SMAL assembler starting in the early
+1980's.  Eric Wedel, in particular, produced the first 32 bit version of SMAL,
+supporting the National 32000 family of machines.
+<P>
+<HR>
+<P>
+<H2> <A name=introduction>Introduction</A> </H2>
+<P>
+SMAL32 provides assembly language support for a generic
+32 bit machine, minus any special provisions to support any specific machine.
+The SMAL32 assembler supports the assembly format and directives
+of Machine Independent SMAL, a symbolic macro assembly language
+developed at the University of
+Iowa as a tool for teaching and research.
+It is a complete macro
+assembly language and linkage editor system in a form which may be easily
+transported to run on different host systems.
+<P>
+The object code produced by the SMAL32 assembler is relocatable,
+and it includes support for external symbols and FORTRAN common blocks.
+Additionally, the assembler serves as a linker for SMAL32 object
+files; as such, it produces an absolute or relocatable
+textual object code which may
+be easily hand loaded, or loaded 
+by a loader written in about 60 lines of mid-level language code.
+<P>
+The SMAL32 assembler should run on any machine supporting
+32 bit two's complement integers.
+The C version supports standard ASCII with 8 bit characters only.
+It does not dynamically allocate storage on the heap, but it
+uses recursion; this may limit the languages into which it may
+easily be translated.
+<P>
+This document is an adaptation of:
+<DL>
+<DT><I>Machine Independent SMAL: A Symbolic Macro Assembly Language</I>
+<DD><SMALL>Douglas Jones, University of Iowa Computer Science Department
+    Technical Report 84-09, July, 1984.</SMALL>
+</DL>
+Additional information about SMAL is contained in:
+<DL>
+<DT>"Assembly Language as Object Code"
+<DD><SMALL>Douglas Jones, <I>Software - Practice and Experience, Vol 13,</I>
+    No. 8, Aug 1983, Pages 715-726.</SMALL>
+</DL>
+
+<P>
+<HR>
+<P>
+<SMALL>Last Modified:Thursday, 24-May-2004 12:18 CDT.</SMALL>
+<A HREF="http://validator.w3.org/check/referer"><IMG
+ SRC="http://homepage.cs.uiowa.edu/~dwjones/valid-html401.gif"
+ ALT="Valid HTML 4.01!" BORDER="0" HEIGHT="31" WIDTH="88" ALIGN="middle"
+></A>
+</BODY>
+</HTML>

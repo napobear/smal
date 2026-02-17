@@ -1,0 +1,3366 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                           Machine Independent SMAL:
+                       A Symbolic Macro Assembly Language
+
+
+
+
+
+
+
+
+                                       by
+
+                                Douglas W. Jones
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                   May, 1982
+                               Revised, May, 1983
+                               Revised, Oct, 1990
+
+
+
+                         Department of Computer Science
+                               University of Iowa
+                             Iowa City, Iowa  52242
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                      (C)
+                                  Copyright by
+                                Douglas W. Jones
+                                 1982,1983,1990
+
+             Permission to copy this material without fee is grant-
+             ed,  provided  that the entire body of the document up
+             through page 31 is reproduced without  omission,  pro-
+             vided  that  this  notice is included in the copy, and
+             provided that the copies are not made  or  distributed
+             for direct commercial advantage.
+
+                         All other rights are reserved.
+
+
+
+
+
+
+
+
+
+
+
+
+   ACM CR Categories and Subject Descriptors: D.3.2 [Programming
+   Languages]: Language Classifications - macro and assembly languages; D.4.9
+   [Operating Systems]: Systems Programs and Utilities - linkers; loaders
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       ii
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    ABSTRACT
+
+        SMAL, a Symbolic Macro Assembly Language, was developed as a tool for
+   teaching and research.  The SMAL macro and conditional assembly facilities
+   are well structured and the syntax is free format,  thus  encouraging  the
+   use  of  indenting to clarify program structure.  The SMAL macro parameter
+   facility may be unique among assembly languages because, as in high  level
+   languages  such  as  Pascal,  the form of the formal parameter declaration
+   determines the interpretation of the actual parameter.
+
+        SMAL does not include facilities for the support  of  any  particular
+   machine,  but the SMAL assembler is written to allow easy extension to any
+   machine with an 8 bit byte and 16 bit word.  The SMAL assembler is written
+   in highly machine independent Pascal, and has been successfully transport-
+   ed between a number of Pascal implementations.  The  SMAL  assembler  also
+   serves  as  a  linker for SMAL object files; in this capacity, it provides
+   support for most of the features normally associated with linkers on large
+   machines.   Use  of the SMAL assembler as a linker is made possible by the
+   fact that the object language produced by the assembler is  a  sublanguage
+   of SMAL itself.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                      iii
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                 ACKNOWLEDGMENT
+
+
+             Thanks are due to all of the students in  22C:32,  In-
+             troduction  to  Systems Software, who have worked with
+             preliminary versions of the SMAL  assembler  over  the
+             last two years.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       iv
+
+
+
+
+
+
+
+
+                                    CONTENTS
+
+
+
+             INTRODUCTION  .    .    .    .    .    .    .    .    .    1
+
+             NOTATION AND LEXICAL RULES   .    .    .    .    .    .    2
+               Lexical Structure     .    .    .    .    .    .    .    2
+               Identifiers      .    .    .    .    .    .    .    .    3
+               Numbers     .    .    .    .    .    .    .    .    .    4
+               Quoted Strings   .    .    .    .    .    .    .    .    4
+               Comments and Line Ends     .    .    .    .    .    .    5
+
+             BASIC FORMATS      .    .    .    .    .    .    .    .    6
+               Labels      .    .    .    .    .    .    .    .    .    6
+               Directives  .    .    .    .    .    .    .    .    .    6
+               Expressions .    .    .    .    .    .    .    .    .    7
+               Terms  .    .    .    .    .    .    .    .    .    .    9
+               Values      .    .    .    .    .    .    .    .    .    9
+               Functions   .    .    .    .    .    .    .    .    .   10
+
+             DATA STORAGE DIRECTIVES      .    .    .    .    .    .   12
+
+             EXTERNAL SYMBOLS   .    .    .    .    .    .    .    .   14
+               External Declarations      .    .    .    .    .    .   14
+               Internal Declarations      .    .    .    .    .    .   14
+               Common Declarations   .    .    .    .    .    .    .   15
+
+             CONDITIONAL ASSEMBLY    .    .    .    .    .    .    .   16
+               Examples    .    .    .    .    .    .    .    .    .   16
+
+             MACRO ASSEMBLY     .    .    .    .    .    .    .    .   18
+               Macro Definitions     .    .    .    .    .    .    .   18
+               Macro Formal Parameters    .    .    .    .    .    .   18
+               Macro Calls      .    .    .    .    .    .    .    .   19
+               Examples    .    .    .    .    .    .    .    .    .   20
+
+             MISCELANEOUS ASSEMBLY DIRECTIVES  .    .    .    .    .   23
+               Text Insertion   .    .    .    .    .    .    .    .   23
+               End of File      .    .    .    .    .    .    .    .   24
+               Listing Control  .    .    .    .    .    .    .    .   24
+
+             THE SMAL LINKER    .    .    .    .    .    .    .    .   25
+               The Linker Control Language     .    .    .    .    .   25
+               Linker Control Functions   .    .    .    .    .    .   26
+               Producing an Object File as Linker Output      .    .   27
+               Linker Control Macros      .    .    .    .    .    .   29
+
+             SMAL OBJECT LIBRARIES   .    .    .    .    .    .    .   30
+               Library Macros   .    .    .    .    .    .    .    .   30
+
+
+
+
+
+
+
+                                       v
+
+
+
+
+
+
+
+
+             THE SMAL LOADER AND OBJECT LANGUAGES   .    .    .    .   32
+               The Loader Sublanguage     .    .    .    .    .    .   32
+               A SMAL Loader    .    .    .    .    .    .    .    .   32
+               The Object Sublanguage     .    .    .    .    .    .   34
+
+             SMAL INSTALLATION AND MAINTENANCE      .    .    .    .   36
+               Efficiency  .    .    .    .    .    .    .    .    .   37
+               Extending SMAL for a Specific Machine     .    .    .   37
+               Larger Word Sizes     .    .    .    .    .    .    .   39
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       vi
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                                  INTRODUCTION
+
+        SMAL, a Symbolic  Macro  Assembly  Language,  was  developed  at  the
+   University  of Iowa as a tool for teaching and research.  The primary goal
+   of the development of SMAL  was  to  produce  a  complete  macro  assembly
+   language and linkage editor system not bound to any particular machine but
+   easily adaptable to many.  Among the secondary goals were to  explore  the
+   possibility of using  modern notions of parameter binding  in a macro lan-
+   guage, to demonstrate the use of sublanguages as object,  loader, library,
+   and control languages,  and to demonstrate modern language processing  and
+   definition  techniques as  applied to a class of  languages to  which they
+   are not usually applied.
+
+        As a teaching tool, the primary virtues  of  SMAL  are  that  it  has
+   cleanly structured macro and conditional directives, that it is written in
+   relatively machine independent Pascal code, and that the internal  mechan-
+   isms  cleanly  demonstrate a modern approach to lexical analysis and pars-
+   ing.  A typical machine problem assigned using the SMAL  assembler  is  to
+   remove  the  support  components for some feature of the language, such as
+   conditional assembly, and then ask the students to put it back in.  Anoth-
+   er  typical assignment is to give students the SMAL assembler and ask them
+   to extend it to assemble code for a microprocessor with  which  they  have
+   previous experience.
+
+        As a research tool, the primary use of SMAL is  to  provide  assembly
+   language  support  for new microprocessors or experimental computer archi-
+   tectures.  Versions of SMAL have been produced for the 6502 and M6800  mi-
+   croprocessors, for the Heathkit Hero-1 Robot Control Language, and for the
+   experimental ICAP architecture.  Complete assembly  support  for  the  in-
+   struction  set  of a new machine can typically be added to the SMAL assem-
+   bler in a few days.  The time will be somewhat longer  if  support  for  a
+   complex  addressing  mode syntax such as is used on the PDP-11 is desired,
+   but such features do not pose major problems.
+
+        The object code produced by the SMAL assembler is relocatable, and it
+   includes  support  for  external symbols and FORTRAN common blocks.  Addi-
+   tionally, the SMAL assembler serves as a linker for SMAL object files;  as
+   such,  it produces simple relocatable object code which may be loaded by a
+   loader written in about 60 lines of Pascal code.  The linkage functions of
+   the  SMAL assembler are made possible by the fact that the object language
+   is a sub-language of SMAL.  Thus, the SMAL assembler can be thought of  as
+   performing  an endomorphic mapping on the set of legal SMAL programs.  (An
+   endomorphic mapping is a structure preserving mapping from a set to a sub-
+   set of that set.)
+
+        The SMAL assembler is coded so that it should produce correct results
+   on  any  machine  which allows integers to range between -32768 and 32767.
+   This has been verified by running it under versions of  Pascal  supporting
+   16 bit two's complement arithmetic and 32 bit two's complement arithmetic.
+   It should also work on any one's complement machine with at least  17  bit
+   integer  representations.   SMAL  also requires that the character set in-
+   clude at least 55 printing characters.  The SMAL assembler has been tested
+   by running it under a version of Pascal supporting a 64 character colating
+   sequence and under versions supporting ASCII with and without  parity  set
+
+
+
+                                       1
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   in  an  8 bit byte.  The SMAL assembler does not use pointer variables but
+   it does use recursion; this may place limits on the languages  into  which
+   it may easily be translated.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       2
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                           NOTATION AND LEXICAL RULES
+
+        The syntactic rules governing the formation of correct SMAL  programs
+   will  be given in an extended form of BNF using the following special sym-
+   bols:
+
+             < and > are used to enclose the names of syntactic elements.
+                       These elements will either have obvious meanings,
+                       or they will be defined somewhere in the text.
+             { and } are used to enclose a group of syntactic elements
+                       which are optional and may be repeated an indefinite
+                       number of times.
+             [ and ] are used to enclose a group of syntactic elements
+                       which are optional and may not be repeated.
+             | is used to separate alternate groups of syntactic elements
+                       which may be used interchangably.
+             ::= is used to define the named syntactic element on the left
+                       hand side as being replaceable by the group of
+                       syntactic elements on the right hand side.
+             bold face is used for actual text which may be used as a
+                       syntactic element.
+
+   The syntactic rules are supplemented, when needed,  with  text  describing
+   the meaning of the constructs involved, and with illustrative examples.
+
+
+   Lexical Structure
+
+        SMAL programs may be described in two ways:  As sequences of  lexical
+   elements  with no structure, and in terms of syntactic structures.  At the
+   lexical level, SMAL programs have the following structure:
+
+   <program> ::= { { <space> } <lexeme> } { <space> } <line end> <end of file>
+
+   That is, a program is a file containing a sequence of lexemes; lexemes may
+   be separated by any number of blanks, which have no significance, but lex-
+   emes may not contain blanks (except in quoted character strings).  The le-
+   gal lexemes are as follows:
+
+     <lexeme> ::= <identifier>
+		| <number>
+		| <quoted string>
+		| <line end>
+		| :   -colon, used after labels and to take substrings.
+		| .   -dot, used to refer to the location counter.
+		| ,   -comma, used to separate arguments to a command.
+		| =   -equals, used for assignment, comparison, and parameters.
+		| >   -greater than, used for comparison.
+		| <   -less than, used for comparison.
+		| +   -plus, used for addition and as a unary sign.
+		| -   -minus, used for subtraction and as a unary sign.
+		| \   -backslash, used for unary not.
+
+
+
+
+
+                                       3
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+		| &   -ampersand, used for the and operator.
+		| !   -exclamation point, used for the or operator.
+		| >>  -right shift operator.
+		| <<  -left shift operator.
+		| (   -begin paren, used to begin a group or list.
+		| )   -end paren, used to end a group or list.
+
+   The comments above describe the use of the single character lexemes.   The
+   following additional punctuation marks are used within some SMAL lexemes:
+
+             #   -used in numbers with bases other than 10.
+             "   -used in quoted strings.
+             ;   -used to delimit comments at line ends.
+
+   The following ASCII punctuation marks are not used in the machine indepen-
+   dent version of SMAL:
+
+             $ ? { } `
+
+   The following ASCII punctuation marks are not used, but are likely  to  be
+   used in machine dependent versions of SMAL:
+
+             %   -may be used for register specification.
+             *   -may be used for multiplication.
+             /   -may be used for division.
+             [   -may be used to specify indexing or indirection.
+             ]   -may be sued to specify indexing or indirection.
+             ^   -may be used as a prefix on 'extended quotation marks'.
+             _   -may be allowed in identifiers.
+             |   -may be used as a synonym for !.
+             ~   -may be used as a synonym for \.
+             @   -may be used for indirection.
+
+   The comments above only suggest how these symbols may be used.  In modify-
+   ing SMAL to support particular machines, significant changes in the use of
+   special characters may be required.
+
+
+   Identifiers
+
+        Identifiers begin with a letter followed by any number of letters  or
+   digits.  All characters in an identifier are significant.
+
+             <identifier> ::= <letter> { <letter or digit> }
+
+   A consequence of this is that identifiers may not contain spaces  and  may
+   not  cross  from  one line to the next.  Any implementation dependent line
+   length limit poses the only limit on the length of an identifier; typical-
+   ly,  this  limit  will  be  80  characters.  Note that identifiers must be
+   separated from any following decimal number by at least one space to avoid
+   ambiguity.  The following are legal identifiers:
+
+
+
+
+
+
+                                       4
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+             I
+             NEXT
+             THISISONLYONEIDENTIFIER
+             A1235B42XY
+
+   The following are not legal identifiers:
+
+             76TROMBONES
+             THIS'IS_NOT.ONE-IDENTIFIER
+
+   The particular set of letters allowed may  vary  between  implementations;
+   some  will  support  only one case, and others will support both upper and
+   lower case.  If both cases are supported, case differences will be  signi-
+   ficant in comparing identifiers.
+
+
+   Numbers
+
+        Numbers may take three different forms:  They may be  simple  decimal
+   numbers,  they  may  be simple hexadecimal numbers (signified by a leading
+   pound sign), or they may be in an arbitrary radix (signified by a  decimal
+   radix, followed by a pound sign, followed by a number in that radix).
+
+             <number> ::= <decimal number>
+                        | # <extended number>
+                        | <decimal number> # <extended number>
+             <decimal number> ::= <digit> { <digit> }
+             <extended number> ::= <letter or digit> { <letter or digit> }
+
+   The radix of an arbitrary number must be between 2 and 36 (inclusive), and
+   no  digit  must be greater than or equal to the radix.  The SMAL assembler
+   will raise the "bad radix" and "bad digit in  number"  errors  when  these
+   rules  are  violated.   Since  the  SMAL  assembler uses a 16 bit internal
+   representation, no number with a magnitude greater than 65535 is  allowed;
+   The  SMAL  assembler  will produce a "value out of bounds" error if larger
+   numbers are used.  Note that numbers between 32768 and 65536 may be inter-
+   preted  as negative numbers in some situations, for example, when perform-
+   ing comparisons.  Note that decimal numbers must  be  separated  from  any
+   following hexadecimal numbers by at least one space to distinguish the de-
+   cimal number from a radix specification.  The following legal numbers  are
+   all equal:
+
+             32767
+             #7FFF
+             8#77777
+             32#VVV
+
+   The following are not legal numbers
+
+             65536
+             3276A
+             2#10120
+             40#00
+
+
+
+
+                                       5
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   The letters allowed as digits greater than 9 begin with A  which  has  the
+   value  10, and continue up to Z with the value 35.  The letter Z is only a
+   valid digit in base 36.  On systems allowing both  upper  and  lower  case
+   letters, only upper case letters should be used as extended digits.
+
+
+   Quoted Strings
+
+        Quoted strings may be formed with either single or double quotes, and
+   may be of any length that fits on one line.
+
+             <quoted string> ::= " { <character> } "
+                               | ' { <character> } '
+
+   Constraints on the length of a quoted string may be imposed by the context
+   in  which  it  is used.  A "missing end quote" error will be raised if the
+   trailing quote is missing.  It should  be  noted  that  the  single  quote
+   (apostrophe)  has  a  special  meaning in macro definitions, and should be
+   used with care.  The following are legal quoted strings:
+
+             "GREAT'STRING'(("
+             "X"
+
+   The following are not legal strings:
+
+             "UNBALANCED'
+
+   Note especially that it is not possible to include a quote in a string  by
+   repeating it, as in some high level languages.
+
+
+   Comments and Line Ends
+
+        All lines may end with a comment.  Comments begin  with  a  semicolon
+   and  may  include any text.  Comments are completely ignored in the normal
+   assembly process, but they are stored as part of the text of a macro,  and
+   macro parameter substitution does apply to them.
+
+             <line end> ::= [ ; { <character> } ] <end of line>
+
+   Note that, unlike their use in high level languages descended from  algol,
+   it  is  conventional  to  space  the  semicolon  away from any immediately
+   preceding commands and to allign the semicolons  on  successive  lines  to
+   make a column which delimits useful text from comments.
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       6
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                                 BASIC FORMATS
+
+        At the syntactic level, a SMAL program  consists  of  a  sequence  of
+   lines,  each of which may contain any number of labels, an assembly direc-
+   tive, and a comment.  Each of these fields is optional, and each may begin
+   anywhere  on the line, as long as they appear in the required order.  Com-
+   ments are defined at the lexical level and so  are  not  formally  treated
+   here.
+
+             <program> ::= { <line> } <end of file>
+             <line> ::= { <label> } [ <directive> ] <line end>
+
+   Unlike many older assembly languages,  these  rules  allow  indenting  and
+   blank  lines to be used to clarify the structure of programs wherever this
+   is convenient.
+
+
+   Labels
+
+        A label is an indentifier followed by a colon.  The effect of using a
+   particular  identifier  as a label is that the value of that identifier is
+   set to the current assembly location and it becomes illegal to alter  that
+   value  in  any way.  The initial value of the assembly location counter is
+   relocatable zero, and it is incremented once for each byte assembled.
+
+             <label> ::= <identifier> :
+
+   Any attempt to redefine a label will result in a "multiple  label  defini-
+   tion" error.  If the value of the location counter differs between the two
+   passes of the assembler, for example, as the result of a  macro  expanding
+   differently  on  the  two  passes, a "label differed in pass 1" error will
+   result.  The following are legal lines of SMAL code containing labels:
+
+             FIRST:
+             ANOTHER :    ;COMMENT
+               AGAIN:
+
+   Note the lack of column  restrictions  and  the  use  of  optional  spaces
+   between the identifier and the colon.
+
+
+   Directives
+
+        There are two kinds of assembler directives:   The  first  takes  the
+   form  of  an assignment statement and is used to assign values to identif-
+   iers.  The second takes the form of a symbolic directive name followed  by
+   appropriate operands.
+
+             <directive> ::= <assignment> | <symbolic directive>
+
+   The forms of each of the symbolic directives will be documented  in  later
+   sections.   In  general, each begins with an identifier which is either an
+   op-code name or the name of some assembly operation.  If an illegal  iden-
+   tifier  is used in this context, an "invalid directive" error will result.
+
+
+
+                                       7
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   Directive names are not reserved words; that is, the name of  a  directive
+   may be used as a label without any conflict of meaning.  On systems allow-
+   ing the use of both upper and lower case, directive names must be in upper
+   case.
+
+        The assignment directive assigns the value of an arbitrary expression
+   to an identifier.  An identifier assigned a value in this way may be rede-
+   fined at will, but it must not be used elsewhere as a label.
+
+             <assignment> ::= <identifier> = <expression>
+
+   The following lines of legal SMAL code demonstrate the use of assignment:
+
+             NEG1 = -1
+             SIXTEENTHOUSAND=8000+8000
+             L:     THISLOC = L
+
+   Note that spaces are ignored before and after the equals  sign,  and  that
+   labels may be used on the same line as an assignment.  The following lines
+   demonstrate illegal assignments:
+
+             MULDEF: MULDEF = 6
+             A = B
+             B = A
+
+   In the first case, the error is that an identifier used in a label can not
+   be  assigned  to.  In the second and third cases, the definition is circu-
+   lar.
+
+        A special form of the assignment directive is used to modify the  lo-
+   cation counter.  This is used, for example, to set the assembly origin.
+
+             <assignment> ::= . = <expression>
+
+   Here, the special symbol "." (period) is used as if it were an  identifier
+   standing for the location counter.  The location counter will take on both
+   the magnitude and type of the expression.  This means that an absolute as-
+   sembly  section  may  be  begun  by  assigning an absolute value such as a
+   numeric constant to the location counter, and a relocatable section may be
+   begun  by  assigning an external symbol, common name, or other relocatable
+   value to the location counter.  By default, the location counter  is  ini-
+   tialized  to  relocatable  zero.   The  following lines of legal SMAL code
+   demonstrate the use of this form:
+
+             BLOCK: .=.+5 ;BLOCK IS A LABEL ON 5 BYTES OF UNINITIALIZED MEMORY
+             A = .
+                   ; CODE TO INITIALIZE LOCATIONS IN COMMON
+
+   In the first example above, the  location  counter  is  incremented  by  5
+   bytes.   The  remainder  of the lines demonstrate how the current location
+   can be saved, changed to a different area, for example, a location in com-
+   mon, and restored to where it was originally.
+
+
+
+
+
+                                       8
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   Expressions
+
+        Expressions are composed of a sequence of terms separated  by  binary
+   operators.   There  is  no  operator  precidence  hierarchy, and terms are
+   evaluated and combined in a strict left to right order.   If  a  different
+   order  is needed, parentheses may be used to construct a term which is it-
+   self an expression.
+
+             <expression> ::= <term> { <binary operator> <term> }
+
+   The allowed binary operators are:
+
+             <binary operator> ::= + | -
+                                 | > | < | =
+                                 | & | !
+                                 | << | >>
+
+   These stand for, respectively, the arithmetic operations of  addition  and
+   subtraction,  the comparison operations greater than, less than, and equal
+   to, the boolean operations and and or and the left and right shift  opera-
+   tors.   The  following lines of legal SMAL code demonstrate the use of ex-
+   pressions:
+
+             FOUR     =  3 - 2 + 3
+             MINUSTWO = 3 - (2 + 3)
+             TRUE     = 5 = (3 + 2)
+             ONE      = 8 >> 3
+             EIGHT    = 1 << 3
+             NONSENSE =   5 = 3+2
+
+   In the final example, the value of "NONSENSE" will  not  be  the  same  as
+   "TRUE" because of left to right evaluation.  Note that spaces (or the lack
+   of spaces) around the operators have no effect on the order of evaluation.
+
+        The arithmetic operations are computed using 16 bit  binary  numbers.
+   In the absence of other constraints, these may be treated as either values
+   in the range -32768 to 32767 or as values in the range 0 to 65535.   Over-
+   flow  and  underflow are not detected because it is impossible for the as-
+   sembler to determine which operands were intended to be signed or  whether
+   or  not  the  result should be interpreted as signed.  The following rules
+   govern the type of the result when adding or subtracting values of various
+   types:
+
+                absolute + absolute    ==> absolute
+                absolute + relocatable ==> relocatable
+             relocatable + absolute    ==> relocatable
+             relocatable + relocatable ==> error
+                absolute - absolute    ==> absolute
+                absolute - relocatable ==> error
+             relocatable - absolute    ==> relocatable
+             relocatable - relocatable ==> absolute or error
+
+   Note that, in the last case, the difference of two relocatable values will
+   only  be  defined  if  both  are relocated relative to the same relocation
+
+
+
+                                       9
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   base.  A "misuse of relocation" error will result whenever an illegal com-
+   bination of operands is used.
+
+        The comparison operations are computed using 16 bit signed two's com-
+   plement  numbers.   Thus, values will be interpreted as being in the range
+   -32768 to 32767.  As a result, the constant 32768 will be reported  to  be
+   less  than  the  constant 32767.  The results of the comparison operations
+   will be -1, 0 and 1, corresponding respectively to true, false and  incom-
+   parable.   It is illegal to compare values of different types; thus, abso-
+   lute values may only be compared with other absolute values and  not  with
+   relocatable  values.  Failure to follow this rule will result in a "misuse
+   of relocation" error and a value of 1.
+
+        The boolean and and or operators are computed by applying  the  basic
+   operation to corresponding pairs of bits from the operands to produce each
+   bit of the result.  Thus, these may be used for bit setting and testing as
+   well  as for combining results from comparison operations in a boolean ex-
+   pression.  These operations may only be applied to absolute values;  their
+   application  to relocatable values will result in a "misuse of relocation"
+   error.
+
+        The shift operators perform logical shifts.  The left operand is  the
+   value  to  be  shifted and the right operand is the shift count.  Negative
+   shift counts are taken to be zero.  These operations may only  be  applied
+   to absolute values; their application to relocatable values will result in
+   a "misuse of relocation" error.
+
+
+   Terms
+
+        The terms of an expression consist of  an  optional  unary  operatior
+   preceding  a  value.   Thus,  unary  operators  may be included before any
+   operand used in an expression.
+
+             <term> ::= [ <unary operator> ] <value>
+             <unary operator> ::= + | - | \
+
+   The allowed unary operators are a leading plus sign, a leading minus sign,
+   and  a  leading not sign.  The following examples demonstrate legal use of
+   terms in SMAL expressions:
+
+             TRUE = ( +1 = 1 )
+             FALSE = \ TRUE
+             THREE   = - 3 - - 6
+             NEGNINE = -(3 - - 6)
+
+   The last two examples demonstrate that unary operators have a higher  pre-
+   cedence than binary operators.
+
+        The unary plus operator is always legal and has no effect on the  as-
+   sociated value.
+
+        The unary minus operator is used to negate the given value by  taking
+   the two's complement.  It may only be applied to absolute values; it's use
+
+
+
+                                       10
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   with relocatable values will result in a "misuse of relocation" error.
+
+        The unary not operator is used to take the one's  complement  of  the
+   given  value.   As  such, it may be used for bit manipulation or to invert
+   the sense of a boolean value resulting, for  example,  from  a  comparison
+   operation.  As with unary minus, unary not may only be applied to absolute
+   values.  Note that unary not, when applied to the  result  of  an  illegal
+   comparison, returns a value which is neither true nor false.
+
+
+   Values
+
+        The values used to compose the terms of  expressions  may  either  be
+   simple values such as identifiers, numbers, strings, and references to the
+   current value of the location counter, or they may be complex  forms  such
+   as parenthesized expressions and predefined functions.
+
+             <value> ::= <identifier>
+                       | <number>
+                       | <quoted string>
+                       | .
+                       | ( <expression> )
+                       | <function>
+
+   When an identifier is used as a value, it must have a value assigned to it
+   somewhere  in the program.  Simple forward references are allowed, and are
+   processed using two passes.  Thus, if an  expression  contains  a  forward
+   reference to some symbol, that symbol must have been defined by the end of
+   the first pass for that reference to be valid.   References  to  undefined
+   identifiers  will  result  in  an "undefined symbol" error.  When a dot is
+   used as a value in an expression, it is taken to  stand  for  the  current
+   value  of the location counter.  An "unbalanced parentheses" error will be
+   raised if the parentheses on an expression do not balance.
+
+        When a quoted string is used as a value in a term of  an  expression,
+   the  ASCII  values of the characters will be used.  If the string contains
+   only one character, it will be stored in the least significant 8  bits  of
+   the  value.   If  the  string  contains  two characters, the first will be
+   stored in the most significant 8 bits, the second in the least significant
+   8  bits.  Unused bits of the value will be set to zero.  An attempt to use
+   a string longer than two characters as a value will result in a "value out
+   of bounds" error.
+
+
+   Functions
+
+        Special functions are provided to test whether or not a symbol is de-
+   fined,  to  test whether it is a forward reference, to test the type of an
+   expression, and to test the length of a text fragment.
+
+             <function> ::= DEF ( <identifier> )
+                          | FWD ( <identifier> )
+                          | TYP ( <expression> )
+                          | LEN ( <balanced string> )
+
+
+
+                                       11
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   Note that the form of the argument lists for these  functions  depends  on
+   the  particular function used.  An "invalid function" error will result if
+   any other identifier is used in a context where a  function  name  is  al-
+   lowed.  Function names are not reserved words; the use of an identifier as
+   a function name is determined by the fact that it is followed by  a  begin
+   parenthesis.  On systems allowing both upper and lower case letters, func-
+   tion names must be in upper case.
+
+        The DEF function returns true (-1) if its argument has  been  defined
+   previously  in the text of the program, either as a label or as the object
+   of an assignment.  Otherwise, if the argument is an identifier  which  has
+   not  been  previously  defined, it returns false(0).  A "symbolic name ex-
+   pected" error will be raised if the argument is not an identifier; in this
+   case,  the  value returned will be ambiguous (+1).  The following fragment
+   of a SMAL assembler listing demonstrates the use of the DEF function:
+
+             169                  ]DEF = 0
+             170 +0091: 00        ] B DEF(UNDEF)
+             171 +0092: FF        ] B DEF ( DEF )
+             172                  ]UNDEF = 0
+
+   Note that spaces have no effect, and that the  DEF  function  responds  to
+   whether  or  not  its argument was previously defined in the text and thus
+   will return true only if it is defined earlier.   Thus,  DEF  will  always
+   have the same effect during both passes of the assembler.
+
+        The FWD function has the same form and syntactic requirements as  the
+   DEF  function,  but  it  returns  true when there is an unresolved forward
+   reference to the argument.  Thus, FWD  will  be  false  before  the  first
+   reference  to  the  argument  and false after the argument is defined, but
+   true between a reference to the argument and the  later  definition.   The
+   following fragment of a SMAL assembler listing demonstrates the use of the
+   FWD function.
+
+             172 +0093: 00        ] B FWD(FWD)
+             173                  ]REF = FWD
+             174 +0094: FF        ] B FWD(FWD)
+             175                  ]FWD = 0
+             176 +0095: 00        ] B FWD(FWD)
+
+   Note that the use of an identifier as an argument to the DEF or FWD  func-
+   tion  does not constitute a reference to that identifier from the point of
+   view of the FWD function.
+
+        The TYP function returns, as an absolute integer, the type of its ar-
+   gument.   As  a general rule, the particular value returned by TYP will be
+   meaningless, except that it will be the same for all values relocated  re-
+   lative  to  the  same relocation base.  The only exception to this rule is
+   that the TYP applied to any absolute expression  will  return  zero.   The
+   following fragment of a SMAL assembler listing demonstrates the use of the
+   TYP function:
+
+
+
+
+
+
+                                       12
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+             176                  ]  EXT X
+             177 +0097: 00        ]L:B TYP(0)
+             178 +0098: FF        ]  B TYP(.) = TYP(L)
+             179 +0099: 00        ]  B TYP(X) = TYP(L)
+
+   Note the use of comparisons with the TYP function to see if the  different
+   expressions are in fact comparable.  The TYP function operates by evaluat-
+   ing the expression given as an argument, thus, use of an as yet  undefined
+   identifier  as  an  argument to it constitutes a forward reference to that
+   identifier.
+
+        The LEN function returns, as an  absolute  integer,  the  length,  in
+   characters,  of  its  argument.   This is useful for testing, for example,
+   whether a macro parameter is present or absent.  The  only  constraint  on
+   the parameter to the LEN function is that it must be lexically valid (con-
+   tain no illegal numbers or strings), and if it contains  any  parentheses,
+   they  must  be properly balanced.  The length of the parameter will not be
+   interpreted as including any spaces before or after the parameter, but  it
+   will include any spaces within the parameter.  The following fragment of a
+   SMAL assembler listing demonstrates the use of the LEN function:
+
+             180 +009A: 00        ] B LEN()
+             181 +009B: 01        ] B LEN(0)
+             182 +009C: 02        ] B LEN('')
+             183 +009D: 04        ] B LEN( A  B )
+             184 +009E: 06        ] B LEN("A  B")
+             185 +009F: 07        ] B LEN(0 (0) 0)
+
+   Note that LEN, when applied to quoted strings, includes the quote marks in
+   its count.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       13
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                            DATA STORAGE DIRECTIVES
+
+        SMAL supports directives  to  store  bytes,  words,  and  strings  in
+   memory.  The first two of these directives have the same syntax:
+
+             <symbolic directive> ::= B <expression> { , <expression> }
+                                    | W <expression> { , <expression> }
+
+   The B and W directives store, respectively, one byte (8 bits) and one word
+   (16  bits) at the current location.  The location counter will be advanced
+   by the number of bytes stored after the expression is evaluated, so  that,
+   for  example,  "W ." will store a pointer to itself.  If multiple operands
+   are included, the additional operands are treated as  if  they  were  pro-
+   cessed  by  a  new B or W directive on the next line.  If the value of the
+   expression used on the B directive is greater than 255 or less than  -128,
+   a  "value out of bounds" error will be raised.  Note that "B 128" and "B -
+   128" will store exactly the same value; in the first case, it was probably
+   intended to be used as an unsigned 8 bit value, in the second case, it was
+   probably intended to be used as a signed 8 bit value.  The following  sam-
+   ple  assembly  listing  demonstrates the use of the B and W directives for
+   various purposes:
+
+             23 +000F: FF        ]L: B 255
+             24 +0010: 00FF      ]   W 255
+             25 +0012: FFFF      ]   W 65535
+             26 +0014: FF        ]   B 8#377
+             27 +0015: F0        ]   B 2#11110000
+             28 +0016: 7FFF      ]   W 32#VVV
+             29 +0018: 20        ]   B " "
+             30 +0019:+000F      ]   W L
+             31 +001B:+0010      ]   W L+1
+             32 +001D:+001D      ]   W .
+
+   In the above example, the location counter was relocatable,  as  indicated
+   by  the  leading  plus  sign  in  the location column in the listing.  The
+   values on the last 3 lines of the listing are relocatable because they are
+   derived from the location counter.
+
+        Strings of ASCII characters may be stored using the ASCII  directive.
+   This takes a quoted string as an operand.
+
+             <symbolic directive> ::= ASCII <quoted string> { , <expression> }
+
+   Note that the 7 bit ASCII representation of each character in  the  string
+   is  stored  right justified in one byte, and that the most significant bit
+   of that byte is set to zero.  There is no guarantee that "ASCII 'ab'"  and
+   "W 'ab'"  will  store the same result in memory!  This is because, on some
+   machines, the most significant byte of a word is stored  first  in  memory
+   (for  example, the IBM System/370) and on other machines, the least signi-
+   ficant byte of a word is stored first in  memory  (for  example,  the  DEC
+   PDP-11).   The  following fragment of a SMAL assembly listing demonstrates
+   the correct use of the ASCII directive:
+
+
+
+
+
+                                       14
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+     63 +003F: 41        ]   ASCII "A"
+     64 +0040: 41  42    ]   ASCII "AB"
+     65                  ]CR = #0D
+     66                  ]LF = #0A
+     67 +0042: 4E  4F    ]MSG: ASCII "NOW IS THE TIME FOR ALL GOOD MEN"
+     68 +0062: 0D        ]     B CR
+     69 +0063: 0A        ]     B LF
+
+   In this example, note that the control characters CR and LF have been  ap-
+   pended  to  the string by using additional B directives.  These could have
+   been appended to the string by including them as  additional  operands  on
+   the ASCII directive itself, as follows:
+
+     67 +0042: 4E  4F    ]MSG: ASCII "NOW IS THE TIME FOR ALL GOOD MEN",CR,LF
+
+   This has exactly the same meaning as the original.  In general, if the ad-
+   ditional  operands  on an ASCII directive are quoted strings, they will be
+   treated exactly as if they appeared in a new ASCII directive on  the  next
+   line; otherwise, they will be treated as if they appeared as operands on a
+   B directive.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       15
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                                EXTERNAL SYMBOLS
+
+        SMAL allows the results of assembling a number of source programs  to
+   be  combined  into  a single program at run-time by a linkage editor.  Be-
+   cause of this, there are two classes of symbols in SMAL, local symbols and
+   global  symbols.   Local  symbols  are  defined only within one particular
+   source program, and the same name may be used  with  a  different  meaning
+   within another.  Global symbols, on the other hand, are shared by all pro-
+   grams which are to be linked into one final program.  There are two  kinds
+   of  global symbols:  Those which are defined internally in one program and
+   referenced in another, and those which are not defined in  any  particular
+   file but are expected to be defined by the linker.
+
+
+   External Declarations
+
+        When a symbol defined in one program is to be referenced  by  another
+   program,  it  must be declared as being external to the program which uses
+   it.  This is done by defining that identifier with an external directive:
+
+             <symbolic directive> ::= EXT <identifier> { , <identifier> }
+
+   Identifiers which are declared as external symbols may not be used as  la-
+   bels and they may not have values assigned to them; violation of this rule
+   will result in a "multiple label definition" error.  Identifiers  used  in
+   this  context  must not have been previously referenced in the text of the
+   program; a "name used before defined" error will result when this rule  is
+   violated.  Multiple identifiers may be declared with one EXT directive.
+
+        In addition to relocatable symbols introduced by defining  labels  in
+   terms  of relocatable location counter values, each external symbol intro-
+   duces a new relocation base relative to which additional  symbols  may  be
+   defined.   Thus, it is legal to add or subtract absolute values to or from
+   an external symbol name in order to reference adjacent values (if the name
+   is externally defined as a label, the adjacent values will reference adja-
+   cent memory locations).  The following fragment of a SMAL assembler  list-
+   ing illustrates the use of external declarations:
+
+             140                  ]   EXT EXT
+             141                  ]ADR = EXT + 8
+             142 +007A:+0000      ]   W EXT
+             143 +007C:+0008      ]   W ADR
+
+   Note that the external symbol "EXT" in the above example is used as a  re-
+   location base for the symbol "ADR".
+
+
+   Internal Declarations
+
+        When a program wishes to allow other programs to reference a  locally
+   defined symbol, it must be declared to be accessible by an internal direc-
+   tive:
+
+             <symbolic directive> ::= INT <identifier> { , <identifier> }
+
+
+
+                                       16
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   Identifiers declared as internal must be defined somewhere in the program;
+   failure  to  follow  this rule will result in an "undefined symbol" error.
+   Within the program where an internal symbol is defined, that symbol may be
+   manipulated  as  if  it  were an entirely local symbol.  The value of that
+   symbol at the end of the second assembly pass will be the value  which  is
+   exported.  Multiple identifiers may be declared by one INT directive.  The
+   following fragment of legal SMAL code  illustrates  the  use  of  internal
+   directives:
+
+                   INT EXT
+                   INT CONST, CONST1
+             EXT:  CONST = 5
+                   CONST1 = 6
+
+   Note that the internal symbol "EXT" is declared  as  a  label,  and  thus,
+   probably,  has a relocatable value, but the internal symbol "CONST" is de-
+   clared by assigning an absolute integer value to it.
+
+
+   Common Declarations
+
+        When a program wishes to reference an area of memory which is  to  be
+   allocated by the linkage editor, that area must be declared to be a common
+   block and its size must be specified:
+
+             <symbolic directive> ::= COMMON <identifier> , <expression>
+
+   Common names may be used exactly like any external symbol, and must satis-
+   fy  the same rules.  Thus, the name must not have been referenced previous
+   to the common directive, and it must not be defined anywhere else  in  the
+   program.
+
+        The second argument to the common directive gives the size of the re-
+   gion  which  the linkage editor is expected to allocate.  This must be ei-
+   ther an absolute value, in bytes, or it must be relocated relative to  the
+   common base; any other form will result in a "misuse of relocation" error.
+   Generally, the declarations of the same common in the  different  programs
+   linked  by  the  linker should be the same.  If different sizes are speci-
+   fied, the first size encountered by the linker  will  be  used  and  later
+   sizes will be ignored.
+
+        The following fragment of a SMAL assembler  listing  illustrates  the
+   correct use of the COMMON directive:
+
+             227                  ]COMMON COM1,6
+             228                  ]COMMON COM2,COM2LIM
+             229                  ]LOCSAVE = .
+             230                  ]. = COM2
+             231 +0000: 05        ]B 5
+             232 +0001: 06        ]B 6
+             233                  ]COM2LIM:
+             234                  ]. = LOCSAVE
+
+   Note that the size of "COM1" above is  declared  with  a  simple  absolute
+
+
+
+                                       17
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   value,  but that the size of "COM2" is declared by using a label relocated
+   relative to "COM2" itself.  The pattern of code used to initialize  "COM2"
+   is suggested as a standard for assembly time initialization of commons.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       18
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                              CONDITIONAL ASSEMBLY
+
+        SMAL supports structured conditional assembly facilities  which  pro-
+   vide  an  assembly-time  control structure comparable to the corresponding
+   run-time control structures of many high level languages.
+
+             <symbolic directive> ::= IF <expression>
+                                    | ELSEIF <expression>
+                                    | ELSE
+                                    | ENDIF
+
+   The semantics of the conditional directives is best described in terms  of
+   conditional  blocks.  A conditional block begins with an if block and ends
+   with an endif directive.  Between the if block and the endif directive, an
+   optional  sequence  of  elseif  blocks is allowed, followed by an optional
+   else block.  Each block is headed by a specific directive  which  controls
+   the assembly of the following sequence of lines, including possible nested
+   conditional blocks.
+
+             <conditional block> ::= <if block>
+                                   { <elseif block> }
+                                   [ <else block> ]
+                                     ENDIF
+             <if block> ::= IF <expression> <line end> { <line> }
+             <elseif block> ::= ELSEIF <expression> <line end> { <line> }
+             <else block> ::= ELSE <line end> { <line> }
+
+   The lines within an if or an  elseif  block  are  only  assembled  if  the
+   corresponding boolean expression evaluated to true (-1).  The lines within
+   an elseif or else block will only be assembled if no previous if or elseif
+   block  within that conditional block was assembled.  No more than one sub-
+   block within a conditional block will ever be assembled.  A  "missing  en-
+   dif"  error  will be raised if an if block is not correctly terminated be-
+   fore the end of a macro, text insertion, or program.
+
+        It is inappropriate to use labels on the if, elseif, else, and  endif
+   directives,  but  they  are  allowed.  If they are used, they will be con-
+   sidered to be part of the immediately preceding sequence of lines.   Thus,
+   the  label  on an elseif directive will be processed as if it were part of
+   the previous if or elseif block.
+
+
+   Examples
+
+        The following fragments of a SMAL assembler listing illustrate  valid
+   uses of the conditional assembly directives:
+
+             199                  ]IF VERSION < 5
+             200 +00AD: 00        ]  LOWV: B 0
+             201                  ]ENDIF
+
+   The above example might be used to declare and initialize a variable which
+   is only used in some versions of a program.
+
+
+
+
+                                       19
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+             208                  ]IF VERSION < 2
+             209                  ]  STR: ASCII "SIMPLE VERSION"
+             210                  ]ELSEIF VERSION < 4 ;AND VERSION > 1
+             211 +00AF: 4D  45    ]  STR: ASCII "MEDIUM VERSION"
+             212                  ]ELSE ;VERSION > 3
+             213                  ]  STR: ASCII "COMPLEX VERSION"
+             214                  ]ENDIF
+             215 +00BD: 00        ]B 0
+
+   The above example might be used to create the part of the title string  of
+   a  program  which depends on the version.  The comments used on the ELSEIF
+   and ELSE directives document assertions which are known to be true on  en-
+   try to the corresponding block and therefore need not be explicitly tested
+   for.  The following example is equivalent to the above one, but it uses  a
+   nested conditional instead of an elseif directive:
+
+             208                  ]STR: IF VERSION < 2
+             209                  ]         ASCII "SIMPLE"
+             210                  ]     ELSE
+             211                  ]         IF VERSION < 4
+             212 +00AF: 4D  45    ]             ASCII "MEDIUM"
+             213                  ]         ELSE
+             214                  ]             ASCII "COMPLEX"
+             215                  ]         ENDIF
+             216                  ]     ENDIF
+             217 +00B5: 20  56    ]     ASCII " VERSION"
+             218 +00BD: 00        ]     B 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       20
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                                 MACRO ASSEMBLY
+
+        The SMAL macro facilities allow assembly-time control structures com-
+   parable to the procedure structures of many high level languages.  A macro
+   is a named block of text which is assembled into the program wherever  its
+   name occurs in the context of a macro call.  If a macro is defined as hav-
+   ing formal parameters, the corresponding actual parameters are substituted
+   for the formal parameters within the body of the macro before it is assem-
+   bled.
+
+
+   Macro Definitions
+
+        Each macro definition begins with a macro directive and ends with  an
+   endmac directive.  The macro directive is followed by the name of the mac-
+   ro and its formal parameter list.
+
+             <symbolic directive> ::= MACRO <identifier> [ <formal list> ]
+                                    | ENDMAC
+
+   The semantics of a macro declaration are most easily described in terms of
+   macro  blocks  which  begin  with a macro directive and end with an endmac
+   directive.  The body of the block between the two is saved by  the  assem-
+   bler and assembled as a result of each call to the macro.
+
+             <macro block> ::= MACRO <identifier> [ <formal list> ] <line end>
+                             { <line> }
+                               ENDMAC
+
+   Note that any labels on the line containing the macro  directive  are  not
+   interpreted  as  having anything to do with the macro but are processed as
+   normal labels.  Labels on the line containing  the  endmac  directive  are
+   completely  ignored!   If a macro block is not properly terminated with an
+   endmac directive, a "missing endmac" error  will  result.   The  following
+   fragment of valid SMAL code illustrates the definition of a simple parame-
+   terless macro:
+
+             MACRO CRLF
+               B #0D
+               B #0A
+             ENDMAC
+
+   A call to this macro can be used after an ASCII directive to put a CR  and
+   LF after the text string.
+
+        Macro definitions may contain other macro definitions, but the effect
+   is  not  that  of  creating a local macro, as might be expected by anology
+   with high level languages.  Instead, the internal macro definition will be
+   processed  by  the  assembler  each  time  the containing macro is called.
+   Thus, a macro may be used to create a number of other macros by calling it
+   repeatedly with different parameters.
+
+
+
+
+
+
+                                       21
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   Macro Formal Parameters
+
+        The formal parameter list on a macro definition  lists  the  symbolic
+   names  of each parameter and the parameter passing mode.  Symbolic parame-
+   ter names are identifiers.  There is an implementation dependent limit  on
+   the  number  of formal parameters allowed; if this is exceded, a "too many
+   macro parameters" error will be raised.  Typically, at least 8  parameters
+   will be allowed.
+
+             <formal list> ::= <formal parameter> { , <formal parameter> }
+             <formal parameter> ::= <identifier>
+                                  | ( <identifier> )
+                                  | = <identifier>
+
+   The three macro parameter modes are:   Name  mode,  in  which  the  formal
+   parameter  is  declared  by  just its name; list mode, in which the formal
+   parameter name is surrounded by parentheses; and value mode, in which  the
+   formal parameter name is preceded by an equals sign.  The treatment of ac-
+   tual parameters in each of these three modes will be discussed later.  The
+   following  fragment  of a SMAL assembly listing illustrates the definition
+   of a simple macro with one parameter passed by name:
+
+             MACRO ASCIICRLF TEXT
+                ASCII TEXT
+                CRLF
+             ENDMAC
+
+   Note that the above macro contains a call to the macro "CRLF"  defined  in
+   the previous example.
+
+        Within the macro body, each occurance of any macro  formal  parameter
+   name  is  identified  as  the macro is defined.  Formal parameters will be
+   identified within comments and within character strings.   The  only  time
+   that a formal parameter will not be identified is when it is embedded in a
+   larger identifier.  For example, if "A" and  "B"  are  formal  parameters,
+   neither  of  them will be identified in the string "AB".  If "AB" is to be
+   seen as the concatenation of two parameters, an apostrophe should  be  in-
+   serted between the two, as in "A'B".  Within the body of any macro, single
+   apostrophes will be deleted, and strings of two or more  apostrophes  will
+   be  shortened  by one when that macro is defined.  Thus, special care must
+   be taken when using apostrophes as single quotes around quoted strings.
+
+
+
+   Macro Calls
+
+        A macro call takes the form of a symbolic directive which begins with
+   the  name  of  a  previously  defined  macro, followed by a list of actual
+   parameters.
+
+             <symbolic directive> ::= <identifier> [ <actual list> ]
+             <actual list> ::= <actual parameter> { , <actual parameter> }
+             <actual parameter> ::= [ <by name> | <by list> | <by value> ]
+
+
+
+
+                                       22
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   The first step in processing a macro call is to store the text of each ac-
+   tual  parameter,  according to the parameter passing rules associated with
+   that parameter type.  Individual parameters may be omitted  or  blank,  in
+   which case, no text is passed.  In all cases, the number of actual parame-
+   ters must be less than or equal to the number of formal parameters.  After
+   the  parameters  are stored, assembly of the body of the macro begins.  As
+   the body is being assembled, all formal parameters which had been  identi-
+   fied  at  the  time  the body was originally defined are replaced with the
+   text of the corresponding actual parameters.  If the  resulting  text  for
+   any  line is longer than the implementation defined line length limit, the
+   error "text too long for line" will result.
+
+        When a formal parameter is declared as a name parameter,  the  actual
+   parameter  may be any text which does not include commas unless the commas
+   are parenthesized and as long as any parentheses in the text are balanced.
+   The  entire  text of a name parameter will be passed with no changes other
+   than to remove leading and trailing blanks.
+
+        When a formal parameter is declared as a list parameter,  the  actual
+   parameter  must  be  enclosed in parentheses and may contain any lexically
+   valid text as long as the parentheses it contains are  balanced.   A  sub-
+   string  specification  is allowed after the end parenthesis; this consists
+   of two expressions set off from the parameter and each other by colons.
+
+             <by list> ::= ( <balanced string> ) [ <substring> ]
+             <substring> ::= : [ <expression>  [ :] <expression> ]
+
+   If the substring specification is absent, the entire balanced string  will
+   be  passed  as a parameter.  Note that the enclosing parentheses are never
+   passed.  If  the  first  expression  in  the  substring  specification  is
+   present,  it  specifies  the  index of the first character in the balanced
+   string to be passed (the default value of the first  expression  is  one).
+   If  the  second  expression  in the substring specification is present, it
+   specifies how many characters from the balanced string are  to  be  passed
+   (the default value of the second expression is "all").  Substring specifi-
+   cations should be used with care because they may introduce  strings  with
+   unbalanced parentheses.
+
+        When a formal parameter is declared as a value parameter, the  actual
+   parameter must be an expression.
+
+             <by value> ::= <expression>
+
+   The expression will be evaluated at the time of the  macro  call;  if  the
+   result  is  an  absolute  value, the text of the decimal representation of
+   that value will be passed as a parameter.  Note that the decimal represen-
+   tation  used  will  be unsigned, that is, -1 will be passed as 65535; this
+   allows identifiers to be constructed by appending the value of the parame-
+   ter  to  a  letter.   If  the value is not absolute, an expression will be
+   passed which evaluates to the desired value.
+
+        In no case will a macro call be executed if any errors are  found  in
+   the  actual  parameter  list.  During the assembly of the body of a macro,
+   other macro calls may be processed, even recursive calls.
+
+
+
+                                       23
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   Examples
+
+        The following fragments of SMAL  assembly  listings  demonstrate  the
+   correct  use of macros.  The first example is contrived to demonstrate the
+   use of each parameter passing mode:
+
+             249                  ]MACRO T NAME,=NUMBER,(LIST)
+             250                  ]   NAME NUMBER
+             251                  ]   LIST
+             252                  ]ENDMAC
+             253                  ]
+             254                  ]T B,5+4,(COMMON A,5)
+             254 +00BA: 09        ]   B 9
+             254                  ]   COMMON A,5
+             254                  ]END
+             255                  ]
+             256                  ]T W,-1,(BIB -25):3
+             256 +00BB: FFFF      ]   W 65535
+             256 +00BD: E7        ]   B -25
+             256                  ]END
+             257                  ]
+             258                  ]T W,A+2,("; NONESUCH"):2:6
+             258 +00BE:+0002      ]   W A+2
+             258                  ]   ; NONE
+             258                  ]END
+
+   In the first call to the macro, note that the expression  "5+4"  has  been
+   evaluated,  and  the  value  "9" has been substituted into the macro body.
+   Similarly, in the second call,  the  expression  "-1"  was  evaluated  and
+   passed  as  "65536".  In the third call, the expression "A+2" could not be
+   passed as a number because it is relocated relative  to  the  common  name
+   "A", which was defined in the first call to the macro.
+
+        The following two macros demonstrate the use of value parameters  and
+   concatenation for automatic label generation.  The first macro simply con-
+   catenates its three parameters, with the constraint that the middle param-
+   eter  is  an  expression.   This  is  used to construct new symbols by the
+   second macro.  The second macro maintains a counter, "LAB", which  is  in-
+   cremented  once  each time it is called.  Thus, each time it is called, it
+   will be able to create new symbols.
+
+              2                  ]MACRO LABGEN (PART1),=NUM,(PART2)
+              3                  ]   PART1'NUM'PART2
+              4                  ]ENDMAC
+              5                  ]
+              6                  ]LAB = 1
+              7                  ]MACRO LABUSER
+              8                  ]   LAB = LAB + 1
+              9                  ]   LABGEN (L),LAB,(:)
+             10                  ]   B 0
+             11                  ]   LABGEN (W L),LAB
+             12                  ]ENDMAC
+             13                  ]
+
+
+
+
+                                       24
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+             14                  ]LABUSER
+             14                  ]   LAB = LAB + 1
+             14                  ]   LABGEN (L),LAB,(:)
+             14                  ]   L2:
+             14                  ]END
+             14 +0000: 00        ]   B 0
+             14                  ]   LABGEN (W L),LAB
+             14 +0001:+0000      ]   W L2
+             14                  ]END
+             14                  ]END
+             15                  ]
+             16                  ]LABUSER
+             16                  ]   LAB = LAB + 1
+             16                  ]   LABGEN (L),LAB,(:)
+             16                  ]   L3:
+             16                  ]END
+             16 +0003: 00        ]   B 0
+             16                  ]   LABGEN (W L),LAB
+             16 +0004:+0003      ]   W L3
+             16                  ]END
+             16                  ]END
+
+   Note that the symbol "LAB"  could  have  been  initialized  in  the  macro
+   "LABUSER"  instead of in the main program.  To do this, the initialization
+   would have to be assembled conditionally depending on whether or not "LAB"
+   had been previously defined.
+
+        The last example illustrates a macro which is  almost  equivalent  to
+   the ASCII directive.  This macro redefines the ASCII directive and is com-
+   patable with it for most strings.
+
+              1                  ]MACRO ASCII STRING,(PART1),(PART2)
+              2                  ]  IF LEN(STRING) > 0
+              3                  ]    ASCII ,(STRING):2:1,(STRING):3:LEN(STRING)-3
+              4                  ]  ELSEIF LEN(''PART1'') > 2
+              5                  ]    LIST + 100
+              6                  ]    B ''PART1''
+              7                  ]    LIST - 100
+              8                  ]    ASCII ,(PART2):1:1,(PART2):2
+              9                  ]  ENDIF
+             10                  ]ENDMAC
+             11 +0000: 00        ]B 0
+             12                  ]ASCII "CALC"
+             12 +0001: 43        ]    B 'C'
+             12 +0002: 41        ]    B 'A'
+             12 +0003: 4C        ]    B 'L'
+             12 +0004: 43        ]    B 'C'
+             13 +0005: 01        ]B 1
+
+   This example demonstrates the combination of conditional and macro  assem-
+   bly,  the  use  of  substring  parameters,  the use of the function LEN to
+   detect missing parameters, and the use of recursion.  Note also the use of
+   the  listing control directive and the use of doubled single quotes within
+   the macro definition which result in single quotes at expansion time.
+
+
+
+                                       25
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                        MISCELANEOUS ASSEMBLY DIRECTIVES
+
+
+
+   Text Instertions
+
+        SMAL allows text to be inserted into the body of a  program  from  an
+   alternate  source  file  at assembly time.  The only requirements are that
+   the alternate source file be itself a legal SMAL program, and that  inser-
+   tions  are  not  nested  deeper  than  the implementation allows.  The USE
+   directive causes text insertion.
+
+             <symbolic directive> ::= USE <quoted string>
+
+   The string operand on a USE directive must contain the name of a file from
+   which additional text may be read.  The USE directive is not executed by a
+   preprocessor; thus, the inclusion of USE directives in the body of a macro
+   will  have  no effect until that macro is called, and the inclusion of USE
+   directives in the body of a conditional block will only have an effect  if
+   the expressions governing the execution of that conditional block have ap-
+   propriate values.  If too many levels of nested USE directives are encoun-
+   tered,  a "too many use levels" error will be raised.  Typically, at least
+   2 levels of nesting will be allowed, so that one used file can use  anoth-
+   er.
+
+        USE directives are commonly used for inserting standard macro defini-
+   tions  into  a  program, or for inserting common definitions into one of a
+   group of programs which are to be  linked  together.   The  following  two
+   source files demonstrate the use of the USE directive:
+
+             ; FILE OF STANDARD DEFINITIONS
+             CR = #0D
+             LF = #0A
+             BS = #08
+
+             ; A USER FILE
+             USE "STANDARD"
+             ASCII "LINE"
+             B CR
+             B LF
+
+   If the first source file is stored in a file known to the operating system
+   as  "STANDARD",  assembling  the  second file will result in the following
+   listing:
+
+              1                  ]; A USER FILE
+              2                  ]USE "STANDARD"
+              3 +0000: 4C  49    ]ASCII "LINE"
+              4 +0004: 0D        ]B CR
+              5 +0005: 0A        ]B LF
+
+   Note that, by default, the contents of the used file  are  not  listed  as
+   they  are  processed.   For example, in the above listing, the contents of
+   "STANDARD" are not listed, but the assembler has seen its contents, as  is
+
+
+
+                                       26
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   shown by the values produced when "CR" and "LF" were used.
+
+
+   End of File
+
+        The assembler automatically inserts an END directive at  the  end  of
+   each source file from which it reads, and at the end of each macro body it
+   processes.  The only function of the END directive is to mark the ends  of
+   files and macros.
+
+             <symbolic directive> ::= END
+
+   It is legal to explicitly include an END directive at the end of  a  file;
+   if additional lines are included in the file after the end directive, they
+   will always be ignored.
+
+        Explicit inclusion of an END directive in a macro body requires  that
+   the  END  directive  be enclosed in single quotes to prevent it from being
+   mistaken for the end of file.  About the only reason to do this is to  in-
+   clude special comments on the end of a macro or to adjust the indenting of
+   the END directive.
+
+
+   Listing Control
+
+        The assembler normally only lists source lines  from  the  base  file
+   from  which it is assembling, and does not list the results of macro calls
+   and text insertions.  The listing behavior may be manually  controlled  by
+   the list directive.
+
+             <symbolic directive> ::= LIST <expression>
+
+   At all times, the assembler keeps a record of the number of macro  nesting
+   levels it is to include in the listing.  The operand of the LIST directive
+   is added to this counter.  Thus, if the operand is positive, it will cause
+   additional  nesting  levels  to  be listed, and if it is negative, it will
+   suppress the listing of some number of nesting levels.
+
+        The line containing the LIST directive will  not  be  printed  if  it
+   causes listing to be turned on or off.  Thus, macros which use LIST direc-
+   tives to selectively list parts of their expansions will not  clutter  the
+   listing with the LIST directives themselves.
+
+        By default, SMAL listings are titled with the version of  the  assem-
+   bler,  (and  in  some  versions of SMAL, the name of the file being assem-
+   bled).  The following two directives may be used to modify this behavior:
+
+             <symbolic directive> ::= TITLE { <lexeme> }
+                                    | SUBTITLE { <lexeme> }
+
+   The subtitle on each listing page will appear directly  below  the  title.
+   The  remainder  of  the  line following the TITLE or SUBTITLE directive is
+   used as the title or subtitle, including comments.  The text of the  title
+   or  subtitle  must  be  lexically  valid; this usually causes no problems,
+
+
+
+                                       27
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   since any sequence of words is lexically valid as a sequence  of  identif-
+   iers.
+
+        Programs should usually contain only one  TITLE  directive,  and  may
+   contain  any  number of SUBTITLE directives.  Each SUBTITLE directive will
+   force the start of a new page in the listing, and  in  addition,  will  be
+   used  during  the first pass of the assembler to construct a table of con-
+   tents.  Additional page feeds may be included in the listing by the use of
+   the PAGE directive:
+
+             <symbolic directive> ::= PAGE
+
+   PAGE directives and SUBTITLE directives encountered while listing is  dis-
+   abled  will cause a page eject, but the directive itself will not be list-
+   ed.  Some effort has been made to suppress multiple page ejects;  specifi-
+   cally,  a  PAGE directive followed by a SUBTITLE directive will cause only
+   one eject.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       28
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                                THE SMAL LINKER
+
+        When the SMAL assembler processes a SMAL source program, it  produces
+   a SMAL object file.  SMAL object files are encoded in the SMAL object sub-
+   language, and may be linked into a load file by the SMAL assembler.   When
+   the  SMAL  assembler is used for this linkage editing function, it is con-
+   trolled by a SMAL linker control program, encoded in the SMAL linker  con-
+   trol  sublanguage.  As a linker, the SMAL assembler may process object li-
+   brary files in addition to simple object files; such object library  files
+   must be encoded in the SMAL object library sublanguage.  Finally, the out-
+   put of the SMAL assembler when it is used as a linkage  editor  is  either
+   another object file or a load file encoded in the SMAL loader sublanguage.
+
+        As the terminology suggests, SMAL object files, linker control files,
+   and  load files are all legal SMAL programs, encoded in particular subsets
+   of the language.  SMAL object files have less symbolic information in them
+   than  SMAL  source files, and SMAL load files have almost no symbolic con-
+   tent (what remains is concerned only  with  establishing  relocatability).
+   SMAL  linker  control  files and object library files consist primarily of
+   information concerning how to find each part of the program to  be  linked
+   and when to link it.
+
+
+   The Linker Control Sublanguage
+
+        A SMAL linker control program consists of  an  optional  sequence  of
+   linker  controls,  followed  by  a sequence of object specifications which
+   name the files to be linked, followed by an optional common specification.
+
+             <linker control program> ::= { <linker control> }
+                                          { <object specification> }
+                                          [ <common specification> ]
+                                            <end of file>
+
+   If the object files to be linked do not reference any common regions,  and
+   if the result to be produced is intended for loading only, then the linker
+   control program need not contain anything but object specifications.
+
+             <object specification> ::= USE <quoted string> <line end>
+
+   Each object specification is a USE directive which names either an  object
+   file or a library file.  The object files named will be loaded sequential-
+   ly in memory, while the library files will be searched to see if they con-
+   tain definitions of any symbols referenced by the programs already loaded.
+   If so, appropriate material from the library files is also loaded.  If the
+   files "MAIN", "SUB1", and "SUB2" are SMAL object files, the following SMAL
+   linker control program could be used to link them:
+
+             USE "MAIN"
+             USE "SUB1"
+             USE "SUB2"
+
+   If there is some external symbol used by one of these programs but not de-
+   fined  in another of them, an "undefined symbol" error will be produced in
+
+
+
+                                       29
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   the listing file.
+
+        If any of the object files to be linked contain  references  to  com-
+   mons,  the  linker  must  be  told where to place the commons.  The common
+   specification may take a number of forms.  In the simplest form, the link-
+   er  is  told  to  place the commons in memory immediately after everything
+   else:
+
+             <common specification> ::= C = . <line end>
+
+   The following example loader control program illustrates this form of  use
+   of commons:
+
+             USE "MAIN"
+             USE "SUB1"
+             USE "SUB2"
+             USE "LIBRARY"
+             C=.
+
+   Note that the common specification is placed after all  object  specifica-
+   tions, including any which reference libraries.
+
+
+   Linker Control Functions
+
+        If programs are to be loaded in random access memory in a convention-
+   al way, the above should suffice.  On the other hand, there are times when
+   common regions should not be loaded in the same memory  as  normal  object
+   code,  for  example, on systems where one is to be in read-only memory and
+   the other in read-write memory.  In this case, the following form  can  be
+   used:
+
+             <linker control> ::= C = <number> <line end>
+
+   Here, the absolute address where the first common is to be placed is stat-
+   ed,  and  other  commons  will  be placed successively in memory after it.
+   Note that this form of common specification is used before the sequence of
+   object specifications, not after.
+
+        The normal action of the SMAL assembler, when used as a linker, is to
+   produce a relocatable load file.  This normal behavior may be changed in a
+   number of ways by the linker controls.  For example, to create an absolute
+   load file, the following control can be used:
+
+             <linker control> ::= . = <number> <line end>
+
+   For an example of the use of this form, consider a system with 4K bytes of
+   read-write  memory  starting  at address #0000 and with 16K bytes of read-
+   only memory starting at address #1000.  If the source programs for the ob-
+   ject  files  involved were consistent in their use of common for all read-
+   write variables, maintaining a strict separation between  code  and  data,
+   then  the  following  linker  control file could be used to prepare a load
+   file to be used in "burning" the read-only memory:
+
+
+
+
+                                       30
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+             C=#0000
+             USE "MAIN"
+             USE "SUB1"
+             USE "SUB2"
+
+   Note the use of the common specification to control the placement  of  all
+   commons in the read-write region.
+
+        At times, there may be some commons or other external  symbols  which
+   must  be  placed  in specific memory locations, for example, a program may
+   reference a block of perepheral device control registers as a common,  al-
+   lowing  adjustments for the particular machine configuration to be made at
+   linkage time.  In this case, the following form can be used:
+
+             <linker control> ::= R<identifier> = <number> <line end>
+
+   Note that an external name is a legal identifier  which  begins  with  the
+   letter  R.   External names are formed by adding the R prefix to the iden-
+   tifier used internally in a source program as operands on an EXT, INT,  or
+   COMMON directives.  External names should only be defined by a linker con-
+   trol directive when they are not defined by an INT directive in one of the
+   object files to be linked.
+
+        Finally, there are times when it is desirable to be able  to  specify
+   the  size  of a common at linkage time instead of requiring the size to be
+   known within the source programs.  The following form allows this:
+
+             <linker control> ::= S<identifier> = <number> <line end>
+
+   When this form is used, it will override the size of the given common  de-
+   clared in the programs being linked.  Thus, it is actually possible to de-
+   crease the size of a common below that which a program  declared  that  it
+   needed.   When  this  is intended, the common itself should probably begin
+   with an external reference which is expected to be set by the linker  con-
+   trol program to indicate the size of the common actually allocated.
+
+
+   Producing an Object File as Linker Output
+
+        It is possible to direct the SMAL assembler, as a linker, to  produce
+   an  object file as output instead of a load file.  This is done, for exam-
+   ple, when the set of object files being linked does not comprise an entire
+   program,  but  only  part  of  one; thus, the result may still contain un-
+   resolved references to external symbols, and it may define  internal  sym-
+   bols.   In this case, linker control directives must be used to inform the
+   SMAL assembler, as a linker, which external symbols are to be exported  by
+   or imported to the resulting object file.  Export is done as follows:
+
+             <linker control> ::= <identifier> = R<identifier> <line end>
+                                  INT <identifier> <line end>
+
+   The identifiers used on the two lines of  this  directive  should  be  the
+   same.  Import is done as follows:
+
+
+
+
+                                       31
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+             <linker control> ::= EXT <identifier> <line end>
+                                  R<identifier> = <identifier> <line end>
+
+   Again, the identifiers must be the same, and the effect  is  to  make  all
+   references  to the given external name from within any of the object files
+   being linked into references to a  symbol  external  to  the  object  file
+   resulting  from  the  linkage  process.  The following example SMAL linker
+   control file illustrates these forms:
+
+             EXT DATA
+             RDATA = DATA
+             ENTRY = RENTRY
+             INT ENTRY
+             USE "ENTRY"
+             USE "TABLE"
+             C=.
+
+   If  the  object  file  "ENTRY"  was  generated  from   source   containing
+   "EXT TABLE"  and  "INT ENTRY",  and  the object file "TABLE" was generated
+   from source containing "INT TABLE" and "EXT DATA" then the result of  pro-
+   cessing  this  linkage  control file will be a relocatable object file re-
+   ferencing the external name "RDATA" and defining the external  name  "REN-
+   TRY".
+
+        When a common area declared in one of the programs being linked is to
+   be  preserved as a common area in the resulting object file, thus allowing
+   it to be shared with other programs linked to the resulting object file, a
+   special form of import/export must be used:
+
+             <linker control> ::= COMMON <identifier> , S<identifier> <line end>
+                                  R<identifier> = <identifier> <line end>
+
+   Note that the identifiers must all be the same, and that the special iden-
+   tifier consisting of an S prefix attached to the common name gives the de-
+   clared size of the first instance of that common.
+
+        Any commons used by the programs being linked which  are  not  to  be
+   preserved  in the final object file will usually be lumped onto the end of
+   that file as local data by using a "C=." common specification at  the  end
+   of  the  linker control file.  An alternative is to lump the commons which
+   are not individually preserved into a single common in the  resulting  ob-
+   ject  file.  This is useful, for example, when the program must be able to
+   be stored in read-only memory and the commons must be stored in read-write
+   memory.  When this is desired, the following form can be used:
+
+             <linker control> ::= COMMON <identifier> , C <line end>
+                                  C = <identifier> <line end>
+
+   Note, here, that all of the identifiers must be the same.   The  following
+   modified  version  of  the  previous  example  uses this form to allow the
+   result to be linked with commons separated from normal relocatable code:
+
+
+
+
+
+
+                                       32
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+             EXT DATA
+             RDATA = DATA
+             ENTRY = RENTRY
+             INT ENTRY
+             COMMON ENTRYCOM,C
+             C=ENTRYCOM
+             USE "ENTRY"
+             USE "TABLE"
+
+   Note the use in the above example of the convention that the  common  used
+   to store data for a particular routine (or, as in this case, collection of
+   routines) has its name formed by appending the suffix "COM" to the name of
+   the entry point for that routine.
+
+        It should be noted that there is an important restriction on the  set
+   of symbols which can be exported from or imported to an object file creat-
+   ed as linker output:  The symbols 'R' and 'CT' have special meaning during
+   the linkage process; the linker also reserves symbols formed with 'R' as a
+   prefix on an identifier being exported by one of the files  being  linked,
+   or with 'R' or 'S' as a prefix on the name of a common.
+
+
+   Linker Control Macros
+
+        The last four linker control directives discussed above  are  complex
+   enough that it is conventional to package them as macros.  The definitions
+   of these macros should be inserted with a USE directive at the head of the
+   linker  control  file.   Typically, the macros might be packaged in a file
+   called "LINKMACS", so the following new linker directive would  be  intro-
+   duced:
+
+             <linker control> ::= USE "LINKMACS"
+
+   Inclusion of this linker control directive at the head of a file would de-
+   fine the following new linker control directives:
+
+             <linker control> ::= IMPORTS <identifier>
+                                | EXPORTS <identifier>
+                                | PRESERVECOMMON <identifier>
+                                | LUMPCOMMONS <identifier>
+
+   These would be defined by the following macros:
+
+             MACRO IMPORTS NAME
+               EXT NAME
+               R'NAME = NAME
+             ENDMAC
+
+             MACRO EXPORTS NAME
+               NAME = R'NAME
+               INT NAME
+             ENDMAC
+
+
+
+
+
+                                       33
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+             MACRO PRESERVECOMMON NAME
+               COMMON NAME,S'NAME
+               R'NAME = NAME
+             ENDMAC
+
+             MACRO LUMPCOMMONS NAME
+               COMMON NAME,C
+               C=NAME
+             ENDMAC
+
+   In terms of these macros, the last example used above could be recoded  as
+   follows:
+
+             USE "LINKMACS"
+             IMPORTS DATA
+             EXPORTS ENTRY
+             LUMPCOMMONS ENTRYCOM
+             USE "ENTRY"
+             USE "TABLE"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       34
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                             SMAL OBJECT LIBRARIES
+
+        A SMAL object library file is a file of  references  to  SMAL  object
+   code files.  Library files are textual in form, and may be maintained by a
+   conventional text editor.  Unlike the approach taken on  many  other  sys-
+   tems,  library  files  do not contain object code, but only contain refer-
+   ences to object files.  The text of the library file itself is written  in
+   the SMAL object library sublanguage.
+
+             <library file> ::= { <object reference> } <end of file>
+
+   Each object reference in a library file specifies the name  of  an  object
+   file and the names of one or more symbols which that object file defines:
+
+             <object reference> ::= IF <symbol list> <line end>
+                                      USE <quoted string> <line end>
+                                    ENDIF <line end>
+             <symbol list> ::= <symbol reference> { ! <symbol reference> }
+             <symbol reference> ::= FWD ( R<identifier> )
+
+   The effect of an object reference is to cause  the  SMAL  assembler,  when
+   used  as  a  linker,  to  link the indicated object file if the previously
+   loaded material has made any references to the symbols in the symbol  list
+   and  the referenced symbols have not been previously defined.  Each symbol
+   in the symbol list takes the form of an external name, that is,  an  iden-
+   tifier  consisting of an "R" prefix on an identifier used as an operand of
+   a COMMON or INT directive in the object file.  The following  is  a  legal
+   SMAL library file:
+
+             IF FWD(RSIN) ! FWD(RCOS) ! FWD(RTAN)
+               USE "TRIGFUNC"
+             ENDIF
+             IF FWD(REXP) ! FWD(RPOWER)
+               USE "EXPFUNC"
+             ENDIF
+             IF FWD(RLOG) ! FWD(RLN)
+               USE "LOGFUNC"
+             ENDIF
+             IF FWD(RFLOAT)
+               USE "FLOATFUNC"
+             ENDIF
+             IF FWD(RFIX)
+               USE "FIXFUNC"
+             ENDIF
+
+   Note that, if one of the object files in the library  references  another,
+   that  file  should be placed before the file it relies on.  It is legal to
+   repeat an object reference any number of times in an object library  file,
+   and  it  is legal to have multiple object references with different symbol
+   references which refer to the same object file.
+
+
+
+
+
+
+
+                                       35
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   Library Macros
+
+        The form of an object reference is complex enough  that  it  is  con-
+   venient to package it as a macro, thus introducing the following new form:
+
+             <object reference> ::= LIB <quoted string> , <identifier> <line end>
+
+   The macro to do this should be included in the file  "LINKMACS"  used  for
+   linkage editor macros; this macro can be defined as follows:
+
+             MACRO LIB FILE,NAME
+               IF FWD(R'NAME)
+                 USE FILE
+               ENDIF
+             ENDMAC
+
+   Using this form, the above example library could be recoded as follows:
+
+             LIB "TRIGFUNC",SIN
+             LIB "TRIGFUNC",COS
+             LIB "TRIGFUNC",TAN
+             LIB "EXPFUNC",EXP
+             LIB "EXPFUNC",POWER
+             LIB "LOGFUNC",LOG
+             LIB "LOGFUNC",LN
+             LIB "FLOATFUNC",FLOAT
+             LIB "FIXFUNC",FIX
+
+   Note that this sequence of macro calls does not expand  to  the  same  se-
+   quence of SMAL directives as was used in the previous example, but that it
+   expands to a sequence of directives with the same effect.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       36
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                      THE SMAL LOADER AND OBJECT LANGUAGES
+
+        SMAL load files contain text in the  SMAL  loader  sublanguage.   The
+   loader  sublanguage  is a subset of the SMAL object sublanguage, which is,
+   in turn, a subset of the entire SMAL  language.   These  sublanguages  are
+   very small subsets of the entire SMAL language; they only contain the bare
+   minimum of information needed to satisfy their purpose.
+
+
+   The Loader Sublanguage
+
+        A SMAL load file consists of a fixed header followed by a sequence of
+   load directives:
+
+             <load file> ::= R=.<end of line>
+                           { <load directive><end of line> }
+                             <end of file>
+
+   No blanks or blank lines are used within  a  load  file  unless  they  are
+   specifically required by some particular load directive.
+
+        There are 3 basic load directives which control the  setting  of  the
+   loader location counter, the loading of bytes, and the loading of words.
+
+             <load directive> ::= .=<load value>
+                                | B<load value>
+                                | W<load value>
+
+   The value on each load directive may be either an  absolute  (hexadecimal)
+   integer, or a relocatable value, specified by the use of the symbol "R".
+
+             <load value> ::= <hexadecimal number>
+                            | <hexadecimal number>+R
+                            | <space>R
+             <hexadecimal number> ::= #<extended number>
+
+   Every load file always ends with the location counter set just beyond  the
+   highest relocatable location used by that load file.
+
+
+   A SMAL Loader
+
+        The following Pascal function will read and load one SMAL  load  file
+   from  the specified file and place it in the global array called "memory",
+   relocated relative to the given relocation base.  The function returns the
+   address of the first location beyond the last loaded relocatable location:
+
+
+
+
+
+
+
+
+
+
+
+                                       37
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+       function load (f:textfile; loc:integer): integer;
+           var temp: integer;
+               ch: char;
+               base: integer { the relocation base };
+
+           procedure value;
+               begin
+                   read(f,ch);
+                   if ch = '#' then begin
+                       temp := 0;
+                       repeat
+                           read(f,ch);
+                           if ch in ['0'..'9'] then begin
+       {precision}             temp := (16 * temp) + (ord(ch) - ord('0'));
+                           end else if ch in ['A'..'F'] then begin
+       {precision}             temp := (16 * temp) + (ord(ch) - ord('A')) + 10;
+                           end;
+                       until (ch = '+') or eoln(f);
+                       {assert ch in ['+','A'..'F','0'..'9']}
+                       if ch = '+' then begin
+                           read(f,ch) {assert ch='R'};
+                           temp := temp + base;
+                       end;
+                   end else begin
+                       {assert ch=' '}
+                       read(f,ch) {assert ch='R'};
+                       temp := base;
+                   end;
+                   {assert eoln(f)}
+               end {value};
+
+           begin
+               reset(f);
+               while not(eof(f)) do begin
+                   read(f,ch);
+                   case ch of
+                       ".": begin
+                                read(f,ch) {assert ch='='};
+                                value;
+                                loc := temp;
+                            end;
+                       "B": begin
+                                value;
+                                memory[loc] := temp;
+                                loc := loc + 1;
+                            end;
+                       "W": begin
+                                value;
+       {byte order}             memory[loc := temp div] 256;
+       {byte order}             memory[loc + 1 := temp mod] 256;
+                                loc := loc + 2;
+                            end;
+
+
+
+
+
+                                       38
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                       "R": begin
+                                read(f,ch) {assert ch='='};
+                                read(f,ch) {assert ch='.'};
+                                base := loc;
+                            end
+                   end {case};
+                   {assert eoln(f)}
+                   readln(f);
+               end {while};
+               load := loc;
+           end {load};
+
+   The above code is not resiliant in the sense that it makes  no  effort  to
+   detect  errors  or  make  use  of  the  redundancy  inherent in the object
+   language; if such resiliancy is desired,  comments  included  in  it  give
+   assertions about conditions which can be tested.
+
+        This code is written for a machine in which the most significant byte
+   of  a  word  is  stored first in memory.  If it is to be used on a machine
+   where the least significant byte of a word  is  stored  first,  the  lines
+   marked with the comment 'byte order' must be modified.
+
+        This code also assumes that the arithmetic operations available to it
+   support  unsigned integer values between 0 and 65535.  If it is to be used
+   on a machine supporting only signed integers in the range -32768 to 32767,
+   the  mod  and div operators on the lines marked with the "byte order" com-
+   ment must be modified, and  the  multiplication  operators  on  the  lines
+   marked  with  a "precision" comment must also be modified.  If the code is
+   rewritten in machine language, the multiply and divide operators should be
+   replaced with shift operators, and the modulus operator should be replaced
+   with a masking operator.
+
+
+   The Object Sublanguage
+
+        A SMAL object file consists of a fixed header identical to that  used
+   on  SMAL load files, followed by a sequence of object directives, followed
+   by an optional sequence of internal definitions:
+
+             <object file> ::= R=.<end of line>
+                             { <object directive><end of line> }
+                             { <internal definition><end of line> }
+                               <end of file>
+
+   As in load files, spaces and blank lines are not included in object  files
+   unless  they are explicitly needed.  In the case of object files, however,
+   this rule need not be strictly followed; spaces are allowed  wherever  the
+   SMAL assembler will accept them.
+
+        There is a form of object directive which corresponds to each of  the
+   loader  directives,  but the forms of the allowed values are more complex,
+   and a new compound directive is used to manage common declarations:
+
+
+
+
+
+                                       39
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+             <object directive> ::= .=<object value>
+                                  | B<object value>
+                                  | W<object value>
+                                  | <common definition>
+
+   The value specified on each basic object directive may be either an  abso-
+   lute  integer or a relocatable value and a specification of the relocation
+   base:
+
+             <object value> ::= <hexadecimal number>
+                              | <hexadecimal number>+<relocation base>
+                              | <space><relocation base>
+             <relocation base> ::= R | R<identifier>
+
+   Note that "R" is the default relocation base, and that any other  form  of
+   relocation base is a reference to an external symbol defined in the inter-
+   nal definition section of some other object file.
+
+        Common declarations in a SMAL source program result in the  following
+   special form of object directive:
+
+             <common definition> ::= IF\DEF(S<identifier>)<end of line>
+                                      S<identifier>=#<extended number><end of line>
+                                     ENDIF<end of line>
+                                     IF\DEF(R<identifier>)<end of line>
+                                      R<identifier>=C<end of line>
+                                      C=C+S<identifier><end of line>
+                                      CT=.<end of line>
+                                      .=C<end of line>
+                                      .=CT<end of line>
+                                     ENDIF
+
+   Each common directive in a SMAL source program will result in  a  sequence
+   of  object code patterned on the above, where all identifiers are replaced
+   by the common name, and the extended number is replaced by the common size
+   in hexadecimal.
+
+        If the SMAL source program contains any internal symbol  definitions,
+   these  will be gathered together at the end of the object file and encoded
+   in the following form:
+
+             <internal definition> ::= R<identifier>=<object value>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       40
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+                       SMAL INSTALLATION AND MAINTENANCE
+
+        The SMAL assembler is written in Pascal with the intent  that  it  be
+   easily  transportable  and easily extended to provide support for specific
+   machines.  The following sections introduce the problems which will be en-
+   countered  in  installing SMAL on a new machine, removing machine indepen-
+   dence in order to improve efficiency, and extending SMAL to support a par-
+   ticular machine.
+
+
+   Installation
+
+        The interface between the SMAL assembler and the file system  of  the
+   host  machine  will probably have to be changed when the SMAL assembler is
+   moved to a new machine.  In order for the use directive to be properly ex-
+   ecuted,  the SMAL assembler must run in an environment where it has direct
+   access to the file system; use of SMAL in a version of Pascal  where  pro-
+   gram  parameters are the only way of connecting a Pascal file to an actual
+   file will thus be somewhat inconvenient.
+
+        The global procedure "getfiles" is used to encapsulate the problem of
+   getting  the  name of the source file from the user and using this to syn-
+   thesize the names of the object and listing  files.   These  textual  file
+   names  are  stored  in  the  global  variables  "infile",  "outfile",  and
+   "objfile", which are used, respectively, to open the  text  files  "inp1",
+   "output",  and  "obj".  The text files "inp2" and "inp3" are opened by the
+   procedure "insert", which is called whenever a use  directive  is  encoun-
+   tered.   The  text files "inp1", "inp2", and "inp3" can thus be considered
+   to be a short stack of files used for input.  If more levels of nested use
+   directives  are to be allowed, this stack must be enlarged.  Note that the
+   operation of binding a Pascal text file to a file with a particular textu-
+   al  name  is  accomplished by the "reset" and "rewrite" procedures in some
+   versions of Pascal and by a special "open" procedure in  others.   In  the
+   latter  cases,  calls  to "open" will have to be added before each call to
+   "reset" or "rewrite".
+
+        All matters concerning listing generation are encapsulated within the
+   procedures  "listline"  and  "newpage";  these will require changes if the
+   system being used does not respond to an ASCII FF character to initiate  a
+   formfeed.  Typical changes might include the introduction of FORTRAN style
+   carriage control characters at the start of  each  listing  line,  or  the
+   printing  of sequences of blank lines instead of special page feed charac-
+   ters.
+
+        In addition to converting the SMAL assembler to use  the  appropriate
+   file  system,  the  sizes  of  the  various static data structures must be
+   specified.  These are all set with constant declarations in the main  pro-
+   gram,  but  the values of the constants in the machine independent version
+   are all set low enough that the static data structures are  easily  filled
+   for  testing  purposes.  The constants "symsize", "opcodes", and "linelen"
+   may be set as large as desired with no change to other parts of  the  SMAL
+   assembler.   The  constant  "poolsize" is limited to 32767 by the code for
+   "pushint" and "popint", which are used to push and pop pointers  into  the
+   string pool on the stack within the pool.  A number of other constants can
+
+
+
+                                       41
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   be modified to do such things as change the listing format or  change  the
+   number  of  allowed  macro parameters.  Limits on the values of these con-
+   stants are documented in comments on their declarations.
+
+        The global array "ascii" is used to associate internal Pascal charac-
+   ters  with  their ASCII representations.  On versions of Pascal supporting
+   more than 64 printing characters in their character set,  the  "initascii"
+   procedure  should be extended to initialize the additional characters.  On
+   some ASCII implementations of Pascal, it may be possible to eliminate  the
+   "ascii"  array  and use the "ord" function (but beware of the default set-
+   ting of the high bit; in SMAL, this shoud be consistently set to zero!) In
+   some  environments,  it may be reasonable to add an ebcdic directive and a
+   new supporting translation array in order to allow use of the EBCDIC char-
+   acter  set.   When  this  is  done, the ASCII directive should remain, and
+   quoted strings should retain their ASCII interpretation as  values  unless
+   some  special new quote mark, such as $, is used to indicate an EBCDIC in-
+   terpretation.
+
+
+   Efficiency
+
+        The machine independent version of the SMAL assembler was written  to
+   be easily moved to a new machine, but this does not imply that it will run
+   efficiently in that environment.  In fact, transportability and efficiency
+   are in direct conflict, especially in the areas of bit packing and integer
+   arithmetic.  If efficiency becomes an issue, the following  steps  outline
+   the  order  in  which different changes to the assembler should be made to
+   remove machine independance and speed things up:
+
+        Many Pascal implementations generate a considerable amount of code to
+   check  such  things  as  array bounds and subrange variables.  Turning off
+   this checking is frequently easy, and  has  resulted  in  improvements  of
+   about  15%  for  the SMAL assembler under the Hull R-mode compiler for the
+   Prime 750 computer.  The SMAL assembler is coded to  be  resiliant  enough
+   that turning off the run-time checking should not threaten the reliability
+   of the assembler, but if any changes are made to the compiler, the  checks
+   should be turned back on until all is secure.
+
+        The routine "writehex" used for object code  and  listing  generation
+   uses some cumbersome code to guarantee consistent results on machines with
+   different integer representations.  Since this routine is called three  to
+   four  times  for  each  line of code assembled, it may pay to recode it in
+   machine code using shift and mask instructions to extract and convert hex-
+   adecimal digits.
+
+        The lexical analysis routine for parsing numeric constants has a sig-
+   nificant  amount  of cumbersome code to allow it to handle unsigned 16 bit
+   values on a machine using a signed 16 bit representation.  If the SMAL as-
+   sembler is run on a machine with a larger word size, this code can be sig-
+   nificantly simplified.
+
+        A key cause of inefficiency in the SMAL assembler is the  implementa-
+   tion of 16 bit two's complement arithmetic in a manner which will run con-
+   sistently on any machine which  supports  the  desired  range  of  integer
+
+
+
+                                       42
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   values.   The routines responsible for this are grouped at head of the as-
+   sembler and may easily be  changed  to  use  external  routines  coded  in
+   machine  code.   On versions of Pascal implemented with 16 bit arithmetic,
+   it may be sufficient to simply turn off  run-time  checking  and  use  the
+   built in operations; thus, a call to "add(a,b)" may be equivalent to "a+b"
+   when run-time checking is disabled.  Although this change will have a sig-
+   nificant  effect  on  the speed of these operations, they are infrequently
+   used during the assembly process, and probably do not contribute  signifi-
+   cantly to the time taken to assemble typical programs.
+
+
+   Extending SMAL for a Specific Machine
+
+        If SMAL is to be extended to assemble code for  a  specific  machine,
+   the  changes involved will typically be confined to three locations in the
+   code of the assembler.  The declaration of the type "optypes" must be  ex-
+   tended  to  include each new type of opcode to be processed, the procedure
+   "opinit" must be extended to initialize the opcode table which  associates
+   the  symbolic name of the opcode with its type and additional information,
+   and the case statement in the body of the "onepass" procedure must be  ex-
+   tended to process each new opcode type.
+
+        A key concept involved in the extension of the assembler is  that  of
+   the  type  of  an opcode.  Two opcodes have the same type if they have the
+   same assembly format and the same object code format, and if they have the
+   same definition of how information from the source is transformed into the
+   object.  Thus, all opcodes of the same type may be assembled by  the  same
+   code  in  the body of the assembler.  For example, all relative branch in-
+   structions might be considered to be of one type, and all register to  re-
+   gister instructions might be considered to be of another type.
+
+        Having identified the set of opcode types for a  particular  machine,
+   they  must  be  added to the declaration of the type "optypes" in the type
+   declaration part of the main program.   For  example,  it  there  are  two
+   types,  corresponding  to  relative  branch  instructions  and register to
+   memory instructions, these might be added as follows:
+
+             ,OPREL  (* RELATIVE BRANCH INSTRUCTIONS *)
+             ,OPREGM (* REGISTER TO REGISTER INSTRUCTIONS *)
+
+   Having added these types, the entries in the opcode table can be built  by
+   adding  the  following  to  the  sequence of opcode initializations in the
+   "opinit" procedure:
+
+             OP('BEQ     ',OPREL    ,HEX('9000'));
+             OP('BNE     ',OPREL    ,HEX('9080'));
+             OP('BGT     ',OPREL    ,HEX('9100'));
+             OP('BLE     ',OPREL    ,HEX('9180'));
+             OP('ADD     ',OPREGM   ,HEX('4000'));
+             OP('SUB     ',OPREGM   ,HEX('40C0'));
+             OP('AND     ',OPREGM   ,HEX('4100'));
+             OP('OR      ',OPREGM   ,HEX('41C0'));
+
+   For the purpose of this example, assume that the machine involved has a 16
+
+
+
+                                       43
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   bit  instruction  word containing the machine representation of the opcode
+   and other fields.  Note the use of the "hex" function to  help  initialize
+   the  value field of the table; this contains the instruction word with all
+   but the opcode field set to zero.
+
+        Having declared the appropriate types, all that remains is  to  write
+   the  code which parses the symbolic forms of the new opcodes and generates
+   appropriate code.  This code must be added to (or called from)  new  cases
+   in  the  case  statement  in the body of the "onepass" procedure.  For the
+   above example, this code could be written as follows:
+
+     OPREL:  BEGIN (* RELATIVE BRANCH INSTRUCTIONS, OBJECT FORMAT:
+		      9 BIT OPCODE, 7 BIT SIGNED OFFSET            *)
+		  EXPRESBAL (* THE OPERAND IS AN EXPRESSION *);
+		  EXPR.OFFSET := SUB(EXPR.OFFSET,LOC.OFFSET);
+		  IF EXPR.BASE <> LOC.BASE THEN BEGIN
+		       ERROR(BADREL,EXPRPOS,EXPRLIM);
+		  END ELSE IF (EXPR.OFFSET>63) OR (EXPR.OFFSET<64) THEN BEGIN
+		       ERROR(BOUNDS,EXPRPOS,EXPRLIM);
+		  END;
+		  PUTOBJ(2,IOR( OPVAL, IAND(EXPR.OFFSET,127) ),ABSSYM);
+	     END;
+     OPREGM: BEGIN (* REGISTER TO MEMORY INSTRUCTIONS, OBJECT FORMAT:
+		      12 BIT OPCODE, 4 BIT REGISTER, 16 BIT ADDRESS   *)
+		  EXPRESBAL (* REGISTER OPERAND IS AN EXPRESSION *);
+		  IF EXPR.BASE <> ABSSYM THEN BEGIN (* MUST BE ABSOLUTE *)
+		       ERROR(BADREL,EXPRPOS,EXPRLIM);
+		  END ELSE IF (EXPR.OFFSET<0) OR (EXPR.OFFSET>15) THEN BEGIN
+		       ERROR(BOUNDS,EXPRPOS,EXPRLIM);
+		  END;
+		  PUTOBJ(2,IOR( OPVAL, IAND(EXPR.OFFSET,15) ),ABSSYM);
+		  GETCOMMA (* A COMMA MUST SEPARATE REGISTER FROM ADDRESS *);
+		  EXPRESBAL (* ADDRESS OPERAND IS AN EXPRESSION *);
+		  PUTOBJ(2,EXPR.OFFSET,EXPR.BASE);
+	     END;
+
+   Here, note that the procedure "expresbal" parses an expression and  forces
+   any  unbalanced  trailing  parentheses to be consumed and marked as unbal-
+   anced.  The procedure "putobj" takes, as parameters, the number  of  bytes
+   of  object  code  to be generated, the absolute value to be generated, and
+   the relocation base of that value.  As a result, these two cases introduce
+   the following new syntactic alternatives for a directive:
+
+     <symbolic directive> ::= <relative branch> <expression>
+			    | <register to memory> <expression> , <expression>
+     <relative branch> ::= BEQ | BNE | BGT | BLE
+     <register to memory> ::= ADD | SUB | AND | OR
+
+   Note that other instruction types may have the same syntax  as  either  of
+   these  new  types, but will have different semantic constraints, for exam-
+   ple, on the values of the expressions.
+
+        It is significantly more complicated to extend the assembler to  han-
+   dle  a  symbolic  instruction format such as is used on the PDP-11.  Here,
+
+
+
+                                       44
+
+
+
+
+
+   D. W. Jones                                       Machine Independent SMAL
+
+
+   the form of the operand includes information on the addressing mode.  This
+   problem  can  be solved by writing a new procedure to parse an operand and
+   return both its value (in the global variable "expr") and  its  addressing
+   mode.   Further  complexity is introduced if the instruction set is itself
+   irregular, as in the R6502, where, unlike the  PDP-11,  the  documentation
+   does not suggest the presence of a mode field in the instruction.  In this
+   case, the value field of the opcode table will probably have to suggest  a
+   row  in  a  secondary  table,  where the mode is used to select the actual
+   machine instruction from that row.
+
+
+   Larger Word Sizes
+
+        The machine independent version of the SMAL assembler is written  for
+   a  16 bit machine, but there are cases where it may be desirable to extend
+   it to handle 32, 48, or 64 bit operands.  This will require few changes in
+   the  basic  structure  of  the  assembler, but it will require significant
+   changes to all of the assembler components which are sensitive to the word
+   size.   These  include the input and output conversion routines and the 16
+   bit two's complement arithmetic routines.  The  assembly  language  itself
+   will require one simple extension: New data storage directives for the new
+   word sizes.  Using the notation used on the VAX computers, these might  be
+   named as follows:
+
+             B  -byte
+             W  -word, 2 bytes
+             L  -long word, 4 bytes
+             Q  -quad word, 8 bytes
+
+   On some machines, such as the PDP-11 or the IBM System/360, the  alignment
+   of data on word boundaries is a significant problem.  If this must be han-
+   dled, a new assembler directive will have to be introduced  to  force  the
+   location counter to the next alignment boundary.  Since this alignment can
+   only be performed by the assembler  relative  to  the  current  relocation
+   base,  the relocation base must itself be aligned.  This can be insured by
+   heading each object file with an align  directive,  and  by  including  an
+   align directive in the object code for each common declaration.  The align
+   directive might take the following form:
+
+             <symbolic directive> ::= ALIGN <expression>
+
+   Where the expression must be a power of two less than or equal to  a  max-
+   imum set by the alignment of the object modules themselves.  In all cases,
+   "ALIGN 1" whould have no effect.  On a 16 bit machine with a byte  addres-
+   sible memory, "ALIGN 2" would align to the nearest word boundary.  On a 32
+   bit machine, "ALIGN 2" would align to a half word boundary, and  "ALIGN 4"
+   would align to a word boundary.
+
+
+
+
+
+
+
+
+
+
+                                       45
+
+

@@ -1,0 +1,393 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual, The Loader and Object Sublanguages</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>9. The SMAL Loader and Object Sublanguages</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="index.html">
+      
+      the SMAL Manual
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<OL>
+<LI> <A href="loader.html#load">The Loader Sublanguage</A>
+<LI> <A href="loader.html#loader">A SMAL32 Loader</A>
+<LI> <A href="loader.html#object">The Object Sublanguage</A>
+</OL>
+
+<HR>
+
+<P>
+SMAL32 load files contain text in the loader sublanguage.
+The loader sublanguage is a subset of the SMAL32 object sublanguage,
+which is, in turn, a subset of the entire language.
+These sublanguages are very small subsets of the entire SMAL32 language;
+they only contain the bare minimum of information needed to satisfy
+their purpose.
+
+<H2><A NAME=load>9.1. The Loader Sublanguage</A></H2>
+<P>
+A SMAL32 load file consists of a fixed header followed by a sequence of
+load directives:
+<PRE>
+&lt;load file&gt; ::= R=.&lt;end of line&gt;
+              { &lt;load directive&gt;&lt;end of line&gt; }
+                &lt;end of file&gt;
+</PRE>
+<P>
+No blanks or blank lines are used within a load file unless they are
+specifically required by some particular load directive.
+<P>
+There are 6 basic load directives which control the setting of the loader
+location counter (see
+the loading of data (see <A HREF="storage.html">Chapter 3</A>),
+and the setting of the starting address
+<A HREF="misc.html#starting">Section 7.3</A>),
+<PRE>
+&lt;load directive&gt; ::= .=&lt;load value&gt;
+                   | W&lt;load value&gt;
+                   | T&lt;load value&gt;
+                   | H&lt;load value&gt;
+                   | B&lt;load value&gt;
+                   | S&lt;load value&gt;
+</PRE>
+<P>
+The value on each load directive may be either an absolute (hexadecimal)
+integer, or a relocatable value, specified by the use of the
+symbol <TT>R</TT>.
+<PRE>
+&lt;load value&gt; ::= &lt;hexadecimal number&gt;
+               | &lt;hexadecimal number&gt;+R
+               | &lt;space&gt;R
+&lt;hexadecimal number&gt; ::= #&lt;extended number&gt;
+</PRE>
+<P>
+Every load file always ends with the location counter set just beyond the
+highest relocatable location used by that load file.
+<BR>&nbsp;
+
+<H2><A NAME=loader>9.2. A SMAL32 Loader</A></H2>
+<P>
+The following <I>Pascal</I> function will read and load one SMAL load file
+from the file <TT>f</TT> and place it in the global array called "memory",
+relocated relative to <TT>loc</TT>, the relocation base.
+The function returns the address of the first location beyond the last loaded
+relocatable location; in addition, if the object file contains starting
+address specifications set using <TT>S</TT>
+directive <A HREF="misc.html#starting">Section 7.3</A>),
+the values of these will be
+set in the global variable "start".  Generally, there should be only one
+<TT>S</TT> directive in any program.
+<P>
+The code is not resiliant in the sense that it makes no effort to
+detect errors or make use of the redundancy inherent in the object language;
+if such resiliancy is desired, comments included in it give assertions
+about conditions which can be tested.
+<P>
+The code assumes that the arithmetic operations available to it support
+unsigned 32 bit integer values.  If it is to be used on
+a machine supporting an insufficient range of integers, the
+the arithmetic operators on the lines marked
+with a "precision" comment must be modified.
+If the code is rewritten in machine language, the multiply
+operators should be replaced with shift operators.
+<P>
+The code uses 4 functions, <TT>byte0()</TT> through <TT>byte3()</TT>,
+that return successive bytes of the value to be loaded.  Of these,
+<TT>byte0()</TT> always returns the least
+significant byte, and <TT>byte3()</TT> always returns the most significant
+byte.  As shown here, these use division and modulus, but they would be
+better written using shifting and masking.  The
+code given here is for a machine that stores the least significant byte first.
+For machines that store the most significant byte first, the order of the
+calls to "byte0" through "byte3" must be changed on the lines with the
+comment "byte order".
+<PRE>
+function load (f:textfile; loc:integer): integer;
+type smalint: 0 .. 4294967296;
+var temp: smalint;
+    ch: char;
+    base: smalint { the relocation base };
+
+    procedure value;
+    begin
+        read(f,ch);
+        if ch = '#' then begin
+            temp := 0;
+            repeat
+                read(f,ch);
+                if ch in ['0'..'9'] then begin
+{precision}         temp := 16*temp + (ord(ch) - ord('0'));
+                end else if ch in ['A'..'F'] then begin
+{precision}         temp := 16*temp + (ord(ch) - ord('A')) + 10;
+                end;
+            until (ch = '+') or eoln(f);
+            {assert ch in ['+','A'..'F','0'..'9']}
+            if ch = '+' then begin
+                read(f,ch) {assert ch='R'};
+                temp := temp + base;
+            end;
+        end else begin
+            {assert ch=' '}
+            read(f,ch) {assert ch='R'};
+            temp := base;
+        end;
+        {assert eoln(f)}
+    end {value};
+
+    function byte0(smalint i):integer;
+    begin
+        byte0 := i mod 256;
+    end {byte0}
+
+    function byte1(smalint i):integer;
+    begin
+        byte1 := (i / 256) mod 256;
+    end {byte1}
+
+    function byte2(smalint i):integer;
+    begin
+        byte2 := (i / 65536) mod 256;
+    end {byte2}
+
+    function byte3(smalint i):integer;
+    begin
+        byte3 := (i / 16777216) mod 256;
+    end {byte3}
+
+begin
+    reset(f);
+    while not(eof(f)) do begin
+        read(f,ch);
+        { assert f in [".","B","H","T","W","S","R"] }
+        case ch of
+            ".": begin
+                     read(f,ch) {assert ch='='};
+                     value;
+                     loc := temp;
+                 end;
+            "B": begin
+                     value;
+                     memory[loc] := byte0(temp);
+                     loc := loc + 1;
+                 end;
+            "H": begin
+                     value;
+{byte order}         memory[loc] := byte0(temp);
+{byte order}         memory[loc+1] := byte1(temp);
+                     loc := loc + 2;
+                 end;
+            "T": begin
+                     value;
+{byte order}         memory[loc] := byte0(temp);
+{byte order}         memory[loc+1] := byte1(temp);
+{byte order}         memory[loc+2] := byte2(temp);
+                     loc := loc + 3;
+                 end;
+            "W": begin
+                     value;
+{byte order}         memory[loc] := byte0(temp);
+{byte order}         memory[loc+1] := byte1(temp);
+{byte order}         memory[loc+2] := byte2(temp);
+{byte order}         memory[loc+3] := byte3(temp);
+                     loc := loc + 4;
+                 end;
+            "S": begin
+                     { start should not previously have been set }
+                     value;
+                     start := temp;
+                 end;
+            "R": begin
+                     read(f,ch) {assert ch='='};
+                     read(f,ch) {assert ch='.'};
+                     base := loc;
+                 end
+        end {case};
+        {assert eoln(f)}
+        readln(f);
+    end {while};
+    load := loc;
+end {load};
+
+</PRE>
+
+<H2><A NAME=object>9.3. The Object Sublanguage</A></H2>
+<P>
+A SMAL32 object file consists of a fixed header identical to that used
+on load files, followed by a sequence of object directives, followed
+by an optional sequence of internal definitions:
+<PRE>
+&lt;object file&gt; ::= R=.&lt;end of line&gt;
+                { &lt;object directive&gt;&lt;end of line&gt; }
+                { &lt;internal definition&gt;&lt;end of line&gt; }
+                  &lt;end of file&gt;
+</PRE>
+<P>
+As in load files, spaces and blank lines are not included in object files
+unless they are explicitly needed.
+In the case of object files, however, this rule need not be strictly followed;
+spaces are allowed wherever the assembler will accept them.
+<P>
+There is a form of object directive which corresponds to each of the
+loader directives (see <A HREF="loader.html#load">Section 9.1</A>),
+but the forms of the allowed values are more complex,
+and a new compound directive is used to manage common declarations:
+<PRE>
+&lt;object directive&gt; ::= .=&lt;object value&gt;
+                     | W&lt;object value&gt;
+                     | T&lt;object value&gt;
+                     | H&lt;object value&gt;
+                     | B&lt;object value&gt;
+                     | S&lt;object value&gt;
+                     | &lt;common definition&gt;
+</PRE>
+<P>
+The value specified on each basic object directive may just a hexadecimal
+number, the same as for load directive (see <A HREF="loader.html#load">Section 9.1</A>),
+or a hexidecimal number added to a relocation base:
+<PRE>
+&lt;object value&gt; ::= &lt;hexadecimal number&gt;
+                 | &lt;hexadecimal number&gt;+&lt;relocation base&gt;
+                 | &lt;space&gt;&lt;relocation base&gt;
+&lt;relocation base&gt; ::= R | R&lt;identifier&gt;
+</PRE>
+<P>
+Note that <TT>R</TT> is the default relocation base, and that any other form
+of relocation base is a reference to an external symbol defined in the internal
+definition section of some other object file.
+<P>
+Common declarations in a SMAL32
+source program (see <A HREF="external.html#common">Section 4.3</A>),
+result in the following special
+form of object directive:
+<PRE>
+&lt;common definition&gt; ::= IF\\DEF(S&lt;identifier&gt;)&lt;end of line&gt;
+                         S&lt;identifier&gt;=#&lt;extended number&gt;&lt;end of line&gt;
+                        ENDIF&lt;end of line&gt;
+                        IF\\DEF(R&lt;identifier&gt;)&lt;end of line&gt;
+                         R&lt;identifier&gt;=C&lt;end of line&gt;
+                         C=C+S&lt;identifier&gt;&lt;end of line&gt;
+                         CT=.&lt;end of line&gt;
+                         .=C&lt;end of line&gt;
+                         .=CT&lt;end of line&gt;
+                        ENDIF
+</PRE>
+<P>
+Each common directive in a SMAL32 source program will result in a sequence
+of object code patterned on the above, where all
+identifiers are replaced by the common name, and the extended number is
+replaced by the common size in hexadecimal.  The common size passed through
+by the assembler will be rounded up to an integer number of words to help
+assure word alignment of commons.
+<P>
+The above construct uses a
+conditional block (see <A HREF="conditional.html#simple">Section 5.1</A>),
+to assure that first occurance of a particular <TT>COMMON</TT> directive
+sets the size, unless earlier code in the
+linker control file (see <A HREF="linker.html#control">Section 8.1</A>)
+overrides the default.  The second conditional block guarantees that the
+common is allocated only once, with the body of the block doing the actual
+allocation.
+<P>
+If the source program contains any internal symbol definitions
+(see <A HREF="external.html#internal">Section 4.2</A>),
+these will be gathered together at the end of the object file and encoded
+in the following form:
+<PRE>
+&lt;internal definition&gt; ::= R&lt;identifier&gt;=&lt;object value&gt;
+</PRE>
+<P>
+If the relocatable part of the object program does not consist of an integer
+number of words, the assembly origin will also be set in order to round the
+size up to the nearest word boundary.  This assures that all relocatable
+object files will be word aligned, assuming that the linker aligns the first
+in the sequence of object files.
+<P>
+</BODY>
+</HTML>

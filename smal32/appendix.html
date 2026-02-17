@@ -1,0 +1,546 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual, Appendices</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>Appendices</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="index.html">
+      
+      the SMAL Manual
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2>Index</H2>
+
+<UL>
+<LI> <A href="appendix.html#directives">A.1 Index of Assembly Directives</A>
+<LI> <A href="appendix.html#index">A.2 Alphabetical Index</A>
+</UL>
+<P>&nbsp;
+
+<HR>
+
+<P>&nbsp;
+<P>
+<H2><A NAME=directives>A.1 Index of Assembly Directives</A></H2>
+<P>
+<TABLE WIDTH="100%" CELLPADDING=0 CELLSPACING=1>
+<TR><TD> <A href="storage.html#text"><TT>ASCII</TT></A>
+    <TD> &lt;quoted string&gt; { , &lt;expression&gt; }
+    <TD> assemble text into memory
+    <TD ALIGN="right"> 3.5
+<TR><TD> <A href="storage.html#byte"><TT>B</TT></A>
+    <TD> &lt;expression&gt; { , &lt;expression&gt; }
+    <TD> assemble byte into memory
+    <TD ALIGN="right"> 3.1
+<TR><TD> <A href="external.html#common"><TT>COMMON</TT></A>
+    <TD> &lt;identifier&gt; , &lt;expression&gt;
+    <TD> declare shared data area
+    <TD ALIGN="right"> 4.3
+<TR><TD> <A href="conditional.html#else"><TT>ELSE</TT></A>
+    <TD>
+    <TD> alternative in conditional assembly
+    <TD ALIGN="right"> 5.2
+<TR><TD> <A href="conditional.html#else"><TT>ELSEIF</TT></A>
+    <TD> &lt;expression&gt;
+    <TD> alternative in conditional assembly
+    <TD ALIGN="right"> 5.2
+<TR><TD>&nbsp;
+<TR><TD> <A href="misc.html#end"><TT>END</TT></A>
+    <TD>
+    <TD> end of file
+    <TD ALIGN="right"> 7.2
+<TR><TD> <A href="conditional.html#simple"><TT>ENDIF</TT></A>
+    <TD>
+    <TD> end of conditional
+    <TD ALIGN="right"> 5.1
+<TR><TD> <A href="macro.html#definition"><TT>ENDMAC</TT></A>
+    <TD>
+    <TD> end of macro definition
+    <TD ALIGN="right"> 6.1
+<TR><TD> <A href="misc.html#errors"><TT>ERROR</TT></A>
+    <TD> { &lt;lexeme&gt; }
+    <TD> force an error to be listed
+    <TD ALIGN="right"> 7.7
+<TR><TD> <A href="external.html#external"><TT>EXT</TT></A>
+    <TD> &lt;identifier&gt; { , &lt;identifier&gt; }
+    <TD> import externally defined symbol
+    <TD ALIGN="right"> 4.1
+<TR><TD>&nbsp;
+<TR><TD> <A href="storage.html#half"><TT>H</TT></A>
+    <TD> &lt;expression&gt; { , &lt;expression&gt; }
+    <TD> assemble halfword into memory
+    <TD ALIGN="right"> 3.2
+<TR><TD> <A href="conditional.html#simple"><TT>IF</TT></A>
+    <TD> &lt;expression&gt;
+    <TD> begin conditional assembly
+    <TD ALIGN="right"> 5.1
+<TR><TD> <A href="external.html#internal"><TT>INT</TT></A>
+    <TD> &lt;identifier&gt; { , &lt;identifier&gt; }
+    <TD> export internally defined symbol
+    <TD ALIGN="right"> 4.2
+<TR><TD> <A href="misc.html#listing"><TT>LIST</TT></A>
+    <TD> &lt;expression&gt;
+    <TD> turn listing on (<TT>LIST +1</TT>) or off (<TT>LIST -1</TT>)
+    <TD ALIGN="right"> 7.4
+<TR><TD> <A href="macro.html#definition"><TT>MACRO</TT></A>
+    <TD> &lt;identifier&gt; [ &lt;formal list&gt; ]
+    <TD> begin macro definition
+    <TD ALIGN="right"> 6.1
+<TR><TD>&nbsp;
+<TR><TD> <A href="misc.html#paging"><TT>PAGE</TT></A>
+    <TD>
+    <TD> force a page eject in listing
+    <TD ALIGN="right"> 7.6
+<TR><TD> <A href="misc.html#starting"><TT>S</TT></A>
+    <TD> &lt;expression&gt;
+    <TD> set starting address of program
+    <TD ALIGN="right"> 7.3
+<TR><TD> <A href="misc.html#titles"><TT>SUBTITLE</TT></A>
+    <TD> { &lt;lexeme&gt; }
+    <TD> set subtitle for listing
+    <TD ALIGN="right"> 7.5
+<TR><TD> <A href="storage.html#trip"><TT>T</TT></A>
+    <TD> &lt;expression&gt; { , &lt;expression&gt; }
+    <TD> assemble three/quarter word into memory
+    <TD ALIGN="right"> 3.3
+<TR><TD> <A href="misc.html#titles"><TT>TITLE</TT></A>
+    <TD> { &lt;lexeme&gt; }
+    <TD> set title for listing
+    <TD ALIGN="right"> 7.5
+<TR><TD>&nbsp;
+<TR><TD> <A href="misc.html#insertion"><TT>USE</TT></A>
+    <TD> &lt;quoted string&gt;
+    <TD> insert text from named file
+    <TD ALIGN="right"> 7.1
+<TR><TD> <A href="storage.html#word"><TT>W</TT></A>
+    <TD> &lt;expression&gt; { , &lt;expression&gt; }
+    <TD> assemble word into memory
+    <TD ALIGN="right"> 3.4
+<TR><TD>&nbsp;
+<TR><TD> <A href="basic.html#directives"><TT>=</TT></A>
+    <TD> &lt;expression&gt;
+    <TD> assign value to symbol or location counter
+    <TD ALIGN="right"> 2.2
+<TR><TD> <A href="basic.html#directives"><TT>=:</TT></A>
+    <TD> &lt;expression&gt;
+    <TD> immutably assign value to symbol
+    <TD ALIGN="right"> 2.2
+<TR><TD>&nbsp;
+<TR><TD> <A href="storage.html"><TT>.</TT>&nbsp; (dot)</A>
+    <TD>
+    <TD> symbol for the location counter
+    <TD ALIGN="right"> 3.&nbsp;&nbsp;
+</TABLE>
+<P>&nbsp;
+<HR>
+<P>&nbsp;
+<P>
+<H2><A NAME=index>A.2 Alphabetical Index</A></H2>
+<BLOCKQUOTE>
+<P>
+<TABLE WIDTH="100%" CELLPADDING=0 CELLSPACING=1>
+<TR><TD> <A href="basic.html#functions"><TT>ABS</TT> - function</A>
+    <TD WIDTH="15%">-<TD WIDTH="10%">-<TD ALIGN="right"> 2.6
+<TR><TD> <A href="basic.html#origin">absolute assembly - origin setting</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.2
+<TR><TD> <A href="linker.html#functions">absolute linkage - linker control</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.2
+<TR><TD> <A href="macro.html#calls">actual parameters, to macros</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.3
+<TR><TD> <A href="macro.html#align"><TT>ALIGN</TT> - macro</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.4
+<TR><TD> <A href="external.html#common">alignment - of common blocks</A>
+    <TD>-<TD>-<TD ALIGN="right"> 4.3
+<TR><TD> <A href="basic.html#align">alignment - of the location counter</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.2
+<TR><TD> <A href="storage.html#text"><TT>ASCII</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 3.5
+<TR><TD> <A href="basic.html#assignments">assignments</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.2
+<TR><TD> <A href="basic.html#expressions">assembly time arithmetic</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.3
+<TR><TD> <A href="basic.html#comparison">assembly time comparison</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.3
+<TR><TD> <A href="basic.html#expressions">arithmetic (at assembly time)</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.3
+<TR><TD> <A href="storage.html#byte"><TT>B</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 3.1
+<TR><TD> <A href="notation.html#notation">BNF notation</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.1
+<TR><TD> <A href="basic.html#boolean">boolean operators (at assembly time)</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.3
+<TR><TD> <A href="storage.html#byte">byte - assembly into memory</A>
+    <TD>-<TD>-<TD ALIGN="right"> 3.1
+<TR><TD> <A href="macro.html#calls">calls - to macros</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.3
+<TR><TD> <A href="macro.html#formals">call by value macro parameters</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="macro.html#formals">call by list macro parameters</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="macro.html#formals">call by name macro parameters</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="notation.html#lexical">characters with special meanings</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.2
+<TR><TD> <A href="using.html#command">command line arguments for Unix</A>
+    <TD>-<TD>-<TD ALIGN="right"> 10.1
+<TR><TD> <A href="notation.html#comments">comments</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.6
+<TR><TD> <A href="external.html#common"><TT>COMMON</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 4.3
+<TR><TD> <A href="linker.html#functions">common allocation - linker control</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.2
+<TR><TD> <A href="basic.html#comparison">comparison (at assembly time)</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.3
+<TR><TD> <A href="macro.html#concat">concatenation of strings
+		in macro bodies</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="conditional.html">conditional assembly</A>
+    <TD>-<TD>-<TD ALIGN="right"> 5.&nbsp;&nbsp;
+<TR><TD> <A href="macro.html#align">conditionals in a macro body, example</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.4
+<TR><TD> <A href="notation.html#numbers">decimal numbers</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.4
+<TR><TD> <A href="basic.html#functions"><TT>DEF</TT> - function</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.6
+<TR><TD> <A href="basic.html#directives">directives</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.2
+<TR><TD> <A href="using.html#command">dumping the symbol table</A>
+    <TD>-<TD>-<TD ALIGN="right"> 10.1
+<TR><TD> <A href="notation.html#notation">EBNF notation</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.1
+<TR><TD> <A href="conditional.html#else"><TT>ELSE</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 5.2
+<TR><TD> <A href="conditional.html#else"><TT>ELSEIF</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 5.2
+<TR><TD> <A href="misc.html#end">end of file</A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.2
+<TR><TD> <A href="misc.html#end"><TT>END</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.2
+<TR><TD> <A href="conditional.html#simple"><TT>ENDIF</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 5.1
+<TR><TD> <A href="macro.html#definition"><TT>ENDMAC</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.1
+<TR><TD> <A href="misc.html#listing"><TT>ERROR</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.7
+<TR><TD> <A href="macro.html#align">error detection in a macro body, example</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.4
+<TR><TD> <A href="using.html#listing">error message format</A>
+    <TD>-<TD>-<TD ALIGN="right"> 10.2
+<TR><TD> <A href="linker.html#simple">errors in linkage</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.7
+<TR><TD> <A href="basic.html#expressions">expressions</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.3
+<TR><TD> <A href="notation.html#notation">extended BNF notation</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.1
+<TR><TD> <A href="external.html#external">external declarations</A>
+    <TD>-<TD>-<TD ALIGN="right"> 4.1
+<TR><TD> <A href="external.html#external"><TT>EXT</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 4.1
+<TR><TD> <A href="macro.html#formals">formal parameters of macros</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="basic.html#functions">functions</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.6
+<TR><TD> <A href="basic.html#functions"><TT>FWD</TT> - function</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.6
+<TR><TD> <A href="external.html">global symbols</A>
+    <TD>-<TD>-<TD ALIGN="right"> 4.&nbsp;&nbsp;
+<TR><TD> <A href="storage.html#half"><TT>H</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 3.2
+<TR><TD> <A href="storage.html#half">halfword - assembly into memory</A>
+    <TD>-<TD>-<TD ALIGN="right"> 3.2
+<TR><TD> <A href="notation.html#numbers">hexidecimal numbers</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.4
+<TR><TD> <A href="notation.html#identifiers">identifiers</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.3
+<TR><TD> <A href="conditional.html#simple"><TT>IF</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 5.1
+<TR><TD> <A href="misc.html#insertion">include directive, see <TT>USE</TT></A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.1
+<TR><TD> <A href="misc.html#insertion">insertion of text from other files</A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.1
+<TR><TD> <A href="external.html#internal">internal declarations</A>
+    <TD>-<TD>-<TD ALIGN="right"> 4.2
+<TR><TD> <A href="external.html#internal"><TT>INT</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 4.2
+<TR><TD> <A href="using.html#command"><TT>L</TT> - command line argument</A>
+    <TD>-<TD>-<TD ALIGN="right"> 10.1
+<TR><TD> <A href="basic.html#labels">labels</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.1
+<TR><TD> <A href="macro.html#labgen">label generation in macros</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.4
+<TR><TD> <A href="basic.html# - functions"><TT>LEN</TT> - function</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.6
+<TR><TD> <A href="notation.html#lexical">lexemes</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.2
+<TR><TD> <A href="notation.html#lexical">lexical Structure</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.2
+<TR><TD> <A href="misc.html#insertion">libraries - of macros</A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.1
+<TR><TD> <A href="linker.html#libraries">libraries - of object files</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.5
+<TR><TD> <A href="linker.html#libmacs">library macros for object libraries</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.5
+<TR><TD> <A href="notation.html#comments">line ends</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.6
+<TR><TD> <A href="basic.html#lines">lines</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.&nbsp;&nbsp;
+<TR><TD> <A href="linker.html#functions">linker control functions</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.2
+<TR><TD> <A href="linker.html#macros">linker control macros</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.4
+<TR><TD> <A href="linker.html#control">linker control sublanguage</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.1
+<TR><TD> <A href="linker.html#simple">linker - simplified for Unix</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.7
+<TR><TD> <A href="misc.html#listing"><TT>LIST</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.4
+<TR><TD> <A href="macro.html#formals">list macro parameter passing mode</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="misc.html#listing">listing control</A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.4
+<TR><TD> <A href="loader.html#load">loader sublanguage (object file format)</A>
+    <TD>-<TD>-<TD ALIGN="right"> 9.1
+<TR><TD> <A href="loader.html#loader">loader for the loader sublanguage</A>
+    <TD>-<TD>-<TD ALIGN="right"> 9.2
+<TR><TD> <A href="external.html">local symbols</A>
+    <TD>-<TD>-<TD ALIGN="right"> 4.&nbsp;&nbsp;
+<TR><TD> <A href="basic.html#align">location counter - alignment of</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.2
+<TR><TD> <A href="macro.html#align">location counter - alignment macro</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.4
+<TR><TD> <A href="basic.html#origin">location counter - setting</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.2
+<TR><TD> <A href="storage.html">location counter
+		- use of, in storage directives</A>
+    <TD>-<TD>-<TD ALIGN="right"> 3.&nbsp;&nbsp;
+<TR><TD> <A href="basic.html#labels">location counter
+		- use of, to define labels</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.1
+<TR><TD> <A href="basic.html#values">location counter
+		- value of, in expressions</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.5
+<TR><TD> <A href="using.html#listing">location counter
+		- value of, in listings</A>
+    <TD>-<TD>-<TD ALIGN="right"> 10.2
+<TR><TD> <A href="macro.html#definition"><TT>MACRO</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.1
+<TR><TD> <A href="macro.html#calls">macro actual parameters</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.3
+<TR><TD> <A href="macro.html#calls">macro Calls</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.3
+<TR><TD> <A href="macro.html#definition">macro Definitions</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.1
+<TR><TD> <A href="macro.html#formals">macro Formal Parameters</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="macro.html#formals">macro parameter passing modes</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="linker.html#macros">macros for linker control</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.4
+<TR><TD> <A href="linker.html#libmacs">macros for object libraries</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.6
+<TR><TD> <A href="macro.html#formals">name macro parameter passing mode</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="conditional.html#example">nested conditional assembly</A>
+    <TD>-<TD>-<TD ALIGN="right"> 5.3
+<TR><TD> <A href="notation.html#notation">notation</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.1
+<TR><TD> <A href="notation.html#numbers">numbers</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.4
+<TR><TD> <A href="linker.html#object">object file - as linker output</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.3
+<TR><TD> <A href="linker.html#libraries">object file formats
+		- library sublanguage</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.5
+<TR><TD> <A href="loader.html#load">object file formats - loader sublanguage</A>
+    <TD>-<TD>-<TD ALIGN="right"> 9.1
+<TR><TD> <A href="loader.html#object">object file formats
+		- object sublanguage</A>
+    <TD>-<TD>-<TD ALIGN="right"> 9.3
+<TR><TD> <A href="linker.html#libraries">object libraries</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.5
+<TR><TD> <A href="linker.html#libmacs">object library macros</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.6
+<TR><TD> <A href="basic.html#origin">origin setting</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.2
+<TR><TD> <A href="misc.html#paging"><TT>PAGE</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.6
+<TR><TD> <A href="macro.html#calls">parameters, actual, of Macros</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.3
+<TR><TD> <A href="macro.html#formals">parameters, Formal, of Macros</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="macro.html#formals">parameter passing modes for Macros</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="basic.html#values">parentheses in expressions</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.5
+<TR><TD> <A href="macro.html#formals">parentheses in macro calls</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="basic.html#programs">programs -- syntactic</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.&nbsp;&nbsp;
+<TR><TD> <A href="notation.html#lexical">programs -- lexical</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.2
+<TR><TD> <A href="notation.html#quotes">quoted Strings</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.5
+<TR><TD> <A href="notation.html#numbers">radix</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.4
+<TR><TD> <A href="macro.html#align">recursive macro call example</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.4
+<TR><TD> <A href="basic.html#functions"><TT>REL</TT> - function</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.6
+<TR><TD> <A href="basic.html#origin">relocatable assembly - origin setting</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.2
+<TR><TD> <A href="linker.html#functions">relocatable linkage
+		- linker control</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.2
+<TR><TD> <A href="misc.html#starting"><TT>S</TT> - symbolic directive </A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.3
+<TR><TD> <A href="external.html">scope rules</A>
+    <TD>-<TD>-<TD ALIGN="right"> 4.&nbsp;&nbsp;
+<TR><TD> <A href="basic.html#shift">shift operators (at assembly time)</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.3
+<TR><TD> <A href="misc.html#starting">starting address specification</A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.3
+<TR><TD> <A href="macro.html#concat">string concatenation in macro bodies</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="notation.html#quotes">strings</A>
+    <TD>-<TD>-<TD ALIGN="right"> 1.5
+<TR><TD> <A href="storage.html#text">strings - assembly into memory</A>
+    <TD>-<TD>-<TD ALIGN="right"> 3.5
+<TR><TD> <A href="basic.html#values">strings in expressions</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.5
+<TR><TD> <A href="macro.html#formals">strings in macro parameters</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="linker.html#libraries">sublanguages - object library</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.5
+<TR><TD> <A href="linker.html#control">sublanguages - linker control</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.2
+<TR><TD> <A href="loader.html#load">sublanguages - load file format</A>
+    <TD>-<TD>-<TD ALIGN="right"> 9.1
+<TR><TD> <A href="loader.html#object">sublanguages - object file format</A>
+    <TD>-<TD>-<TD ALIGN="right"> 9.3
+<TR><TD> <A href="misc.html#listing"><TT>SUBTITLE</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.5
+<TR><TD> <A href="using.html#command">symbol table dump, Creation</A>
+    <TD>-<TD>-<TD ALIGN="right"> 10.1
+<TR><TD> <A href="using.html#dump">symbol table dump, Format</A>
+    <TD>-<TD>-<TD ALIGN="right"> 10.3
+<TR><TD> <A href="storage.html#trip"><TT>T</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 3.3
+<TR><TD> <A href="basic.html#terms">terms</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.4
+<TR><TD> <A href="storage.html#text">text - assembly into memory</A>
+    <TD>-<TD>-<TD ALIGN="right"> 3.5
+<TR><TD> <A href="misc.html#listing"><TT>TITLE</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.5
+<TR><TD> <A href="storage.html#trip">three-quarter word - assembly into memory</A>
+    <TD>-<TD>-<TD ALIGN="right"> 3.3
+<TR><TD> <A href="basic.html#functions"><TT>TYP</TT> - function</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.6
+<TR><TD> <A href="basic.html#terms">unary operators</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.4
+<TR><TD> <A href="misc.html#insertion"><TT>USE</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 7.1
+<TR><TD> <A href="linker.html#control"><TT>USE</TT> - linker control function</A>
+    <TD>-<TD>-<TD ALIGN="right"> 8.2
+<TR><TD> <A href="macro.html#formals">value macro parameter passing mode</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.2
+<TR><TD> <A href="basic.html#values">values</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.5
+<TR><TD> <A href="storage.html#word"><TT>W</TT> - symbolic directive</A>
+    <TD>-<TD>-<TD ALIGN="right"> 3.4
+<TR><TD> <A href="storage.html#word">word - assembly into memory </A>
+    <TD>-<TD>-<TD ALIGN="right"> 3.4
+<TR><TD> <A href="basic.html#align">word alignment of the location counter</A>
+    <TD>-<TD>-<TD ALIGN="right"> 2.2
+<TR><TD> <A href="macro.html#align">word alignment macro</A>
+    <TD>-<TD>-<TD ALIGN="right"> 6.4
+</TABLE>
+</BLOCKQUOTE>
+
+</BODY>
+</HTML>

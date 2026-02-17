@@ -1,0 +1,314 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual, Miscellaneous Assembly Directives</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>7. Miscellaneous Assembly Directives</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="index.html">
+      
+      the SMAL Manual
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2>Index</H2>
+
+<OL>
+<LI> <A href="misc.html#insertion">Text Insertions</A>
+<LI> <A href="misc.html#end">End of File</A>
+<LI> <A href="misc.html#starting">Starting Address Specification</A>
+<LI> <A href="misc.html#listing">Listing Control</A>
+<LI> <A href="misc.html#titles">Titles and Subtitles</A>
+<LI> <A href="misc.html#paging">Pagination</A>
+<LI> <A href="misc.html#errors">Deliberate Error Messages</A>
+</OL>
+
+<HR>
+
+<H2><A NAME=insertion>7.1. Text Instertions</A></H2>
+<P>
+SMAL32 allows text to be inserted into the body of a program from
+an alternate source file at assembly time.  The only requirements are that
+the alternate source file be itself a legal SMAL program, and that insertions
+are not nested deeper than the implementation allows.  The <TT>USE</TT>
+directive causes text insertion.
+<PRE>
+&lt;symbolic directive&gt; ::= USE &lt;quoted string&gt;
+</PRE>
+<P>
+The string operand on a <TT>USE</TT> directive must contain the name of a
+readable text file.  The <TT>USE</TT> directive is not
+executed by a preprocessor; thus, the inclusion of <TT>USE</TT>
+directives in the body of a macro will have no effect until that
+macro is expanded (see <A HREF="macro.html#calls">Section 6.3</A>),
+and the inclusion of <TT>USE</TT> directives in the body of
+a conditional block (see <A HREF="conditional.html">Chapter 5<A>)
+will only have an effect if the expressions governing
+the execution of that conditional block have appropriate values.
+If <TT>USE</TT> directives nested too deeply,
+a "too many use levels" error will be raised.
+All versions of SMAL should support at least 2 levels of nesting.
+<P>
+<TT>USE</TT> directives are commonly used for inserting standard macro
+definitions (see <A HREF="macro.html">Chapter 6</A>) and assignments of
+symbolic values (see <A HREF="basic.html#directives">Section 2.2</A>)
+into a program, or
+for inserting shared <TT>COMMON</TT> definitions
+(see <A HREF="external.html#common">Section 4.3</A>)
+into one of a group of programs which are to be linked together.
+The following two source files demonstrate the use of the <TT>USE</TT>
+directive:
+<PRE>
+    ; FILE OF STANDARD DEFINITIONS
+    A     =:    0
+    B     =:    1
+
+    ; A USER FILE
+          USE   "standard.h"
+          W     A
+          W     B
+</PRE>
+<P>
+If the first file is stored in a file known to the operating
+system as <TT>standard.h</TT>, assembling the user file will result in the
+following listing:
+<PRE>
+                             1  ; A USER FILE
+                             2        USE   "standard.h"
++000000: 00000000            3        W     A
++000004: 00000001            4        W     B
+                             5  END
+</PRE>
+<P>
+Note that, by default, the contents of the used file are not listed
+as they are processed; this can be changed using the <TT>LIST</TT> directive.
+For example, in the above listing, the contents of <TT>standard.h</TT>
+are not listed, but the assembler has seen its contents, as is shown by the
+values produced when <TT>A</TT> and <TT>B</TT> were used.
+<P>
+File name suffixes such as <TT>.a</TT> or <TT>.h</TT> have no meaning to
+SMAL.  They are merely parts of the file name.  The convention of
+adding a <TT>.h</TT> (header) suffix is a sensible way to name
+files holding definitions intended to be inserted by
+<TT>USE</TT> directives at the head of a source file.
+<P>
+When a hierarchically structured file system is used where there is a
+clear syntactic distinction between absolute and relative file names,
+the SMAL32 assembler will interpret relative file names
+in the context of the directory immediately containing the file from which
+the line containing the file name was read.  This is not necessarily the
+same as the user's current working directory.
+Under Unix (including Linux), if the assembler is currently
+reading from "library/src.a" and <TT>USE "entry.h"</TT> is
+encountered, the assembler will read from <TT>library/entry.h</TT>.
+In the same context, if the directive <TT>USE "/usr/public/lib"</TT> will
+result in reading from <TT>/usr/public/lib</TT>, since that file name was
+specified absolutely.
+<P>
+If the SMAL32 assembler cannot find the desired relative file name on its
+first try, and if a <TT>USE</TT> directory has been specified using the
+<TT>-U</TT> command-line option
+(see <A HREF="using.html#command">Section 10.1</A>),
+it will look in that directory for the file before giving up.
+
+<H2><A NAME=end>7.2. End of File</A></H2>
+<P>
+The assembler automatically inserts an <TT>END</TT> directive at the
+end of each source file from which it reads, and at the end of each macro
+body (see <A HREF="macro.html#definition">Section 6.1</A>).
+The only function of the <TT>END</TT> directive is to mark the ends
+of files and macros.
+<PRE>
+&lt;symbolic directive&gt; ::= END
+</PRE>
+<P>
+If an <TT>END</TT> directive is explicitly given in a file,
+all lines after it will be ignored.
+
+<H2><A NAME=starting>7.3. Starting Address Specification</A></H2>
+<P>
+The assembler allows the address at which the object program is to begin
+execution to be passed through to the loader by the use of the start directive.
+<PRE>
+&lt;symbolic directive&gt; ::= S &lt;expression&gt;
+</PRE>
+<P>
+Only one <TT>S</TT> directive may be given per program, and it is suggested
+that that directive be given at the head of the program so that it is easy
+to find.
+A typical program might begin as follows:
+<PRE>
+      TITLE MAIN PROGRAM
+      S     START
+START:
+</PRE>
+<P>
+If no starting address is give, the loader may set a default.
+The run-time system determines how the starting address is used.
+Some systems may require use of a
+standard external symbol such as <TT>MAIN</TT>.   Some systems
+may use the starting address to set an initial breakpoint.
+
+<H2><A NAME=listing>7.4. Listing Control</A></H2>
+<P>
+The assembler normally only lists lines from the base file,
+and does not list lines resulting from macro expansion
+(see <A HREF="macro.html#calls">Section 6.3</A>) and <TT>USE</TT> insertions
+(see <A HREF="misc.html#insertion">Section 7.1</A>).
+This default may be overridden by the
+<TT>LIST</TT> directive.
+<PRE>
+&lt;symbolic directive&gt; ::= LIST &lt;expression&gt;
+</PRE>
+<P>
+At all times, the assembler keeps a record of the number of macro or
+<TT>USE</TT> nesting levels to be included in the listing.
+The operand of the <TT>LIST</TT> directive is adjusts this.
+Poitive operands cause that many additional levels to be listed.
+Negative operands cause that many fewer to be listed.
+<P>
+The line containing the LIST directive will not be printed if it causes
+listing to be turned on.
+
+<H2><A NAME="titles">7.5. Titles and Subtitles</A></H2>
+<P>
+By default, SMAL32 listings are titled with the version of the assembler
+and the name of the file being assembled.
+The following two directives may be used to modify this behavior:
+<PRE>
+&lt;symbolic directive&gt; ::= TITLE { &lt;lexeme&gt; }
+                       | SUBTITLE { &lt;lexeme&gt; }
+</PRE>
+<P>
+The subtitle on each listing page will appear directly below the title.
+The remainder of the line following the <TT>TITLE</TT> or <TT>SUBTITLE</TT>
+directive is used as the title or subtitle, including comments.  The text
+of the title or subtitle must be lexically valid; this usually causes no
+problems, since any sequence of words is lexically valid as a sequence of
+identifiers.
+<P>
+Programs should usually contain only one <TT>TITLE</TT> directive, and may
+contain any number of <TT>SUBTITLE</TT> directives.  Each <TT>SUBTITLE</TT>
+directive will force the start of a new page in the listing, and in
+addition, will be used during the first pass of the assembler to construct a
+table of contents.
+<P>
+<TT>SUBTITLE</TT> directives encountered while listing is disabled will not
+cause a page eject, but the new subtitles will show up on the next page
+heading.  A <TT>PAGE</TT> directive followed by a <TT>SUBTITLE</TT>
+directive will cause only one page eject.
+
+<H2><A NAME="paging">7.6. Pagination</A></H2>
+<P>
+By default, the assembly listing contains page breaks every 60 lines,
+Thee <TT>TITLE</TT> and <TT>SUBTITLE</TT> directives produce additional
+breaks, and if additional breaks are desired, the
+<TT>PAGE</TT> directive may be used:
+<PRE>
+&lt;symbolic directive&gt; ::= PAGE
+</PRE>
+<P>
+<TT>PAGE</TT> directives encountered while listing is
+disabled will not cause a page eject.  A <TT>PAGE</TT> directive followed by a
+<TT>SUBTITLE</TT> directive will cause only one page eject.
+
+<H2><A NAME="errors">7.7. Deliberate Error Messages</A></H2>
+<PRE>
+&lt;symbolic directive&gt; ::= ERROR { &lt;lexeme&gt; }
+</PRE>
+<P>
+The <TT>ERROR</TT> directive, like <TT>TITLE</TT> and <TT>SUBTITLE</TT>,
+allows any text to be included
+in the remainder of the line; this directive always forces an assembly error
+message that will list that line, at the point where it was encountered
+during the assembly process.  This is most likely to be useful inside complex
+conditional (see <A HREF="conditional.html">Chapter 5<A>)
+and macro (see <A HREF="macro.html">Chapter 6</A>)
+assembly, for example, to report an illegal parameter.
+
+</BODY>
+</HTML>

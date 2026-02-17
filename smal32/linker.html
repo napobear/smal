@@ -1,0 +1,644 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual, The SMAL Linker</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>8. The SMAL Linker</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="index.html">
+      
+      the SMAL Manual
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2>Index</H2>
+
+<OL>
+<LI> <A href="linker.html#control">The Linker Control Sublanguage</A>
+<LI> <A href="linker.html#functions"> Linker Control Functions</A>
+<LI> <A href="linker.html#object"> Producing an Object File as Linker Output</A>
+<LI> <A href="linker.html#macros"> Linker Control Macros</A>
+<LI> <A href="linker.html#libraries">Object Libraries</A>
+<LI> <A href="linker.html#libmacs"> Library Macros</A>
+<LI> <A href="linker.html#simple">A Simplified Linker for Unix</A>
+</OL>
+
+<HR>
+
+<P>
+When the SMAL assembler processes a source program,
+it produces an object file.
+Object files are encoded in the SMAL object sublanguage, and may be
+linked into a load file by the SMAL assembler.
+When the assembler is used for this linkage editing function,
+it is controlled by a linker control program, encoded in the
+SMAL32 linker control sublanguage.
+As a linker, the assembler may process object library files in addition
+to simple object files; such object library files must be encoded in the
+SMAL32 object library sublanguage.
+Finally, the output of the assembler when it is used as a linkage
+editor is either another object file or a load file encoded in the
+SMAL loader sublanguage.
+<P>
+As the terminology suggests, object files, linker control files, and
+load files are all legal SMAL
+programs, encoded in particular subsets of the
+language.  Object files have less symbolic information in them than
+source files, and load files have almost no symbolic content
+(what remains is concerned only with establishing relocatability).
+SMAL32 linker control files and object library files consist primarily of
+information concerning how to find each part of the program to be linked
+and when to link it.
+<P>
+SMAL32 is targeted for 32 bit architectures, so the sizes of all relocatable
+object files and the sizes of all common blocks are rounded up to a 32 bit
+boundary (so that the last two bits of each size are zero).
+
+<H2><A NAME=control>8.1. The Linker Control Sublanguage</A></H2>
+<P>
+A SMAL linker control program consists of an optional sequence of
+linker controls, followed by a sequence of object specifications
+which name the files to be linked, followed by an optional common
+specification.
+<PRE>
+&lt;linker control program&gt; ::= { &lt;linker control&gt; }
+                             { &lt;object specification&gt; }
+                             [ &lt;common specification&gt; ]
+                               &lt;end of file&gt;
+</PRE>
+<P>
+If the object files to be linked do not reference any common regions,
+and if the result to be produced is intended for loading only, then
+the linker control program need not contain anything but object
+specifications.
+<PRE>
+&lt;object specification&gt; ::= USE &lt;quoted string&gt; &lt;line end&gt;
+</PRE>
+<P>
+Each object specification is a <TT>USE</TT> directive
+(see <A HREF="misc.html#insertion">Section 7.1</A>)
+which names either an object file or a library file.
+The object files named will be loaded
+sequentially in memory, while the library files will be searched to see
+if they contain definitions of any symbols referenced by the programs
+already loaded.  If so, appropriate material from the library files
+is also loaded.
+If the files <TT>main.o</TT>, <TT>sub1.o</TT>, and <TT>sub2.o</TT>
+are SMAL object files, the
+following linker control program could be used to link them:
+<PRE>
+    USE "main.o"
+    USE "sub1.o"
+    USE "sub2.o"
+</PRE>
+<P>
+If there is some external symbol used by one of these programs but not
+defined in another of them, an "undefined symbol" error will be produced
+on the terminal and in the listing file.
+<P>
+If any of the object files to be linked contain references to commons,
+the linker must be told where to place the commons.
+The linkage-time symbol <TT>C</TT> determines where commons will be placed.
+The common specification may take a number of forms.
+In the simplest form, the linker is told to place the commons in memory
+immediately after everything else by setting <TT>C</TT>
+(see <A HREF="basic.html#directives">Section 2.2</A>)
+after all of the object specifications:
+<PRE>
+&lt;common specification&gt; ::= C = . &lt;line end&gt;
+</PRE>
+<P>
+The following example loader control program illustrates this form of use
+of commons:
+<PRE>
+    USE "main.o"
+    USE "sub1.o"
+    USE "sub2.o"
+    USE "library.o"
+    C=.
+</PRE>
+<P>
+Note that the common specification is placed after all object specifications,
+including any which reference libraries.
+<P>
+If programs are to be loaded in random access memory in a conventional
+way, the above should suffice.  On the other hand, there are times when common
+regions should not be loaded in the same memory as normal object code,
+for example, on systems where one is to be in read-only memory and the
+other in read-write memory.  In this case, the following form can be
+used:
+<PRE>
+&lt;common specification&gt; ::= C = &lt;number&gt; &lt;line end&gt;
+</PRE>
+<P>
+Here, <TT>C</TT> is set
+(see <A HREF="basic.html#directives">Section 2.2</A>)
+to the absolute address where the first common is to be placed.
+all other commons will be placed successively in memory after it.
+Note that this form of common specification may be safely placed before the
+sequence of object specifications with linker controls.
+To assure word alignment of commons,
+the address given here must be word aligned.
+
+<H2><A NAME=functions>8.2. Linker Control Functions</A></H2>
+<P>
+The normal action of the SMAL assembler, when used as a linker, is to
+produce a relocatable load file.  This normal behavior may be changed in
+a number of ways by the linker controls.  For example, to create an
+absolute load file, the following control can be used:
+<PRE>
+&lt;linker control&gt; ::= . = &lt;number&gt; &lt;line end&gt;
+</PRE>
+<P>
+To assure word alignment of object files, the address specified here must
+be word aligned.
+<P>
+For example, consider a tiny system with 4K bytes
+of read-write memory starting at address 0000<SUB>16</SUB> and with 16K bytes
+of read-only memory starting at address 1000<SUB>16</SUB>.  If the source
+programs for
+the object files involved were consistent in their use of common for all
+read-write variables, maintaining a strict separation between
+code and data, then the following linker control file could be used
+to prepare a load file to be used in "burning" the read-only memory:
+<PRE>
+    .=#1000
+    USE "main.o"
+    USE "sub1.o"
+    USE "sub2.o"
+    C=#0000
+</PRE>
+<P>
+Note the use of the common specification to control the placement of all
+commons in the read-write region.
+<P>
+At times, there may be some commons or other external symbols which must
+be placed in specific memory locations, for example, a program may reference
+a block of perepheral device control registers as a common, allowing
+adjustments for the particular machine configuration to be made at linkage
+time.  In this case, the following form can be used:
+<PRE>
+&lt;linker control&gt; ::= R&lt;identifier&gt; =: &lt;number&gt; &lt;line end&gt;
+</PRE>
+<P>
+Note that an external name is a legal identifier which begins with the
+letter <TT>R</TT>.  External names are formed by adding the <TT>R</TT>
+prefix to the identifier
+used internally in a source program as operands on an <TT>EXT</TT>,
+<TT>INT</TT>, or <TT>COMMON</TT> directives
+(see <A HREF="external.html">Chapter 4</A>).
+Definition using <TT>=:</TT>
+(see <A HREF="basic.html#directives">Section 2.2</A>)
+guarantees that there will be a linkage time
+error message if the same external symbol is also
+defined by an <TT>INT</TT> directive in one of the object files being linked.
+<P>
+When it is necessary to specify the size of a common at linkage time
+instead of at assembly time, the following linker control may be used:
+<PRE>
+&lt;linker control&gt; ::= S&lt;identifier&gt; =: &lt;number&gt; &lt;line end&gt;
+</PRE>
+<P>
+When this form is used, it will override the size of the given common
+declared in the programs being linked.  To maintain alignment of data in
+commons, this size should be an even number of words.
+Definition using <TT>=:</TT>
+(see <A HREF="basic.html#directives">Section 2.2</A>)
+guarantees that the size will be set only once.
+It is possible to decrease the size of a common below that
+which a program declared that it needed.  When common sizes are given at
+linkage time, the data structure in common itself should begin with
+an external reference which the linker can set to indicate
+the size of the common actually allocated.
+<P>
+Finally, if the starting address
+(see <A HREF="misc.html#starting">Section 7.3</A>)
+of a program is not specified internally
+in any of the routines being linked, it may be specified at linkage time
+as follows:
+<PRE>
+&lt;linker control&gt; ::= S R&lt;identifier&gt;
+</PRE>
+<P>
+Where the identifier is an internal symbol
+(see <A HREF="external.html#internal">Section 4.2</A>)
+defined in one of the files being linked.  An error will result if
+this directive is used and one of the linked routines already has a
+specified starting address.
+
+<H2><A NAME=object>8.3. Producing an Object File as Linker Output</A></H2>
+<P>
+It is possible to direct the SMAL assembler, as a linker, to
+produce an object file as output instead of a load file.  This is done,
+for example, when the set of object files being linked does not comprise
+an entire program, but only part of one; thus, the result may contain
+unresolved references to external symbols, and it may define internal symbols
+(see <A HREF="external.html">Chapter 4</A>).
+In this case, linker control directives must be used to inform the
+assembler, as a linker, which external symbols are to be exported by or
+imported to the resulting object file.  Export is done as follows:
+<PRE>
+&lt;linker control&gt; ::= &lt;identifier&gt; = [ : ] R&lt;identifier&gt; &lt;line end&gt;
+                     INT &lt;identifier&gt; &lt;line end&gt;
+</PRE>
+<P>
+Export using <TT>=</TT> allows redefinition, while export using <TT>=:</TT>
+is non-redefinable (see <A HREF="basic.html#directives">Section 2.2</A>).
+The identifiers used on the two lines of this directive should be the same.
+Import is done as follows:
+<PRE>
+&lt;linker control&gt; ::= EXT &lt;identifier&gt; &lt;line end&gt;
+                     R&lt;identifier&gt; = [ : ] &lt;identifier&gt; &lt;line end&gt;
+</PRE>
+<P>
+Again, the identifiers must be the same, and the effect is to
+make all references to the given external name from within any of the
+object files being linked into references to a symbol
+external to the object file resulting from the linkage process.
+The following example SMAL linker control file illustrates these forms:
+<PRE>
+    EXT DATA
+    RDATA = DATA
+    ENTRY = RENTRY
+    INT ENTRY
+    USE "entry.o"
+    USE "table.o"
+    C=.
+</PRE>
+<P>
+If the object file <TT>entry.o</TT> was generated from source containing
+<TT>EXT&nbsp;TABLE</TT>
+and <TT>INT&nbsp;ENTRY</TT>, and the object file <TT>table.o</TT> was
+generated from source containing <TT>INT&nbsp;TABLE</TT> and
+<TT>EXT&nbsp;DATA</TT> then the result of processing
+this linkage control file will be a relocatable object file referencing the
+external
+name <TT>RDATA</TT> and defining the external name <TT>RENTRY</TT>.
+<P>
+When a common area declared in one of the programs being linked is to be
+preserved as a common area in the resulting object file, thus allowing it to
+be shared with other programs linked to the resulting object file, a special
+form of import/export must be used:
+<PRE>
+&lt;linker control&gt; ::= COMMON &lt;identifier&gt; , S&lt;identifier&gt; &lt;line end&gt;
+                     R&lt;identifier&gt; =: &lt;identifier&gt; &lt;line end&gt;
+</PRE>
+<P>
+Note that the identifiers must all be the same, and that the
+special identifier consisting of an <TT>S</TT> prefix attached to the common
+name gives the declared size of the first instance of that common.
+<P>
+Any commons used by the programs being linked
+which are not to be preserved in the final object file will usually be
+lumped onto the end of that file as local data by using a <TT>C=.</TT> common
+specification at the end of the linker control file.  An alternative is
+to lump the commons which are not individually preserved into
+a single common in the resulting object file.
+This is useful, for example, when the program must be able to be stored in
+read-only memory and the commons must be stored in, or rather, must refer to
+read-write memory.  When this is desired, the following form can be used:
+<PRE>
+&lt;common specification&gt; ::= COMMON &lt;identifier&gt; , C &lt;line end&gt;
+			   C = &lt;identifier&gt; &lt;line end&gt;
+</PRE>
+<P>
+Note, here, that all of the identifiers must be the same.
+The following modified version of the previous example uses this form
+to allow the result to be linked with commons separated from normal
+relocatable code:
+<PRE>
+    EXT DATA
+    RDATA =: DATA
+    ENTRY =: RENTRY
+    INT ENTRY
+    COMMON ENTRYCOM,C
+    C=ENTRYCOM
+    USE "entry.o"
+    USE "table.o"
+</PRE>
+<P>
+Note the use in the above example of the convention that the common used
+to store data for a particular routine (or, as in this case, collection
+of routines) has its name formed by appending the suffix
+<TT>COM</TT> to the name of the entry point for that routine.
+<P>
+It should be noted that there is an important restriction on the set of
+symbols which can be exported from or imported to an object file created as
+linker output:  The symbols <TT>R</TT> and <TT>C</TT> have special meaning
+during the linkage process; the linker also reserves symbols formed with
+<TT>R</TT> as a prefix on an identifier being exported by one of the files
+being linked, or with <TT>R</TT>
+or <TT>S</TT> as a prefix on the name of a common.
+
+<H2><A NAME=macros>8.4. Linker Control Macros</A></H2>
+<P>
+The last four linker control directives discussed above are complex
+enough that it is conventional to package them as macros
+(see <A HREF="macro.html">Chapter 6</A>).
+The definitions of these macros should be inserted
+with a <TT>USE</TT> directive
+(see <A HREF="misc.html#insertion">Section 7.1</A>)
+at the head of the linker control file.  Typically, the macros might be
+packaged in a file called <TT>linkmacs.h</TT>, so the following new
+linker directive would be introduced:
+<PRE>
+&lt;linker control&gt; ::= USE "linkmacs.h"
+</PRE>
+<P>
+Inclusion of this linker control directive at the head of a file would
+define the following new linker control directives:
+<PRE>
+&lt;linker control&gt; ::= IMPORTS &lt;identifier&gt;
+                   | EXPORTS &lt;identifier&gt;
+                   | PRESERVECOMMON &lt;identifier&gt;
+                   | LUMPCOMMONS &lt;identifier&gt;
+</PRE>
+<P>
+These would be defined by the following macros:
+<PRE>
+    MACRO IMPORTS NAME
+      EXT NAME
+      R'NAME =: NAME
+    ENDMAC
+
+    MACRO EXPORTS NAME
+      NAME =: R'NAME
+      INT NAME
+    ENDMAC
+
+    MACRO PRESERVECOMMON NAME
+      COMMON NAME,S'NAME
+      R'NAME =: NAME
+    ENDMAC
+
+    MACRO LUMPCOMMONS NAME
+      COMMON NAME,C
+      C=NAME
+    ENDMAC
+</PRE>
+<P>
+In terms of these macros, the last example above could be
+rewritten as follows:
+<PRE>
+    USE "lincmacs.h"
+    IMPORTS DATA
+    EXPORTS ENTRY
+    LUMPCOMMONS ENTRYCOM
+    USE "entry.o"
+    USE "table.o"
+</PRE>
+
+<H2><A NAME=libraries>8.5. Object Libraries</A></H2>
+<P>
+A SMAL object library file controls linkage of object code files.
+Library files are textual and may be maintained by a conventional
+text editor.  Unlike many other systems, library files
+do not contain object code, only references to object files.
+The text of the library file is written in the SMAL object library
+sublanguage.
+<PRE>
+&lt;library file&gt; ::= { &lt;object reference&gt; } &lt;end of file&gt;
+</PRE>
+<P>
+Each object reference specifies the name of an object
+file and the names of one or more symbols which that object file
+defines:
+<PRE>
+&lt;object reference&gt; ::= IF &lt;symbol list&gt; &lt;line end&gt;
+                         USE &lt;quoted string&gt; &lt;line end&gt;
+                       ENDIF &lt;line end&gt;
+&lt;symbol list&gt; ::= &lt;symbol reference&gt; { ! &lt;symbol reference&gt; }
+&lt;symbol reference&gt; ::= FWD ( R&lt;identifier&gt; )
+</PRE>
+<P>
+The mechanism used here rests on the <TT>FWD</TT> function
+(see <A HREF="basic.html#functions">Section 2.6</A>)
+and simple conditional directives
+(see <A HREF="conditional.html#simple">Section 5.1</A>).
+<P>
+An object reference causes the SMAL assembler, when
+used as a linker, to link an object file if the previously
+loaded material has made references to any symbol in the symbol list
+and that symbol has not yet been defined.
+Each symbol in the symbol list takes the form of an external name, that is,
+it starts with an <TT>R</TT> prefix on an identifier used as an
+operand of a <TT>COMMON</TT> or <TT>INT</TT> directive
+(see <A HREF="external.html">Chapter 4</A>) in the object file.
+See the following example:
+<PRE>
+    IF FWD(RSIN) ! FWD(RCOS) ! FWD(RTAN)
+      USE "trigfunc.o"
+    ENDIF
+    IF FWD(REXP) ! FWD(RPOWER)
+      USE "expfunc.o"
+    ENDIF
+    IF FWD(RLOG) ! FWD(RLN)
+      USE "logfunc.o"
+    ENDIF
+    IF FWD(RFLOAT)
+      USE "floatfunc.o"
+    ENDIF
+    IF FWD(RFIX)
+      USE "fixfunc.o"
+    ENDIF
+</PRE>
+<P>
+Note that, if one of the object files in the library references another,
+that file should be placed before the file it relies on.
+It is legal to repeat an object reference any number of times in an object
+library file, and it is legal to have multiple object references with different
+symbol references which refer to the same object file.
+<P>
+When SMAL is run under a hierarchically sturctured file system,
+each library should be organized as a single directory, with the library
+file itself stored under that directory in a file named <TT>dir.o</TT>, and all
+other object files in the library stored in the same directory.
+If the <TT>USE</TT> directive
+(see <A HREF="misc.html#insertion">Section 7.1</A>)
+properly interprets relative file names, the library
+as a whole can be copied using a tree copy operation without
+the need to modify any internal file names.
+
+<H2><A NAME=libmacs>8.6. Library Macros</A></H2>
+<P>
+The form of an object reference is complex enough that it is convenient
+to package it as a macro
+(see <A HREF="macro.html">Chapter 6</A>),
+thus introducing the following new form:
+<PRE>
+&lt;object reference&gt; ::= LIB &lt;quoted string&gt; , &lt;identifier&gt; &lt;line end&gt;
+</PRE>
+<P>
+The macro to do this should be included in the file <TT>linkmacs.h</TT> used
+for linkage editor macros; this macro can be defined as follows:
+<PRE>
+    MACRO LIB FILE,NAME
+      IF FWD(R'NAME)
+        USE FILE
+      ENDIF
+    ENDMAC
+</PRE>
+<P>
+Using this form, the above example library could be recoded as follows:
+<PRE>
+    LIB "trigfunc.o",SIN
+    LIB "trigfunc.o",COS
+    LIB "trigfunc.o",TAN
+    LIB "expfunc.o",EXP
+    LIB "expfunc.o",POWER
+    LIB "logfunc.o",LOG
+    LIB "logfunc.o",LN
+    LIB "floatfunc.o",FLOAT
+    LIB "fixfunc.o",FIX
+</PRE>
+<P>
+Note that this sequence of macro calls does not expand to the same
+sequence of directives as was used in the previous example,
+but that it expands to a sequence of directives with the same effect.
+
+<H2><A NAME=simple>8.7. A Simplified Linker for Unix</A></H2>
+<P>
+Unix (including Linux) users are generally familiar with the idea of a
+link command with the following description:
+<PRE>
+    % link xx.o yy.o zz.o
+</PRE>
+<P>
+This links the object or library files <TT>xx.o</TT>, <TT>yy.o</TT>
+and <TT>zz.o</TT> and produces output to a file called <TT>link.o</TT>.
+(The name <TT>a.out</TT> would be even more in the Unix tradition, but
+becaue the file formats are incompatable, we don't use it).
+The following Unix shell script can be used to implement a link
+command with this behavior:
+<PRE>
+    !#/bin/sh
+    # sh script (Bourne or BASH shell)
+    #    link xx.o yy.o zz.o
+    #    produces output to link.o
+
+    if [ -help = $1 ]
+    then
+        echo "link a b c
+         links SMAL object and library files named a, b and c
+         into a new loadable file called link.o"
+        exit 1
+    fi
+
+    echo TITLE smallink $* &gt; link.a
+    echo .=#0 &gt;&gt; link.a
+    while [ $# -gt 0 ]
+    do
+        echo USE \"$1\" &gt;&gt; link.a
+        shift
+    done
+    echo RUNUSED=:C &gt;&gt; link.a
+    echo C=. &gt;&gt; link.a
+    smal -D -L link.a
+    rm link.a
+    sort +2-3 link.d &gt; link.map
+</PRE>
+<P>
+This script first creates a file <TT>link.a</TT>, written in the linker control
+sublanguage described above, and then runs the SMAL assembler, as a linker,
+using this script.  The script given above is only an example and as a
+suggested starting point for development of scripts for specific machines.
+As a general rule, as illustrated above, the linkage script for a
+particular machine should offer help in response to the command line
+argument <TT>-help</TT>.
+<P>
+The script given above produces output in the loader sublanguage, starting
+at absolute address zero, and it places all common blocks immediately after
+all object code.  In addition, it defines the external symbol <TT>UNUSED</TT>
+as the address of the next location after the last loaded common block.  More
+complex scripts will typically be needed to account for machines with
+separate program and data segments.
+<P>
+This script leaves the linker's symbol table, sorted into numerical order,
+in a file named <TT>link.map</TT>.
+
+</BODY>
+</HTML>

@@ -1,0 +1,339 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual, Notation and Lexical Rules</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>1. Notation and Lexical Structure</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="index.html">
+      
+      the SMAL Manual
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2>Index</H2>
+
+<OL>
+<LI> <A href="notation.html#notation">Notation</A>
+<LI> <A href="notation.html#lexical">Lexical Structure</A>
+<LI> <A href="notation.html#identifiers"> Identifiers</A>
+<LI> <A href="notation.html#numbers"> Numbers</A>
+<LI> <A href="notation.html#quotes"> Quoted Strings</A>
+<LI> <A href="notation.html#comments"> Comments and Line Ends</A>
+</OL>
+
+<HR>
+
+<P>
+<H2><A NAME=notation>1.1. Notation</A></H2>
+<P>
+The syntactic rules governing the formation of correct SMAL32 programs
+will be given in an extended form of BNF using the following special
+symbols:
+<DL>
+<DT><TT>&lt;</TT> and <TT>&gt;</TT>
+<DD>Angle brackets enclose names of syntactic elements.
+          These will be defined somewhere in the text unless the
+	  meaning is obvious.
+<P>
+<DT><TT>{</TT> and <TT>}</TT>
+<DD>Curly races enclose optional syntactic elements
+          that may be repeated an indefinite
+          number of times.
+<P>
+<DT><TT>[</TT> and <TT>]</TT>
+<DD>Square braces enclose optional syntactic elements
+          that may not be repeated.
+<P>
+<DT><TT>|</TT>
+<DD>Vertical bars separate alternative groups of syntactic elements
+          that may be used interchangably.
+<P>
+<DT><TT>::=</TT>
+<DD>The BNF "assignment symbol" is used to define the name to the left
+          as being replaceable by the group of
+          syntactic elements to the right.
+</DL>
+<P>
+Technically, newlines are not significant in BNF, but for readability,
+major alternatives (separated by <TT>|</TT> are frequently set off from
+each other by newlines.
+<P>&nbsp;
+
+<H2><A NAME=lexical>1.2. Lexical Structure</A></H2>
+<P>
+SMAL programs may be described in two ways:  As sequences of lexical
+elements with no structure, and in terms of syntactic structures.
+At the lexical level, SMAL programs have the following structure:
+<PRE>
+&lt;program&gt; ::= { { &lt;space&gt; } &lt;lexeme&gt; } { &lt;space&gt; }
+              &lt;line end&gt; &lt;end of file&gt;
+</PRE>
+That is, a program is a file containing a sequence of lexemes;
+lexemes may be separated by any number of blanks (or tabs), which have no
+significance, but lexemes may not contain blanks (except in quoted character
+strings).  The legal lexemes are as follows:
+<PRE>
+&lt;lexeme&gt; ::= <A HREF="notation.html#identifiers">&lt;identifier&gt;</A>
+           | <A HREF="notation.html#numbers">&lt;number&gt;</A>
+           | <A HREF="notation.html#quotes">&lt;quoted string&gt;</A>
+           | <A HREF="notation.html#comments">&lt;line end&gt;</A>
+           | :   -colon, suffix on <A HREF="basic.html#labels">labels<A> and <A HREF="macro.html#calls">substring notation</A>.
+           | .   -dot, refers to the <A HREF="storage.html">location counter</A>.
+           | ,   -comma, separates <A HREF="macro.html">macro</A> parameters.
+           | =   -equals, <A HREF="basic.html#directives">assignment</A>, <A HREF="basic.html#expressions">comparison</A>, and macro <A HREF="macro.html#formals">parameters</A>.
+           | &gt;   -greater than, comparison and <A HREF="basic.html#expressions">shifting</A>.
+           | &lt;   -less than, comparison and shifting.
+           | +   -plus, <A HREF="basic.html#expressions">addition</A> and as a <A HREF="basic.html#terms">unary sign</A>.
+           | -   -minus, subtraction and as a unary sign.
+           | *   -times, multiplication.
+           | /   -divide by, division.
+           | \   -backslash, <A HREF="basic.html#terms">unary not</A>.
+           | ~   -a synonym for \.
+           | &amp;   -ampersand, the <A HREF="basic.html#expressions">and operator</A>.
+           | !   -exclamation point, the or operator.
+           | |   -a synonym for !.
+           | (   -begin paren, in a <A HREF="basic.html#values">group</A> or <A HREF="macro.html#formals">list</A>.
+           | )   -end paren, ends a group or list.
+</PRE>
+The comments above describe the use of the single character lexemes.
+The following additional punctuation marks are used within some lexemes:
+<PRE>
+             #   -number sign, <A HREF="notation.html#numbers">numbers</A> in arbitrary radixes.
+             "   -double quote, <A HREF="notation.html#quotes">quoted</A> strings.
+             '   -single quote, quoted strings and <A HREF="macro.html">macros</A>.
+             ;   -semicolon delimits <A HREF="notation.html#comments">comments</A> at line ends.
+</PRE>
+The following ASCII punctuation marks are not used in the SMAL32
+assembly language:
+<PRE>
+             [ ] { } ` $
+</PRE>
+The following ASCII punctuation marks are not used, but are likely to be used
+in future revisions:
+<PRE>
+             ^   -may be used as a prefix for extended quotes.
+             @   -may be used to name registers.
+</PRE>
+<P>
+<H2><A NAME=identifiers>1.3. Identifiers</A></H2>
+<P>
+Identifiers begin with a letter followed by any number of letters or digits.
+All characters in an identifier are significant.
+<PRE>
+&lt;identifier&gt; ::= &lt;letter&gt; { &lt;letter or digit&gt; }
+</PRE>
+Identifiers may not contain spaces and may not
+cross from one line to the next, so any limit on line length
+will limit the length of identifiers.  80 character lines will
+always be permitted.
+For the purpose of defining identifiers, the underscore character is a letter.
+Note that identifiers must be separated from any following decimal number
+by at least one space.
+<P>
+The following are legal identifiers:
+<PRE>
+    I
+    NEXT
+    THISISONLYONEIDENTIFIER
+    A1235_B42XY
+</PRE>
+The following are not legal identifiers:
+<PRE>
+    76TROMBONES
+    THIS_ISN'T.ONE-IDENTIFIER
+</PRE>
+The particular set of letters allowed may vary between implementations;
+some may support only one case, but most will support both upper and
+lower case and some may support additional alphabets.
+Where both cases are supported, case differences will be significant
+in comparing identifiers.
+<P>
+<H2><A NAME=numbers>1.4. Numbers</A></H2>
+<P>
+Numbers may take two basic forms:  They may be simple decimal numbers,
+or they may be numbers in another radix (signified by a leading
+radix specification).
+A single character radix specifications is provided for hexadecimal numbers;
+other bases may be used
+by specifying the base as a decimal number, followed by the radix character,
+followed by the number in that base.
+<PRE>
+&lt;number&gt; ::= &lt;decimal number&gt;
+           | &lt;radix&gt; &lt;extended number&gt;
+&lt;radix&gt; ::= #
+          | &lt;decimal number&gt; #
+&lt;decimal number&gt; ::= &lt;digit&gt; { &lt;digit&gt; }
+&lt;extended number&gt; ::= &lt;letter or digit&gt; { &lt;letter or digit&gt; }
+</PRE>
+The digits <TT>A</TT> through <TT>Z</TT> are used for the numerical values
+10 through 35 in
+numbers with a radix over 10.  Thus, the number A<SUB>16</SUB> is equal
+to 10<SUB>10</SUB> and is represented as either
+<TT>#A</TT> or just <TT>10</TT> in SMAL.  For bases other than 10 and 16,
+the base must be specified, so, for example,
+12<SUB>15</SUB>, which has the value 17<SUB>10</SUB>, is
+represented as <TT>15#12</TT> in SMAL.
+<P>
+The radix, if explicitly specified, must be between 2 and 36 (inclusive), and
+no digit must ever be greater than or equal to the radix.
+The assembler will raise the "bad radix" or "bad digit in number" errors
+when these rules are violated.  The assembler uses a 32 bit internal
+representation, use of larger numbers will result in
+a "value out of bounds" error.
+Note that numbers between 2<SUP>31</SUP> and 2<SUP>32</SUP> are
+interpreted as negative numbers in some situations, for example, when
+performing comparisons.
+Note that decimal numbers must be separated from any following hexadecimal,
+octal, or binary
+numbers by at least one space to distinguish the decimal number from a
+radix specification.
+<P>
+The following legal numbers are all equal:
+<PRE>
+    32767
+    #7FFF
+    16#7FFF
+    8#77777
+    32#VVV
+    2#111111111111111
+</PRE>
+The following are not legal numbers:
+<PRE>
+    3276A
+    2#10120
+    40#00
+</PRE>
+The letters allowed as digits greater than 9 begin with A which has the value
+10, and continue up to Z with the value 35.  The letter Z is only a valid digit
+in base 36.  On systems allowing both upper and lower case letters, only
+upper case letters should be used as extended digits.
+<P>
+<H2><A NAME=quotes>1.5. Quoted Strings</A></H2>
+<P>
+Quoted strings may be formed with either single or double quotes, and may
+be of any length that fits on one line.
+<PRE>
+&lt;quoted string&gt; ::= " { &lt;character&gt; } "
+                  | ' { &lt;character&gt; } '
+</PRE>
+Constraints on the length of a quoted string may be imposed by the
+context in which it is used.  A "missing end quote" error will be raised
+if the trailing quote is missing.
+It should be noted that the single quote (apostrophe) has a special
+meaning in macro definitions, and should be used with care.
+The following are legal quoted strings:
+<PRE>
+    "GREAT'STRING'(("
+    "X"
+    ''
+    ')+"5"+('
+</PRE>
+The following are not legal strings:
+<PRE>
+    'DON''T DO IT'
+    "UNBALANCED'
+</PRE>
+Note especially that it is not possible to include a quote in a string by
+repeating it, as in some high level languages.
+<P>
+<H2><A NAME=comments>1.6. Comments and Line Ends</A></H2>
+<P>
+All lines may end with a comment.  Comments begin with a semicolon
+and may include any text.  Comments are completely ignored in the
+normal assembly process, but they are stored as part of the
+text of a macro, and macro parameter substitution does apply to them.
+<PRE>
+&lt;line end&gt; ::= [ ; { &lt;character&gt; } ] &lt;end of line&gt;
+</PRE>
+Note that, unlike their use in high level languages descended from Algol,
+it is conventional to space the semicolon away from any immediately preceding
+commands and to align the semicolons on successive lines to make a
+column which delimits useful text from comments.
+<P>
+</BODY>
+</HTML>

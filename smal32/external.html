@@ -1,0 +1,252 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>SMAL32 Manual, External and Internal Symbols</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>4. External and Internal Symbols</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="index.html">
+      
+      the SMAL Manual
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2>Index</H2>
+
+<OL>
+<LI> <A href="external.html#external">External Declarations</A>
+<LI> <A href="external.html#internal">Internal Declarations</A>
+<LI> <A href="external.html#common">Common Declarations</A>
+</OL>
+
+<HR>
+
+<P>
+SMAL32 allows the results of assembling a number of source programs to be
+combined into a single program at run-time by a linkage editor.
+Because of this, there
+are two classes of symbols in SMAL, local symbols and global symbols.
+Local symbols are defined only within one particular source program, and the
+same name may be used with a different meaning within another.  Global
+symbols, on the other hand, are shared by all programs which are to be linked
+into one final program.  There are two kinds of global symbols:  Those which
+are defined internally in one program and referenced in another, and those
+which are not defined in any particular file but are expected to be defined
+by the linker.
+
+<H2><A NAME=external>4.1. External Declarations</A></H2>
+<P>
+When a symbol defined in one program is to be referenced by another program,
+it must be declared as being external to the program which uses it.
+This is done by defining that identifier with an external directive:
+<PRE>
+&lt;symbolic directive&gt; ::= EXT &lt;identifier&gt; { , &lt;identifier&gt; }
+</PRE>
+Identifiers which are declared as external symbols may not be used as
+labels and they may not have values assigned to them; violation of this
+rule will result in a "multiple label definition" error.
+Identifiers used in this context must not have been previously referenced
+in the text of the program; a
+"name used before defined" error will result when this rule is violated.
+Multiple identifiers may be declared with one <TT>EXT</TT> directive.
+<P>
+In addition to relocatable symbols introduced by defining labels in terms
+of relocatable location counter values, each external symbol introduces a new
+relocation base relative to which additional symbols may be defined.
+Thus, it is legal to add or subtract absolute values to or from an external
+symbol name in order to reference adjacent values (if the name is externally
+defined as a label, the adjacent values will reference adjacent memory
+locations).
+The following fragment of a SMAL32 assembler listing
+(see <A HREF="using.html#listing">Section 10.2</A>)
+illustrates the use of external declarations:
+<PRE>
+
+                             7        EXT   EXT
+                             8  ADR   =     EXT + 8
++000000:+00000000            9        W     EXT
++000004:+00000008           10        W     ADR
+
+</PRE>
+Note that the external symbol <TT>EXT</TT> declared by the <TT>EXT</TT>
+directive in the above example is used as a
+relocation base for the symbol <TT>ADR</TT>.
+<P>
+Symbols defined by <TT>EXT</TT> in one source file must be defined either by
+<TT>INT</TT>
+(see <A HREF="external.html#internal">Section 4.2</A>)
+or <TT>COMMON</TT>
+(see <A HREF="external.html#common">Section 4.3</A>)
+in some other file and these files must then
+be linked.
+(see <A HREF="linker.html">Chapter 8</A>)
+<BR>&nbsp;
+
+<H2><A NAME=internal>4.2. Internal Declarations</A></H2>
+<P>
+When a program wishes to allow other programs to reference a locally defined
+symbol, it must be declared to be accessible by an internal directive:
+<PRE>
+&lt;symbolic directive&gt; ::= INT &lt;identifier&gt; { , &lt;identifier&gt; }
+</PRE>
+<P>
+Identifiers declared as internal must be defined somewhere in the program;
+failure to follow this rule will result in an "undefined symbol" error.
+Within the program where an internal symbol is defined, that symbol may
+be manipulated as if it were an entirely local symbol.  The value of that
+symbol at the end of the second assembly pass will be the value which is
+exported.
+Multiple identifiers may be declared by one <TT>INT</TT> directive.
+The following fragment of legal SMAL32 code illustrates the use of
+internal directives:
+<PRE>
+         INT   EXT
+         INT   CONST, CONST1
+    EXT: CONST = 5
+         CONST1= 6
+</PRE>
+<P>
+Note that the internal symbol <TT>EXT</TT> is declared as a label, so it
+probably has a relocatable value, but the internal symbol <TT>CONST</TT>
+is declared by assigning an absolute integer value to it.
+<P>
+Do not make the mistake of reading the <TT>INT</TT> directive as if it means
+<I>integer</I>.
+
+<H2><A NAME=common>4.3. Common Declarations</A></H2>
+<P>
+When a program wishes to reference an area of memory which is to be allocated
+by the linkage editor, that area must be declared to be a common block
+and its size must be specified:
+<PRE>
+&lt;symbolic directive&gt; ::= COMMON &lt;identifier&gt; , &lt;expression&gt;
+</PRE>
+<P>
+Common names may be used exactly like any external symbol, and must satisfy
+the same rules.  Thus, the name must not have been referenced previous to the
+<TT>COMMON</TT> directive,
+and it must not be defined anywhere else in the program.
+<P>
+The second argument to the <TT>COMMON</TT> directive gives the minimum size
+of the region which the linkage editor is expected to allocate.  This must
+be either an absolute value, in bytes, or it must be relocated relative to
+the common base; any other form will result in a "misuse of relocation" error.
+Generally, the declarations of the same common in the different programs
+linked by the linker should be the same.  If different sizes are
+specified, the first size encountered by the linker will be used and later
+sizes will be ignored.
+<P>
+The size specified is the minimum for two reasons:  First, the size
+may be overridden at linkage time, when a larger size may be specified.
+Second, the size will be rounded up to an even number of 32 bit words
+in order to guarantee that all common blocks are aligned by the linker.
+<P>
+The following fragment of an assembler listing
+(see <A HREF="using.html#listing">Section 10.2</A>)
+illustrates the correct
+use of the <TT>COMMON</TT> directive:
+<PRE>
+                             8  ADR   =     EXT + 8
+                            11        COMMON COM1,6
+                            12        COMMON COM2,COM2LIM
+                            13  LCSV  =     .
+                            14  .     =     COM2
++000000:+00000000           15        W     COM1
++000004: 00000006           16        W     6
+                            17  COM2LIM:
+                            18  .     =     LCSV
+</PRE>
+<P>
+Note that the size of <TT>COM1</TT> above is declared with a simple
+absolute value, but that the size of <TT>COM2</TT> is declared by using
+a label relocated relative to <TT>COM2</TT> itself.  The pattern of code
+used to initialize <TT>COM2</TT> is suggested as a standard for combining
+assembly time initialization of a common block with computing the size of the
+block.
+
+</BODY>
+</HTML>

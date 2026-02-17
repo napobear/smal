@@ -1,0 +1,2202 @@
+.\" smal32.me -- documentation for the SMAL32 assembler
+.\" language: nroff -me (on UNIX systems)
+.\" author: Douglas W. Jones, University of Iowa, Iowa City, Iowa 52242, USA.
+.\"   internet address: jones@herky.cs.uiowa.edu
+.\" copyright: see the notice embedded in the text below; in addition,
+.\"   note that there are no restrictions, whatsoever, on converting this
+.\"   document to a different text formatter processor for high quality
+.\"   printing.  UNIX troff, TeX, LaTeX, MacWrite, and others are candidates.
+.po 12m
+.ll 77m
+.he ''''
+.oh ''''
+.fo ''''
+.rs
+.sp 11
+.ce 1000
+SMAL32:
+A Symbolic Macro Assembly Language
+for 32 bit Computers
+.sp 8
+by
+.sp
+Douglas W. Jones
+.sp 12
+July, 1983
+Revised, June, 1984
+Revised, December, 1988
+.sp 3
+Department of Computer Science
+University of Iowa
+Iowa City, Iowa  52242
+USA
+.ce 0
+.bp
+.rs
+.sp 12
+.ce 1000
+(C)
+Copyright by
+Douglas W. Jones
+1982,1983,1988
+.ce 0
+.(q
+.(q
+Permission to copy this material without fee
+is granted, provided that the entire body of the document
+is reproduced without omission, provided that the above copyright notice
+is included in the copy,
+and provided that the copies are not made or distributed
+for commercial advantage.  The name SMAL32 may be changed in the copies
+by changing the suffix 32 to a suffix designating a specific machine, and
+material may be added to copies, for example, to document features added to
+SMAL32 to support specific machines.
+.)q
+.)q
+.ce 1000
+All other rights are reserved.
+.ce 0
+.sp 8
+.na
+ACM CR Categories and Subject Descriptors: D.3.2
+[Programming Languages]: Language
+Classifications - macro and assembly languages;
+D.4.9 [Operating Systems]: Systems Programs and Utilities - linkers;
+loaders
+.ad
+.bp
+.rs
+.sp 13
+.sh 1 "ABSTRACT"
+.pp
+SMAL32 is a symbolic macro assembly language for 32 bit computers.
+The assembler has no built-in knowledge of any machine's instruction set.
+In addition to providing
+the basic assembly functions the SMAL32 assembler provides a powerful
+macro facility and a linkage editor facility supporting separate assembly,
+subprogram libraries, and shared common blocks.  Assembler and linker
+output may be either absolute or relocatable, and the object language is
+encoded in an easily interpreted textual form.
+.pp
+The SMAL32 assembler is a variant of the Machine Independent SMAL
+assembler,
+originally developed at the University of Iowa as a tool for teaching
+and research.
+Assemblers in the SMAL family are
+written in highly machine independent Pascal, and have been successfully
+transported between a number of Pascal implementations.
+.bp
+.rs
+.sp 18
+.sh 1 "ACKNOWLEDGMENT"
+.(q
+.(q
+Thanks are due to all of the students in 22C:32,
+Introduction to Systems Software, who
+have worked with preliminary versions of the SMAL assembler.
+.)q
+.)q
+.ep
+.eh 'SMAL32' 'D. W. Jones'
+.oh 'University of Iowa' 'SMAL32'
+.fo ''%''
+.bp 1
+.sh 1 "INTRODUCTION"
+.pp
+The SMAL32 cross assembler provides assembly language support for a generic
+32 bit machine, minus any special provisions to support any specific machine.
+The SMAL32 assembler supports the assembly format and directives
+of Machine Independent SMAL, a symbolic macro assembly language
+developed at the University of
+Iowa as a tool for teaching and research.
+as such, it is a complete macro
+assembly language and linkage editor system in a form which may be easily
+transported to run on different host systems.
+.pp
+The object code produced by the SMAL32 assembler is relocatable,
+and it includes support for external symbols and FORTRAN common blocks.
+Additionally, the assembler serves as a linker for SMAL32 object
+files; as such, it produces an absolute or relocatable
+textual object code which may
+be easily hand loaded, or loaded 
+by a loader written in about 60 lines of Pascal code.
+.pp
+The SMAL32 assembler will run on any machine supporting integers with at
+least the precision range of 32 bit two's complement arithmetic.
+It should
+also work on any one's complement machine with at least 33 bit integer
+representations.  The character set must include at least
+55 printing characters and the machine independent version
+has been tested
+under a version of Pascal supporting a 64 character colating sequence and
+under versions supporting ASCII with and without parity set in an 8 bit
+byte.
+The assembler does not use pointer variables but it does use recursion;
+this may place limits on the languages into which it may easily be translated.
+.pp
+This document is an adaptation of:
+.(l I
+.ul 1
+Machine Independent SMAL: A Symbolic Macro Assembly Language
+  Douglas Jones, University of Iowa Computer Science Department
+  Technical Report 84-09, July, 1984.
+.)l
+Additional information about SMAL is contained in:
+.(l I
+.ul 1
+Assembly Language as Object Code
+  Douglas Jones, Software - Practice and Experience, in press.
+.)l
+.bp
+.sh 1 "NOTATION AND LEXICAL RULES"
+.pp
+The syntactic rules governing the formation of correct SMAL32 programs
+will be given in an extended form of BNF using the following special
+symbols:
+.(l I
+< and > are used to enclose the names of syntactic elements.
+          These elements will either have obvious meanings,
+          or they will be defined somewhere in the text.
+{ and } are used to enclose a group of syntactic elements
+          which are optional and may be repeated an indefinite
+          number of times.
+[ and ] are used to enclose a group of syntactic elements
+          which are optional and may not be repeated.
+| is used to separate alternate groups of syntactic elements
+          which may be used interchangably.
+::= is used to define the named syntactic element on the left
+          hand side as being replaceable by the group of
+          syntactic elements on the right hand side.
+.)l
+The syntactic rules are supplemented, when needed, with text describing
+the meaning of the constructs involved, and with illustrative examples.
+.sh 2 "Lexical Structure"
+.pp
+SMAL programs may be described in two ways:  As sequences of lexical
+elements with no structure, and in terms of syntactic structures.
+At the lexical level, SMAL programs have the following structure:
+.(l I
+.ne 4
+<program> ::= { { <space> } <lexeme> } { <space> } <line end> <end of file>
+.)l
+That is, a program is a file containing a sequence of lexemes;
+lexemes may be separated by any number of blanks, which have no significance,
+but lexemes may not contain blanks (except in quoted character strings).  The
+legal lexemes are as follows:
+.(l I
+.ne 4
+<lexeme> ::= <identifier>
+           | <number>
+           | <quoted string>
+           | <line end>
+           | :   -colon, used after labels and to take substrings.
+           | .   -dot, used to refer to the location counter.
+           | ,   -comma, used to separate arguments.
+           | =   -equals, used for assignment, comparison, and parameters.
+           | >   -greater than, used for comparison and shifting.
+           | <   -less than, used for comparison and shifting.
+           | +   -plus, used for addition and as a unary sign.
+           | -   -minus, used for subtraction and as a unary sign.
+           | \\   -backslash, used for unary not.
+.ne 4
+           | &   -ampersand, used for the and operator.
+           | !   -exclamation point, used for the or operator.
+           | (   -begin paren, used to begin a group or list.
+           | )   -end paren, used to end a group or list.
+.)l
+The comments above describe the use of the single character lexemes.
+The following additional punctuation marks are used within some lexemes:
+.(l I
+.ne 6
+#  - used for hexadecimal and other radix numbers.
+"   -used in quoted strings.
+\&'   -used in quoted strings and in macro definitions.
+;   -used to delimit comments at line ends.
+.)l
+The following ASCII punctuation marks are not used in the SMAL32
+assembly language:
+.(l I
+[ ] { } ` $
+.)l
+The following ASCII punctuation marks are not used, but are likely to be used
+in future revisions:
+.(l I
+.ne 3
+*   -may be used for multiplication.
+/   -may be used for division.
+^   -may be used as a prefix on 'extended quotation marks'.
+@   -may be used as a unary operator to make objects of type register.
+.ne 3
+_   -may be allowed in identifiers.
+|   -may be used as a synonym for !.
+\&~   -may be used as a synonym for \\.
+.)l
+.sh 2 "Identifiers"
+.pp
+Identifiers begin with a letter followed by any number of letters or digits.
+All characters in an identifier are significant.
+.(l I
+<identifier> ::= <letter> { <letter or digit> }
+.)l
+A consequence of this is that identifiers may not contain spaces and may not
+cross from one line to the next.  Any implementation dependent line length
+limit poses the only limit on the length of an identifier; typically, this
+limit will be 80 characters.
+Note that identifiers must be separated from any following decimal number
+by at least one space to avoid ambiguity.
+The following are legal identifiers:
+.(l I
+.ne 4
+I
+NEXT
+THISISONLYONEIDENTIFIER
+A1235B42XY
+.)l
+.ne 7
+The following are not legal identifiers:
+.(l I
+76TROMBONES
+THIS'IS_NOT.ONE-IDENTIFIER
+.)l
+The particular set of letters allowed may vary between implementations;
+some will support only one case, and others will support both upper and
+lower case.  If both cases are supported, case differences will be significant
+in comparing identifiers.
+.sh 2 "Numbers"
+.pp
+Numbers may take two basic forms:  They may be simple decimal numbers,
+or they may be numbers in another radix (signified by a leading
+radix specification).
+A single character radix specifications is provided for hexadecimal numbers;
+other bases may be used
+by specifying the base as a decimal number, followed by the radix character,
+followed by the number in that base.
+.(l I
+<number> ::= <decimal number>
+           | <radix> <extended number> 
+<radix> ::= #
+          | <decimal number> #
+<decimal number> ::= <digit> { <digit> }
+<extended number> ::= <letter or digit> { <letter or digit> }
+.)l
+The radix, if explicitly specified, must be between 2 and 36 (inclusive), and
+no digit must ever be greater than or equal to the radix.  The assembler
+will raise the "bad radix" and "bad digit in number" errors when these
+rules are violated.  The assembler uses a 32 bit internal
+representation, use of larger numbers will result in
+a "value out of bounds" error.
+Note that numbers between 2 to the 31 and 2 to the 32 are
+interpreted as negative numbers in some situations, for example, when
+performing comparisons.
+Note that decimal numbers must be separated from any following hexadecimal,
+octal, or binary
+numbers by at least one space to distinguish the decimal number from a
+radix specification.
+The following legal numbers are all equal:
+.(l I
+.ne 3
+32767
+#7FFF
+16#7FFF
+.ne 3
+8#77777
+32#VVV
+1#111111111111111
+.)l
+.ne 6
+The following are not legal numbers:
+.(l I
+3276A
+2#10120
+40#00
+.)l
+.ne 5
+The letters allowed as digits greater than 9 begin with A which has the value
+10, and continue up to Z with the value 35.  The letter Z is only a valid digit
+in base 36.  On systems allowing both upper and lower case letters, only
+upper case letters should be used as extended digits.
+.sh 2 "Quoted Strings"
+.pp
+Quoted strings may be formed with either single or double quotes, and may
+be of any length that fits on one line.
+.(l I
+<quoted string> ::= " { <character> } "
+                  | ' { <character> } '
+.)l
+Constraints on the length of a quoted string may be imposed by the
+context in which it is used.  A "missing end quote" error will be raised
+if the trailing quote is missing.
+It should be noted that the single quote (apostrophe) has a special
+meaning in macro definitions, and should be used with care.
+The following are legal quoted strings:
+.(l I
+.ne 4
+"GREAT'STRING'(("
+"X"
+\&''
+\&')+"5"+('
+.)l
+.ne 7
+The following are not legal strings:
+.(l I
+\&'DON''T DO IT'
+"UNBALANCED'
+.)l
+Note especially that it is not possible to include a quote in a string by
+repeating it, as in some high level languages.
+.sh 2 "Comments and Line Ends"
+.pp
+All lines may end with a comment.  Comments begin with a semicolon
+and may include any text.  Comments are completely ignored in the
+normal assembly process, but they are stored as part of the
+text of a macro, and macro parameter substitution does apply to them.
+.(l I
+<line end> ::= [ ; { <character> } ] <end of line>
+.)l
+Note that, unlike their use in high level languages descended from algol, it is
+conventional to space the semicolon away from any immediately preceding
+commands and to align the semicolons on successive lines to make a
+column which delimits useful text from comments.
+.bp
+.sh 1 "BASIC FORMATS"
+.pp
+At the syntactic level,
+a SMAL32 program consists of a sequence of lines, each of which
+may contain any number of labels, an assembly directive, and a comment.
+Each of these fields is optional, and each may begin anywhere on the line,
+as long as they appear in the required order.
+Comments are defined at the lexical level and so are not formally treated
+here.
+.(l I
+<program> ::= { <line> } <end of file>
+<line> ::= { <label> } [ <directive> ] <line end>
+.)l
+Unlike many older assembly languages, these rules allow indenting and
+blank lines to be used to clarify the structure of programs wherever this
+is convenient.
+.sh 2 "Labels"
+.pp
+A label is an indentifier followed by a colon.
+The effect of using a
+particular identifier as a label is that the value of that identifier
+is set to the current assembly location and it becomes illegal to alter
+that value in any way.
+The initial value of the assembly location counter is relocatable zero, and
+it is incremented once for each byte assembled.
+.(l I
+<label> ::= <identifier> :
+.)l
+Any attempt to redefine a label will result
+in a "multiple label definition" error.  If the value of the location counter
+differs between the two passes of the assembler, for example, as the result
+of a macro expanding differently on the two passes, a "label differed in pass
+1" error will result.
+The following are legal lines of SMAL code containing labels:
+.(l I
+FIRST:
+ANOTHER :    ;COMMENT
+  AGAIN:
+.)l
+Note the lack of column restrictions and the use of optional spaces
+between the identifier and the colon.
+.sh 2 "Directives"
+.pp
+There are two kinds of assembler directives:  The first takes the form of
+an assignment statement and is used to assign values to identifiers.
+The second takes the form of a symbolic directive name
+or instruction name followed by appropriate
+operands.
+.(l I
+<directive> ::= <assignment> | <symbolic directive>
+.)l
+The forms of each of the symbolic directives will be documented in later
+sections.
+In general, each begins with an identifier which is either an op-code name
+or the name of some assembly operation.  If an illegal identifier is used
+in this context, an "invalid directive" error will result.
+Directive names are not reserved words; that is, the name of a directive may
+be used as a label without any conflict of meaning.
+On systems allowing the use of both upper and lower case, directive
+names must be in upper case.
+.pp
+The assignment directive assigns the value of an arbitrary expression to
+an identifier.  An identifier assigned a value in this way may be redefined
+at will, but it must not be used elsewhere as a label.
+.(l I
+<assignment> ::= <identifier> = <expression>
+.)l
+The following lines of legal SMAL32 code demonstrate the use of assignment:
+.(l I
+.ne 3
+NEG1 = -1
+SIXTEENTHOUSAND=8000+8000
+L:     THISLOC = L
+.)l
+Note that spaces are ignored before and after the equals sign, and that
+labels may be used on the same line as an assignment.
+The following lines demonstrate illegal assignments:
+.(l I
+.ne 6
+MULDEF: MULDEF = 6
+A = B
+B = A
+.)l
+In the first case, the error is that an identifier used in a label cannot
+be assigned to.  In the second and third cases, the definition is circular.
+.pp
+A special form of the assignment directive is used to modify the location
+counter.  This is used, for example, to set the assembly origin.
+.(l I
+<assignment> ::= . = <expression>
+.)l
+Here, the special symbol "." (period) is used as if it were an identifier
+standing for the location counter.
+The location counter will take on both the magnitude and type of the
+expression.  This means that an absolute assembly section may be begun
+by assigning an absolute value such as a numeric constant to the location
+counter, and a relocatable section may be begun by assigning an external
+symbol, common name, or other relocatable value to the location counter.
+By default, the location counter is initialized to relocatable zero.
+The following lines of legal SMAL32 code demonstrate the use of this form:
+.(l I
+.ne 5
+BLOCK: .=.+5 ;BLOCK IS A LABEL ON 5 BYTES OF UNINITIALIZED MEMORY
+A = .
+\&. = COMMON
+      ; CODE TO INITIALIZE LOCATIONS IN COMMON
+\&. = A
+.)l
+In the first example above, the location counter is incremented by 5 bytes.
+The remainder of the lines demonstrate how the current location can be
+saved, changed to a different area, for example, a location in common, and
+restored to where it was originally.
+.sh 2 "Expressions"
+.pp
+Expressions are composed of a sequence of terms separated by binary
+operators.  There is no operator precidence hierarchy, and terms are
+evaluated and combined in a strict left to right order.  If a different
+order is needed, parentheses may be used to construct a term which is
+itself an expression.
+.(l I
+<expression> ::= <term> { <binary operator> <term> }
+.)l
+The allowed binary operators are:
+.(l I
+<binary operator> ::= + | -
+                    | > | < | =
+                    | & | ! | > > | < <
+.)l
+These stand for, respectively, the arithmetic operations of addition and
+subtraction, the comparison operations greater than, less than, and equal to,
+the boolean operations and and or, and the operatons left and right shift.
+The following lines of legal SMAL32 code demonstrate the use of expressions:
+.(l I
+.ne 4
+FOUR     =  3 - 2 + 3
+MINUSTWO = 3 - (2 + 3)
+TRUE     = 5 = (3 + 2)
+NONSENSE =   5 = 3+2
+.)l
+In the final example, the value of "NONSENSE" will not be the same as "TRUE"
+because of left to right evaluation.  Note that spaces (or the lack of spaces)
+around the operators have no effect on the order of evaluation.
+.pp
+The arithmetic operations are computed using 32 bit
+binary numbers.  In the absence of other constraints, these may be treated
+as either signed two's complement values as unsigned values.
+Overflow and underflow are not detected because it is impossible for the
+assembler to determine which operands were intended to be signed or whether
+or not the result should be interpreted as signed.
+The following rules govern the type of the result when adding
+or subtracting values of various types:
+.(l I
+   absolute + absolute    ==> absolute
+   absolute + relocatable ==> relocatable
+relocatable + absolute    ==> relocatable
+relocatable + relocatable ==> error
+   absolute - absolute    ==> absolute
+   absolute - relocatable ==> error
+relocatable - absolute    ==> relocatable
+relocatable - relocatable ==> absolute or error
+.)l
+Note that, in the last case, the difference of two relocatable values
+will only be defined if both are relocated relative to the same relocation
+base.  A "misuse of relocation" error will result whenever an illegal
+combination of operands is used.
+.pp
+The comparison operations are computed using 32 bit signed two's complement
+numbers.
+As a result, some large numbers which look positive in print will be negative
+The results of the comparison operations will
+be -1, 0 and 1, corresponding respectively to true, false and incomparable.
+It is illegal to compare values of different types; thus, absolute
+values may only be compared with other absolute values and not with
+relocatable values.  Failure to follow this rule will result in a
+"misuse of relocation" error and a value of 1.
+.pp
+The boolean and and or operators are computed by applying the basic
+operation to corresponding pairs of bits from the operands to produce each
+bit of the result.  Thus, these may be used for bit setting and testing
+as well as for combining results from comparison operations in a boolean
+expression.  These operations may only be applied to absolute values;
+their application to relocatable values will result in a "misuse of relocation"
+error.
+.pp
+The shift operators return the shifted value of their left operand, shifted
+as many bits as is indicated by their right operand.  Unsigned shifts are used,
+no sign extension or replication is performed on right shifts.  If the shift
+count excedes 32, the result will be zero.  If the shift count is zero or
+negative, the result will not be shifted.  Both operands must be absolute
+values; a "misuse of relocation" error will result if relocatable values
+are used.  Note that the operator symbols themselves consist of 2 lexemes;
+thus, left shift may be written ">>" or ">\ >" with no change in meaning.
+.sh 2 "Terms"
+.pp
+The terms of an expression consist of an optional unary operatior preceding
+a value.  Thus, unary operators may be included before any operand used
+in an expression.
+.(l I
+<term> ::= [ <unary operator> ] <value>
+<unary operator> ::= + | - | \\
+.)l
+The allowed unary operators are a leading plus sign, a leading minus sign, and
+a leading not sign.
+The following examples demonstrate legal use of terms in SMAL32 expressions:
+.(l I
+.ne 6
+TRUE = ( +1 = 1 )
+FALSE = \\ TRUE
+THREE   = - 3 - - 6
+NEGNINE = -(3 - - 6)
+.)l
+The middle two examples demonstrate that unary operators have a higher
+precedence than binary operators.
+The final two examples are the standard register definitions which should
+be included at the head of each program for the 6800 so that the A and B
+registers can be addressed symbolically.
+.pp
+The unary plus operator is always legal and has no effect on the associated
+value.
+.pp
+The unary minus operator is used to negate the given value by taking the
+two's complement.  It may only be applied to absolute values; it's use
+with relocatable values will result in a "misuse of relocation" error.
+.pp
+The unary not operator is used to take the one's complement of the given value.
+As such, it may be used for bit manipulation or to invert the sense of a
+boolean value resulting, for example, from a comparison operation.
+As with unary minus, unary not may only be applied to absolute values.
+Note that unary not, when applied to the result of an illegal comparison,
+returns a value which is neither true nor false.
+.sh 2 "Values"
+.pp
+The values used to compose the terms of expressions may either be simple
+values such as identifiers, numbers, strings, and references to the current
+value of the
+location counter, or they may be complex forms such as parenthesized
+expressions and predefined functions.
+.(l I
+<value> ::= <identifier>
+          | <number>
+          | <quoted string>
+          | .
+          | ( <expression> )
+          | <function>
+.)l
+When an identifier is used as a value, it must have a value assigned to
+it somewhere in the program.  Simple forward references are allowed, and
+are processed using two passes.  Thus, if an expression contains a forward
+reference to some symbol, that symbol must have been defined by the end of
+the first pass for that reference to be valid.
+References to undefined identifiers will result in an "undefined symbol"
+error.
+When a dot is used as a value
+in an expression, it is taken to stand for the current value of the
+location counter.
+An "unbalanced parentheses" error will be raised if the parentheses on an
+expression do not balance.
+.pp
+When a quoted string is used as a value in a term of an expression,
+the ASCII values of the characters will be used.  If the string contains
+only one character, it will be stored in the least significant 8 bits
+of the value.  If the string contains more characters, the rightmost will be
+stored in the least significant 8 bits of the value.
+Unused bits of the value will be set to zero.  An attempt to use
+a string longer than 4 characters as a value will result in a
+"value out of bounds" error.
+.sh 2 "Functions"
+.pp
+Special functions are provided to test whether or not a symbol is defined,
+to test
+whether it is a forward reference, to test the type of an expression,
+and to test the length of a text fragment.
+.(l I
+<function> ::= DEF ( <identifier> )
+             | FWD ( <identifier> )
+             | TYP ( <expression> )
+             | LEN ( <balanced string> )
+.)l
+Note that the form of the argument lists for these functions depends on the
+particular function used.  An "invalid function" error will result if any
+other identifier is used in a context where a function name is allowed.
+Function names are not reserved words; the use of an identifier as a function
+name is determined by the fact that it is followed by a begin parenthesis.
+On systems allowing both upper and lower case letters, function names must
+be in upper case.
+.pp
+The DEF function returns true (-1) if its argument has been defined previously
+in the text of the program, either as a label or as the object of an
+assignment.  Otherwise, if the argument is an identifier which has not
+been previously defined, it returns false(0).  A "symbolic name expected"
+error will be raised if the argument is not an identifier; in this case,
+the value returned will be ambiguous (+1).
+The following fragment of a SMAL32 assembler listing demonstrates the use of
+the DEF function:
+.(l I
+.ne 6
+                         1  DEF = 0
++000000: 00000000        2   W DEF(UNDEF)
++000001: FFFFFFFF        3   W DEF ( DEF )
+                         4  UNDEF = 0
+.)l
+Note that spaces have no effect, and that the DEF function responds
+to whether or not its argument was previously defined in the text and thus
+will return true only if it is defined earlier.
+Thus, DEF will always have the same effect during both passes of the assembler.
+.pp
+The FWD function has the same form and syntactic requirements as the DEF
+function, but it returns true when there is an unresolved forward reference
+to the argument.  Thus, FWD will be false before the first reference to
+the argument and false after the argument is defined, but true between
+a reference to the argument and the later definition.
+The following fragment of a SMAL32 assembler listing demonstrates the use
+of the FWD function.
+.(l I
+.ne 5
++000002: 00000000        5   W FWD(FWD)
+                         6  REF = FWD
++000003: FFFFFFFF        7   W FWD(FWD)
+                         8  FWD = 0
++000004: 00000000        9   W FWD(FWD)
+.)l
+Note that the use of an identifier as an argument to the DEF or FWD
+function does not constitute a reference to that identifier from the point
+of view of the FWD function.
+.pp
+The TYP function returns, as an absolute integer, the type of its argument.
+As a general rule, the particular value returned by TYP will be meaningless,
+except that it will be the same for all values relocated relative to the
+same relocation base.  The only exception to this rule is that the TYP
+applied to any absolute expression will return zero.
+The following fragment of an assembler listing demonstrates the
+use of the TYP function:
+.(l I
+.ne 4
+                        10    EXT X
++000005: 00000000       11  L:W TYP(0)
++000006: FFFFFFFF       12    W TYP(.) = TYP(L)
++000007: 00000000       13    W TYP(X) = TYP(L)
+
+.)l
+Note the use of comparisons with the TYP function to see if the different
+expressions are in fact comparable.
+The TYP function operates by evaluating the expression given as an argument,
+thus, use of an as yet undefined identifier as an argument to it constitutes
+a forward reference to that identifier.
+.pp
+The LEN function returns, as an absolute integer, the length, in characters,
+of its argument.  This is useful for testing, for example, whether a macro
+parameter is present or absent.
+The only constraint on the parameter to the LEN function is that it must
+be lexically valid (contain no illegal numbers or strings), and if
+it contains any parentheses, they must be properly balanced.
+The length of the parameter will not be interpreted as including any
+spaces before or after the parameter, but it will include any spaces
+within the parameter.
+The following fragment of an assembler listing demonstrates the use
+of the LEN function:
+.(l I
+.ne 6
++000008: 00000000       14   W LEN()
++000009: 00000001       15   W LEN(0)
++00000A: 00000002       16   W LEN('')
++00000B: 00000004       17   W LEN( A  B )
++00000C: 00000006       18   W LEN("A  B")
++00000D: 00000007       19   W LEN(0 (0) 0)
+.)l
+Note that LEN, when applied to quoted strings, includes the quote marks
+in its count.
+.bp
+.sh 1 "DATA STORAGE DIRECTIVES"
+.pp
+SMAL32 supports one directives to store words in memory.
+This has the following syntax:
+.(l I
+<symbolic directive> ::= W <expression> { , <expression> }
+.)l
+The W directive stores one word
+(32 bits) at the current location.
+The location counter will be advanced by one after
+the expression is evaluated, so that, for example, "W\ ." will store a
+pointer to itself.
+If multiple operands are included, the additional operands are treated as if
+they were processed by a new B or W directive on the next line.
+Note that
+The following sample assembly listing demonstrates the use of the B and W
+directives for various purposes:
+.(l I
+.ne 10
++00000E: 000000FF       20  B: W 255
++00000F: 0000FFFF       21     W 65535
++000010: FFFFFFFF       22     W #FFFFFFFF
++000011: FFFFFFFF       23     W 32#3VVVVVV
++000012: 30313233       24     W "0123"
++000013:+0000000E       25     W B
++000014:+0000000F       26     W B+1
++000015:+00000015       27     W .
+
+.)l
+In the above example, the location counter was relocatable, as indicated by
+the leading plus sign in the location column in the listing.  The values on
+the last 3 lines of the listing are relocatable because they are derived from
+the location counter.
+.pp
+.sh 1 "EXTERNAL SYMBOLS"
+.pp
+SMAL32 allows the results of assembling a number of source programs to be
+combined into a single program at run-time by a linkage editor.
+Because of this, there
+are two classes of symbols in SMAL, local symbols and global symbols.
+Local symbols are defined only within one particular source program, and the
+same name may be used with a different meaning within another.  Global
+symbols, on the other hand, are shared by all programs which are to be linked
+into one final program.  There are two kinds of global symbols:  Those which
+are defined internally in one program and referenced in another, and those
+which are not defined in any particular file but are expected to be defined
+by the linker.
+.sh 2 "External Declarations"
+.pp
+When a symbol defined in one program is to be referenced by another program,
+it must be declared as being external to the program which uses it.
+This is done by defining that identifier with an external directive:
+.(l I
+<symbolic directive> ::= EXT <identifier> { , <identifier> }
+.)l
+Identifiers which are declared as external symbols may not be used as
+labels and they may not have values assigned to them; violation of this
+rule will result in a "multiple label definition" error.
+Identifiers used in this context must not have been previously referenced
+in the text of the program; a
+"name used before defined" error will result when this rule is violated.
+Multiple identifiers may be declared with one EXT directive.
+.pp
+In addition to relocatable symbols introduced by defining labels in terms
+of relocatable location counter values, each external symbol introduces a new
+relocation base relative to which additional symbols may be defined.
+Thus, it is legal to add or subtract absolute values to or from an external
+symbol name in order to reference adjacent values (if the name is externally
+defined as a label, the adjacent values will reference adjacent memory
+locations).
+The following fragment of a SMAL32 assembler listing illustrates the use of
+external declarations:
+.(l I
+.ne 4
+                        28      EXT EXT
+                        29  ADR = EXT + 8
++000016:+00000000       30      W EXT
++000017:+00000008       31      W ADR
+.)l
+Note that the external symbol "EXT" in the above example is used as a
+relocation base for the symbol "ADR".
+.sh 2 "Internal Declarations"
+.pp
+When a program wishes to allow other programs to reference a locally defined
+symbol, it must be declared to be accessible by an internal directive:
+.(l I
+<symbolic directive> ::= INT <identifier> { , <identifier> }
+.)l
+Identifiers declared as internal must be defined somewhere in the program;
+failure to follow this rule will result in an "undefined symbol" error.
+Within the program where an internal symbol is defined, that symbol may
+be manipulated as if it were an entirely local symbol.  The value of that
+symbol at the end of the second assembly pass will be the value which is
+exported.
+Multiple identifiers may be declared by one INT directive.
+The following fragment of legal SMAL32 code illustrates the use of
+internal directives:
+.(l I
+.ne 4
+      INT EXT
+      INT CONST, CONST1
+EXT:  CONST = 5
+      CONST1 = 6
+.)l
+Note that the internal symbol "EXT" is declared as a label, so it probably
+has a relocatable value, but the internal symbol "CONST" is declared by
+assigning an absolute integer value to it.
+.sh 2 "Common Declarations"
+.pp
+When a program wishes to reference an area of memory which is to be allocated
+by the linkage editor, that area must be declared to be a common block
+and its size must be specified:
+.(l I
+<symbolic directive> ::= COMMON <identifier> , <expression>
+.)l
+Common names may be used exactly like any external symbol, and must satisfy
+the same rules.  Thus, the name must not have been referenced previous to the
+common directive, and it must not be defined anywhere else in the program.
+.pp
+The second argument to the common directive gives the size of the region
+which the linkage editor is expected to allocate.  This must be either an
+absolute value, in bytes, or it must be relocated relative to the common
+base; any other form will result in a "misuse of relocation" error.
+Generally, the declarations of the same common in the different programs
+linked by the linker should be the same.  If different sizes are
+specified, the first size encountered by the linker will be used and later
+sizes will be ignored.
+.pp
+The following fragment of an assembler listing illustrates the correct
+use of the COMMON directive:
+.(l I
+.ne 8
+                        32  COMMON COM1,6
+                        33  COMMON COM2,COM2LIM
+                        34  LOCSAVE = .
+                        35  . = COM2
++000000:+00000000       36  W COM1
++000001: 00000006       37  W 6
+                        38  COM2LIM:
+                        39  . = LOCSAVE
+
+.)l
+Note that the size of "COM1" above is declared with a simple absolute value,
+but that the size of "COM2" is declared by using a label relocated relative
+to "COM2" itself.  The pattern of code used to initialize "COM2" is suggested
+as a standard for assembly time initialization of commons.
+.bp
+.sh 1 "CONDITIONAL ASSEMBLY"
+.pp
+SMAL32 supports structured conditional assembly facilities which provide
+an assembly-time control structure comparable to the corresponding run-time
+control structures of many high level languages.
+.(l I
+<symbolic directive> ::= IF <expression>
+                       | ELSEIF <expression>
+                       | ELSE
+                       | ENDIF
+.)l
+The semantics of the conditional directives is best described in terms
+of conditional blocks.  A conditional block begins with an if block
+and ends with an endif directive.  Between the if block and the endif
+directive, an optional sequence of elseif blocks is allowed, followed by
+an optional else block.  Each block is headed by a specific directive
+which controls the assembly of the following sequence of lines, including
+possible nested conditional blocks.
+.(l I
+<conditional block> ::= <if block>
+                      { <elseif block> }
+                      [ <else block> ]
+                        ENDIF
+<if block> ::= IF <expression> <line end> { <line> }
+<elseif block> ::= ELSEIF <expression> <line end> { <line> }
+<else block> ::= ELSE <line end> { <line> }
+.)l
+The lines within an if or an elseif block are only assembled if the
+corresponding boolean expression evaluated to true (-1).
+The lines within an elseif or else block will only be assembled if no previous
+if or elseif block within that conditional block was assembled.
+No more than one sub-block within a conditional
+block will ever be assembled.
+A "missing endif" error will be raised if an if block is not correctly
+terminated before the end of a macro, text insertion, or program.
+.pp
+It is inappropriate to use labels on the if, elseif, else, and endif
+directives, but they are allowed.  If they are used, they will be considered
+to be part of the immediately preceding sequence of lines.  Thus, the label
+on an elseif directive will be processed as if it were part of the previous
+if or elseif block.
+.sh 2 "Examples"
+.pp
+The following fragments of a SMAL32 assembler listing illustrate valid uses
+of the conditional assembly directives:
+.(l I
+.ne 4
+                        40  VERSION = 3
+                        41  IF VERSION < 5
++000018: 00000000       42    LOWV: W 0
+                        43  ENDIF
+.)l
+The above example might be used to declare and initialize a variable
+which is only used in some versions of a program.
+.(l I
+.ne 11
+                        44  IF VERSION < 2
+                        45    STR: W "SIMP"."LE  ","VERS","ION "
+                        46  ELSEIF (VERSION < 4)
++000019: 4D454449       47    STR: W "MEDI","UM V","VERS","ION "
+         554D2020 
+         56455253 
+         494F4E20 
+                        48  ELSE
+                        49    STR: W "COMP","LEX ","VERS","ION "
+                        50  ENDIF
++00001D: 00000000       51  W 0
+.)l
+The above example might be used to create the part of the title string
+of a program which depends on the version.
+The comments used on the ELSEIF and
+ELSE directives document assertions which are known
+to be true on entry to the corresponding block and therefore need not be
+explicitly tested for.
+The following example is equivalent to the above one, but it uses a nested
+conditional instead of an elseif directive:
+.(l I
+.ne 13
+                        52  STR1: IF VERSION < 2
+                        53            W "SIMP","LE  "
+                        54        ELSE
+                        55            IF VERSION < 4
++00001E: 4D454449       56                W "MEDI","UM  "
+         554D2020 
+                        57            ELSE
+                        58                W "COMP","LEX "
+                        59            ENDIF
+                        60        ENDIF
++000020: 56455253       61        W "VERS","ION "
+         494F4E20 
++000022: 00000000       62        W 0
+.)l
+.bp
+.sh 1 "MACRO ASSEMBLY"
+.pp
+The SMAL32 macro facilities allow assembly-time control structures comparable
+to the procedure structures of many high level languages.
+A macro is a named block of text which is assembled into the program wherever
+its name occurs in the context of a macro call.
+If a macro is defined as having formal parameters, the corresponding actual
+parameters are substituted for the formal parameters within the body of the
+macro before it is assembled.
+.sh 2 "Macro Definitions"
+.pp
+Each macro definition begins with a macro directive and ends with an endmac
+directive.  The macro directive is followed by the name of the macro and its
+formal parameter list.
+.(l I
+<symbolic directive> ::= MACRO <identifier> [ <formal list> ]
+                       | ENDMAC
+.)l
+The semantics of a macro declaration are most easily described in terms of
+macro blocks which begin with a macro directive and end with an endmac
+directive.  The body of the block between the two is saved by the assembler
+and assembled as a result of each call to the macro.
+.(l I
+<macro block> ::= MACRO <identifier> [ <formal list> ] <line end>
+                { <line> }
+                  ENDMAC
+.)l
+Note that any labels on the line containing the macro directive are
+not interpreted as having anything to do with the macro but are processed
+as normal labels.  Labels on the line containing the endmac directive are
+completely ignored!
+If a macro block is not properly terminated with an endmac directive,
+a "missing endmac" error will result.
+The following fragment of valid SMAL32 code illustrates
+the definition of a simple
+parameterless macro:
+.(l I
+.ne 7
+MACRO ZO
+  W 0
+  W -1
+ENDMAC
+.)l
+A call to this macro can be used to put the sequence 0, 1 in memory.
+.pp
+Macro definitions may contain other macro definitions, but the effect is not
+that of creating a local macro, as might be expected by anology with
+high level languages.  Instead, the internal macro definition will be
+processed by the assembler each time the containing macro is called.
+Thus, a macro may be used to create a number of other macros by calling
+it repeatedly with different parameters.
+.sh 2 "Macro Formal Parameters"
+.pp
+The formal parameter list on a macro definition lists the symbolic names
+of each parameter and the parameter passing mode.  Symbolic parameter
+names are identifiers.
+There is an implementation dependent limit on the number of formal parameters
+allowed; if this is exceded, a "too many macro parameters" error will be
+raised.  Typically, at least 8 parameters will be allowed.
+.(l I
+<formal list> ::= <formal parameter> { , <formal parameter> }
+<formal parameter> ::= <identifier>
+                     | ( <identifier> )
+                     | = <identifier>
+.)l
+The three macro parameter modes are:  Name mode, in which the formal parameter
+is declared by just its name; list mode, in which the formal parameter name
+is surrounded by parentheses; and value mode, in which the formal parameter
+name is preceded by an equals sign.  The treatment of actual parameters in
+each of these three modes will be discussed later.
+The following fragment of a SMAL assembly listing illustrates
+the definition of a simple macro
+with one parameter passed by name:
+.(l I
+.ne 6
+MACRO WZO TEXT
+   W TEXT
+   ZO
+ENDMAC
+.)l
+Note that the above macro contains a call to the macro "ZO" defined in the
+previous example.
+.pp
+Within the macro body, each occurance of any macro formal parameter name
+is identified as the macro is defined.  Formal parameters will be identified
+within comments and within character strings.  The only time that a formal
+parameter will not be identified is when it is embedded in a larger
+identifier.  For example, if "A" and "B" are formal parameters, neither
+of them will be identified in the string "AB".  If "AB" is to be seen
+as the concatenation of two parameters, an apostrophe should be inserted
+between the two, as in "A'B".  Within the body of any macro, single
+apostrophes will be deleted, and strings of two or more apostrophes will
+be shortened by one when that macro is defined.  Thus, special care must
+be taken when using apostrophes as single quotes around quoted strings.
+.pp
+.sh 2 "Macro Calls"
+.pp
+A macro call takes the form of a symbolic directive which begins with
+the name of a previously defined macro, followed by a list of actual
+parameters.
+.(l I
+<symbolic directive> ::= <identifier> [ <actual list> ]
+<actual list> ::= <actual parameter> { , <actual parameter> }
+<actual parameter> ::= [ <by name> | <by list> | <by value> ]
+.)l
+The first step in processing a macro call is to store the text of each
+actual parameter, according to the parameter passing rules associated
+with that parameter type.
+Individual parameters may be omitted or blank, in which case, no text is
+passed.  In all cases, the number of actual parameters must be less than
+or equal to the number of formal parameters.
+After the parameters are stored, assembly of the body of
+the macro begins.  As the body is being assembled, all formal parameters
+which had been identified at the time the body was originally
+defined are replaced with the text of the corresponding actual parameters.
+If the resulting text for any line is longer than the implementation defined
+line length limit, the error "text too long for line" will result.
+.pp
+When a formal parameter is declared as a name parameter, the actual parameter
+may be any text which does not include commas unless the commas are
+parenthesized and as long as any parentheses in the text are balanced.
+The entire text of a name parameter will be passed with no changes other than
+to remove leading and trailing blanks.
+.pp
+When a formal parameter is declared as a list parameter, the actual parameter
+must be enclosed in parentheses and may contain any lexically valid text as
+long as the
+parentheses it contains are balanced.  A substring specification is allowed
+after the end parenthesis; this consists of two expressions set off from
+the parameter and each other by colons.
+.(l I
+<by list> ::= ( <balanced string> ) [ <substring> ]
+<substring> ::= : [ <expression> ] [ : <expression> ]
+.)l
+If the substring specification is absent, the entire balanced string
+will be passed as a parameter.
+Note that the enclosing parentheses are never passed.
+If the first expression in the substring
+specification is present, it specifies the index of the first character in
+the balanced string to be passed (the default value of the first expression
+is one).  If the second expression in the substring specification is
+present, it specifies how many characters from the balanced string are
+to be passed (the default value of the second expression is "all").
+Substring specifications should be used with care because they may introduce
+strings with unbalanced parentheses.
+.pp
+When a formal parameter is declared as a value parameter, the actual parameter
+must be an expression.
+.(l I
+<by value> ::= <expression>
+.)l
+The expression will be evaluated at the time of the macro call;
+if the result is an absolute value, the text of the decimal representation
+of that value will be passed as a parameter.  Note that the decimal
+representation used will be unsigned, that is, -1 will be passed as a large
+positive integer;
+this allows identifiers to be constructed by appending the value of the
+parameter to a letter.
+If the value is not absolute, an expression will be passed which evaluates
+to the desired value.
+.pp
+In no case will a macro call be executed if any errors are found in the
+actual parameter list.
+During the assembly of the body of a macro, other macro calls may be
+processed, even recursive calls.
+.sh 2 "Examples"
+.pp
+The following fragments of SMAL32 assembly listings demonstrate the correct
+use of macros.
+The first example is contrived to demonstrate the use of each parameter
+passing mode:
+.(l I
+.ne 5
+                        64  MACRO T NAME,=NUMBER, ( LIST )
+                        65    NAME NUMBER
+                        66    LIST
+                        67  ENDMAC
+                        68
+.ne 4
+                        69  T W,5+4,(COMMON A,5)
++000023: 00000009       69    W 9
+                        69    COMMON A,5
+                        69  END
+                        70
+.ne 4
+                        71  T W,1,(BIW -25):3
++000024: 00000001       71    W 1
++000025: FFFFFFE7       71    W -25
+                        71  END
+                        72
+.ne 4
+                        73  T W, A + 2, ("; NONESUCH"):2:6
++000026:+00000002       73    W A + 2
+                        73    ; NONE
+                        73  END
+.)l
+All lines in the listing with the same line number as the preceding line
+are the result of macro expansion.
+In the first call to the macro, note that the expression "5+4" has been
+evaluated, and the value "9" has been substituted into the macro body.
+Similarly, in the second call, the expression "1" was evaluated and
+passed as "1".  In the third call, the expression "A+2" could not
+be passed as a number because it is relocated relative to the common name
+"A", which was defined in the first call to the macro.
+.pp
+The following two macros demonstrate the use of value parameters and
+concatenation for automatic label generation.
+The first macro simply concatenates its three parameters, with the constraint
+that the middle parameter is an expression.  This is used to construct
+new symbols by the second macro.  The second macro maintains a counter, "LAB",
+which is incremented once each time it is called.  Thus, each time it is
+called, it will be able to create new symbols.
+.(l I
+.ne 4
+                        75  MACRO LABGEN (PART1),=NUM,(PART2)
+                        76     PART1'NUM'PART2
+                        77  ENDMAC
+                        78  
+.ne 7
+                        79  LAB = 1
+                        80  MACRO LABUSER
+                        81     LAB = LAB + 1
+                        82     LABGEN (L),LAB,(:)
+                        83     W 0
+                        84     LABGEN (W L),LAB
+                        85  ENDMAC
+                        86  
+.ne 10
+                        87  LABUSER
+                        87     LAB = LAB + 1
+                        87     LABGEN (L),LAB,(:)
+                        87     L2:
+                        87  END
++000027: 00000000       87     W 0
+                        87     LABGEN (W L),LAB
++000028:+00000027       87     W L2
+                        87  END
+                        87  END
+                        88  
+,ne 10
+                        89  LABUSER
+                        89     LAB = LAB + 1
+                        89     LABGEN (L),LAB,(:)
+                        89     L3:
+                        89  END
++000029: 00000000       89     W 0
+                        89     LABGEN (W L),LAB
++00002A:+00000029       89     W L3
+                        89  END
+                        89  END
+.)l
+Note that the symbol "LAB" could have been initialized in the macro "LABUSER"
+instead of in the main program.  To do this, the initialization would have
+to be assembled conditionally depending on whether or not "LAB" had been
+previously defined.
+.pp
+The last example illustrates a macro which defines a useful
+ASCII directive.  This macro is:
+.(l I
+.ne 10
+                        92  MACRO ASCII STRING,(PART1),(PART2)
+                        93    IF LEN(STRING) > 0
+                        94      ASCIIBUF = 0
+                        95      ASCIICNT = 32
+                        96      ASCII ,(STRING):2:1,(STRING):3:LEN(STRING)-3
+                        97      IF \(ASCIICNT = 32)
+                        98        LIST + 100
+                        99        W ASCIIBUF
+                       100        LIST - 100
+                       101      ENDIF
+.ne 3
+                       102    ELSEIF LEN(''PART1'') > 2
+                       103      ASCIICNT = ASCIICNT - 8
+                       104      ASCIIBUF = ASCIIBUF ! (''PART1'' << ASCIICNT)
+.ne 10
+                       105      IF ASCIICNT = 0
+                       106        LIST + 100
+                       107        W ASCIIBUF
+                       108        LIST - 100
+                       109        ASCIIBUF = 0
+                       110        ASCIICNT = 32
+                       111      ENDIF
+                       112      ASCII ,(PART2):1:1,(PART2):2
+                       113    ENDIF
+                       114  ENDMAC
+.ne 5
++00002B: 00000000      115  W 0
+                       116  ASCII "CALCULATE"
++00002C: 43414C43      116        W ASCIIBUF
++00002D: 554C4154      116        W ASCIIBUF
++00002E: 45000000      116        W ASCIIBUF
+.)l
+This example demonstrates the combination of conditional and macro assembly,
+the use of substring parameters, the use of the function LEN to detect missing
+parameters, and the use of recursion.  Note also the use of the listing
+control directive and the use of doubled single quotes within the macro
+definition which result in single quotes at expansion time.
+.bp
+.sh 1 "MISCELANEOUS ASSEMBLY DIRECTIVES"
+.pp
+.sh 2 "Text Instertions"
+.pp
+SMAL32 allows text to be inserted into the body of a program from
+an alternate source file at assembly time.  The only requirements are that
+the alternate source file be itself a legal SMAL program, and that insertions
+are not nested deeper than the implementation allows.  The USE directive
+causes text insertion.
+.(l I
+<symbolic directive> ::= USE <quoted string>
+.)l
+The string operand on a USE directive must contain the name of a file
+from which additional text may be read.
+The USE directive is not executed by a preprocessor; thus, the inclusion of
+USE directives in the body of a macro will have no effect until that
+macro is called, and the inclusion of USE directives in the body of
+a conditional block will only have an effect if the expressions governing
+the execution of that conditional block have appropriate values.
+If too many levels of nested USE directives are encountered, a "too many use
+levels" error will be raised.
+Typically, at least 2 levels of nesting will be allowed, so that one
+used file can use another.
+.pp
+USE directives are commonly used for inserting standard macro definitions
+into a program, or for inserting common definitions into one of a group
+of programs which are to be linked together.
+The following two source files demonstrate the use of the USE directive:
+.(l I
+.ne 4
+; FILE OF STANDARD DEFINITIONS
+A = 0
+B = 1
+
+.ne 5
+; A USER FILE
+USE "STANDARD"
+ W A
+ W B
+.)l
+If the first file is stored in a file known to the operating
+system as "STANDARD", assembling the second file will result in the
+following listing:
+.(l I
+.ne 9
++00002B: 00000000      115  W 0
++00002C: 43414C43      116        W ASCIIBUF
+                         1  ; A USER FILE
+                         2  USE "STANDARD"
++000000: 00000000        3   W A
++000001: 00000001        4   W B
+.)l
+Note that, by default, the contents of the used file are not listed
+as they are processed.
+For example, in the above listing, the contents of "STANDARD" are not listed,
+but the assembler has seen its contents, as is shown by the
+values produced when "A" and "B" were used.
+.pp
+When a hierarchically structured file system is used where there is a
+clear syntactic distinction between absolute file names and relative
+file names, the SMAL32 assembler will interpret relative file names
+in the context of the directory immediately containing the file from which
+the line containing the file name was read.  This is not necessarily the
+same as the user's current working directory.
+For example, under Unix, if the assembler is currently
+reading from "library/dir" and the directive "USE\ 'entry'" is
+encountered, the assembler will read from "library/entry".  In the
+same context, if the directive "USE\ '/usr/public/lib'" will result
+in reading from "/usr/public/lib", since that file name was specified
+absolutely.
+.sh 2 "End of File"
+.pp
+The assembler automatically inserts an END directive at the end of each
+source file from which it reads, and at the end of each macro body it
+processes.  The only function of the END directive is to mark the ends of files
+and macros.
+.(l I
+<symbolic directive> ::= END
+.)l
+It is legal to explicitly include an END directive at the end of a file; if
+additional lines are included in the file after the end directive, they will
+always be ignored.
+.pp
+Explicit inclusion of an END directive in a macro body requires that the
+END directive be enclosed in single quotes to prevent it from being mistaken
+for the end of file.
+About the only reason to do this is to include special comments on the end
+of a macro or to adjust the indenting of the END directive.
+.sh 2 "Starting Address Specification"
+.pp
+The assembler allows the address at which the object program is to begin
+execution to be passed through to the loader by the use of the start directive.
+.(l I
+<symbolic directive> ::= S <expression>
+.)l
+Only one S directive may be given per program, and it is suggested that
+that directive be given at the head of the program so that it is easy
+to find.
+A typical program might begin as follows:
+.(l I
+        TITLE   MAIN PROGRAM
+        S       START
+START:  LDS     #STACK
+.)l
+If no starting address is specified, a default may be
+established by the loader.
+.sh 2 "Listing Control"
+.pp
+The assembler normally only lists source lines from the base file from
+which it is assembling, and does not list the results of macro calls and
+text insertions.  The listing behavior may be manually controlled by the
+list directive.
+.(l I
+<symbolic directive> ::= LIST <expression>
+.)l
+At all times, the assembler keeps a record of the number of macro or include
+nesting
+levels it is to include in the listing.  The operand of the LIST directive
+is added to this counter.  Thus, if the operand is positive, it will cause
+additional nesting levels to be listed, and if it is negative, it will
+suppress the listing of some number of nesting levels.
+.pp
+The line containing the LIST directive will not be printed if it causes
+listing to be turned on or off.  Thus, macros which use LIST directives
+to selectively list parts of their expansions will not clutter the listing
+with the LIST directives themselves.
+.pp
+By default, SMAL32 listings are titled with the version of the assembler
+and the name of the file being assembled.
+The following two directives may be used to modify this behavior:
+.(l I
+.ne 2
+<symbolic directive> ::= TITLE { <lexeme> }
+                       | SUBTITLE { <lexeme> }
+.)l
+The subtitle on each listing page will appear directly below the title.
+The remainder of the line following the TITLE or SUBTITLE directive is
+used as the title or subtitle, including comments.  The text of the title
+or subtitle must be lexically valid; this usually causes no problems, since
+any sequence of words is lexically valid as a sequence of identifiers.
+.pp
+Programs should usually contain only one TITLE directive, and may contain
+any number of SUBTITLE directives.  Each SUBTITLE directive will force the
+start of a new page in the listing, and in addition, will be used during
+the first pass of the assembler to construct a table of contents.
+Additional page feeds may be included in the listing by the use of the
+PAGE directive:
+.(l I
+<symbolic directive> ::= PAGE
+.)l
+PAGE directives and SUBTITLE directives encountered while listing is
+disabled will cause a page eject, but the directive itself will not
+be listed.  Some effort has been made to suppress multiple page ejects;
+specifically, a PAGE directive followed by a SUBTITLE directive will cause
+only one eject.
+.bp
+.sh 1 "THE SMAL LINKER"
+.pp
+When the SMAL32 assembler processes a source program,
+it produces an object file.
+Object files are encoded in the SMAL32 object sublanguage, and may be
+linked into a load file by the SMAL32 assembler.
+When the assembler is used for this linkage editing function,
+it is controlled by a linker control program, encoded in the
+SMAL32 linker control sublanguage.
+As a linker, the assembler may process object library files in addition
+to simple object files; such object library files must be encoded in the
+SMAL32 object library sublanguage.
+Finally, the output of the assembler when it is used as a linkage
+editor is either another object file or a load file encoded in the
+SMAL32 loader sublanguage.
+.pp
+As the terminology suggests, object files, linker control files, and
+load files are all legal SMAL32
+programs, encoded in particular subsets of the
+language.  Object files have less symbolic information in them than
+source files, and load files have almost no symbolic content
+(what remains is concerned only with establishing relocatability).
+SMAL32 linker control files and object library files consist primarily of
+information concerning how to find each part of the program to be linked
+and when to link it.
+.sh 2 "The Linker Control Sublanguage"
+.pp
+A SMAL32 linker control program consists of an optional sequence of
+linker controls, followed by a sequence of object specifications
+which name the files to be linked, followed by an optional common
+specification.
+.(l I
+.ne 4
+<linker control program> ::= { <linker control> }
+                             { <object specification> }
+                             [ <common specification> ]
+                               <end of file>
+.)l
+If the object files to be linked do not reference any common regions,
+and if the result to be produced is intended for loading only, then
+the linker control program need not contain anything but object
+specifications.
+.(l I
+<object specification> ::= USE <quoted string> <line end>
+.)l
+Each object specification is a USE directive which names either an
+object file or a library file.  The object files named will be loaded
+sequentially in memory, while the library files will be searched to see
+if they contain definitions of any symbols referenced by the programs
+already loaded.  If so, appropriate material from the library files
+is also loaded.
+If the files "MAIN", "SUB1", and "SUB2" are SMAL object files, the
+following linker control program could be used to link them:
+.(l I
+.ne 3
+USE "MAIN"
+USE "SUB1"
+USE "SUB2"
+.)l
+If there is some external symbol used by one of these programs but not
+defined in another of them, an "undefined symbol" error will be produced
+on the terminal and in the listing file.
+.pp
+If any of the object files to be linked contain references to commons,
+the linker must be told where to place the commons.  The common
+specification may take a number of forms.  In the simplest form, the
+linker is told to place the commons in memory immediately after
+everything else:
+.(l I
+<common specification> ::= C = . <line end>
+.)l
+The following example loader control program illustrates this form of use
+of commons:
+.(l I
+.ne 5
+USE "MAIN"
+USE "SUB1"
+USE "SUB2"
+USE "LIBRARY"
+C=.
+.)l
+Note that the common specification is placed after all object specifications,
+including any which reference libraries.
+.sh 2 "Linker Control Functions"
+.pp
+If programs are to be loaded in random access memory in a conventional
+way, the above should suffice.  On the other hand, there are times when common
+regions should not be loaded in the same memory as normal object code,
+for example, on systems where one is to be in read-only memory and the
+other in read-write memory.  In this case, the following form can be
+used instead of the normal common specification:
+.(l I
+<linker control> ::= C = <number> <line end>
+.)l
+Here, the absolute address where the first common is to be placed is
+stated, and other commons will be placed successively in memory after it.
+Note that this form of common specification is used before the sequence of
+object specifications, not after.
+.pp
+The normal action of the SMAL assembler, when used as a linker, is to
+produce a relocatable load file.  This normal behavior may be changed in
+a number of ways by the linker controls.  For example, to create an
+absolute load file, the following control can be used:
+.(l I
+<linker control> ::= . = <number> <line end>
+.)l
+For an example of the use of this form, consider a system with 4K bytes
+of read-write memory starting at address #0000 and with 16K bytes of
+read-only memory starting at address #1000.  If the source programs for
+the object files involved were consistent in their use of common for all
+read-write variables, maintaining a strict separation between
+code and data, then the following linker control file could be used
+to prepare a load file to be used in "burning" the read-only memory:
+.(l I
+.ne 5
+\&.=#1000
+C=#0000
+USE "MAIN"
+USE "SUB1"
+USE "SUB2"
+.)l
+.ne 2
+Note the use of the common specification to control the placement of all
+commons in the read-write region.
+.pp
+At times, there may be some commons or other external symbols which must
+be placed in specific memory locations, for example, a program may reference
+a block of perepheral device control registers as a common, allowing
+adjustments for the particular machine configuration to be made at linkage
+time.  In this case, the following form can be used:
+.(l I
+<linker control> ::= R<identifier> = <number> <line end>
+.)l
+Note that an external name is a legal identifier which begins with the
+letter R.  External names are formed by adding the R prefix to the identifier
+used internally in a source program as operands on an EXT, INT, or COMMON
+directives.  External names should only be defined by a linker control
+directive when they are not defined by an INT directive in one of the object
+files to be linked.
+.pp
+When it is necessary to specify the size of a common at linkage time
+instead of at assembly time, the following linker control may be used:
+.(l I
+<linker control> ::= S<identifier> = <number> <line end>
+.)l
+When this form is used, it will override the size of the given common
+declared in the programs being linked.
+Thus, it is even possible to decrease the size of a common below that
+which a program declared that it needed.  When this is intended,
+the common itself should probably begin with an external reference
+which is expected to be set by the linker control program to indicate
+the size of the common actually allocated.
+.pp
+Finally, if the starting address of a program is not specified internally
+in any of the routines being linked, it may be specified at linkage time
+as follows:
+.(l I
+<linker control> ::= S R<identifier>
+.)l
+Where the identifier is an internal symbol in one of the files being
+linked.  An error will result if this directive is used and one of the
+linked routines already has a specified starting address.
+.sh 2 "Producing an Object File as Linker Output"
+.pp
+It is possible to direct the SMAL32 assembler, as a linker, to
+produce an object file as output instead of a load file.  This is done,
+for example, when the set of object files being linked does not comprise
+an entire program, but only part of one; thus, the result may contain
+unresolved references to external symbols, and it may define internal symbols.
+In this case, linker control directives must be used to inform the
+assembler, as a linker, which external symbols are to be exported by or
+imported to the resulting object file.  Export is done as follows:
+.(l I
+.ne 2
+<linker control> ::= <identifier> = R<identifier> <line end>
+                     INT <identifier> <line end>
+.)l
+The identifiers used on the two lines of this directive should be the same.
+Import is done as follows:
+.(l I
+.ne 2
+<linker control> ::= EXT <identifier> <line end>
+                     R<identifier> = <identifier> <line end>
+.)l
+Again, the identifiers must be the same, and the effect is to
+make all references to the given external name from within any of the
+object files being linked into references to a symbol
+external to the object file resulting from the linkage process.
+The following example SMAL linker control file illustrates these forms:
+.(l I
+.ne 7
+EXT DATA
+RDATA = DATA
+ENTRY = RENTRY
+INT ENTRY
+USE "ENTRY"
+USE "TABLE"
+C=.
+.)l
+If the object file "ENTRY" was generated from source containing "EXT\ TABLE"
+and "INT\ ENTRY", and the object file "TABLE" was generated from source
+containing "INT\ TABLE" and "EXT\ DATA" then the result of processing
+this linkage control file will be a relocatable object file referencing the
+external
+name "RDATA" and defining the external name "RENTRY".
+.pp
+When a common area declared in one of the programs being linked is to be
+preserved as a common area in the resulting object file, thus allowing it to
+be shared with other programs linked to the resulting object file, a special
+form of import/export must be used:
+.(l I
+.ne 2
+<linker control> ::= COMMON <identifier> , S<identifier> <line end>
+                     R<identifier> = <identifier> <line end>
+.)l
+Note that the identifiers must all be the same, and that the
+special identifier consisting of an S prefix attached to the common name
+gives the declared size of the first instance of that common.
+.pp
+Any commons used by the programs being linked
+which are not to be preserved in the final object file will usually be
+lumped onto the end of that file as local data by using a "C=." common
+specification at the end of the linker control file.  An alternative is
+to lump the commons which are not individually preserved into
+a single common in the resulting object file.
+This is useful, for example, when the program must be able to be stored in
+read-only memory and the commons must be stored in read-write memory.
+When this is desired, the following form can be used:
+.(l I
+.ne 2
+<linker control> ::= COMMON <identifier> , C <line end>
+                     C = <identifier> <line end>
+.)l
+Note, here, that all of the identifiers must be the same.
+The following modified version of the previous example uses this form
+to allow the result to be linked with commons separated from normal
+relocatable code:
+.(l I
+.ne 8
+EXT DATA
+RDATA = DATA
+ENTRY = RENTRY
+INT ENTRY
+COMMON ENTRYCOM,C
+C=ENTRYCOM
+USE "ENTRY"
+USE "TABLE"
+.)l
+Note the use in the above example of the convention that the common used
+to store data for a particular routine (or, as in this case, collection
+of routines) has its name formed by appending the suffix "COM" to the name of
+the entry point for that routine.
+.pp
+It should be noted that there is an important restriction on the set of
+symbols which can be exported from or imported to an object file created as
+linker output:  The symbols 'R' and 'CT' have special meaning during the
+linkage process; the linker also reserves symbols formed with 'R' as a prefix
+on an identifier being exported by one of the files being linked, or with 'R'
+or 'S' as a prefix on the name of a common.
+.sh 2 "Linker Control Macros"
+.pp
+The last four linker control directives discussed above are complex
+enough that it is conventional to package them as macros.  The definitions
+of these macros should be inserted with a USE directive at the head of the
+linker control file.  Typically, the macros might be packaged in a file
+called "LINKMACS", so the following new linker directive would be
+introduced:
+.(l I
+<linker control> ::= USE "LINKMACS"
+.)l
+Inclusion of this linker control directive at the head of a file would
+define the following new linker control directives:
+.(l I
+.ne 4
+<linker control> ::= IMPORTS <identifier>
+                   | EXPORTS <identifier>
+                   | PRESERVECOMMON <identifier>
+                   | LUMPCOMMONS <identifier>
+.)l
+These would be defined by the following macros:
+.(l I
+.ne 4
+MACRO IMPORTS NAME
+  EXT NAME
+  R'NAME = NAME
+ENDMAC
+
+.ne 4
+MACRO EXPORTS NAME
+  NAME = R'NAME
+  INT NAME
+ENDMAC
+
+.ne 4
+MACRO PRESERVECOMMON NAME
+  COMMON NAME,S'NAME
+  R'NAME = NAME
+ENDMAC
+
+.ne 4
+MACRO LUMPCOMMONS NAME
+  COMMON NAME,C
+  C=NAME
+ENDMAC
+.)l
+In terms of these macros, the last example used above could be
+recoded as follows:
+.(l I
+.ne 6
+USE "LINKMACS"
+IMPORTS DATA
+EXPORTS ENTRY
+LUMPCOMMONS ENTRYCOM
+USE "ENTRY"
+USE "TABLE"
+.)l
+.bp
+.sh 1 "SMAL OBJECT LIBRARIES"
+.pp
+A SMAL32 object library file is a file of references to object code files.
+Library files are textual in form, and may be maintained by a conventional
+text editor.  Unlike the approach taken on many other systems, library files
+do not contain object code, but only contain references to object files.
+The text of the library file itself is written in the SMAL32 object library
+sublanguage.
+.(l I
+<library file> ::= { <object reference> } <end of file>
+.)l
+Each object reference in a library file specifies the name of an object
+file and the names of one or more symbols which that object file
+defines:
+.(l I
+.ne 5
+<object reference> ::= IF <symbol list> <line end>
+                         USE <quoted string> <line end>
+                       ENDIF <line end>
+<symbol list> ::= <symbol reference> { ! <symbol reference> }
+<symbol reference> ::= FWD ( R<identifier> )
+.)l
+The effect of an object reference is to cause the assembler, when
+used as a linker, to link the indicated object file if the previously
+loaded material has made any references to the symbols in the symbol list
+and the referenced symbols have not been previously defined.
+Each symbol in the symbol list takes the form of an external name, that is,
+an identifier consisting of an "R" prefix on an identifier used as an
+operand of a COMMON or INT directive in the object file.
+The following is a legal SMAL32 library file:
+.(l I
+.ne 3
+IF FWD(RSIN) ! FWD(RCOS) ! FWD(RTAN)
+  USE "TRIGFUNC"
+ENDIF
+.ne 3
+IF FWD(REXP) ! FWD(RPOWER)
+  USE "EXPFUNC"
+ENDIF
+.ne 3
+IF FWD(RLOG) ! FWD(RLN)
+  USE "LOGFUNC"
+ENDIF
+.ne 3
+IF FWD(RFLOAT)
+  USE "FLOATFUNC"
+ENDIF
+.ne 3
+IF FWD(RFIX)
+  USE "FIXFUNC"
+ENDIF
+.)l
+Note that, if one of the object files in the library references another,
+that file should be placed before the file it relies on.
+It is legal to repeat an object reference any number of times in an object
+library file, and it is legal to have multiple object references with different
+symbol references which refer to the same object file.
+.pp
+When SMAL32 is run under a hierarchically sturctured file system,
+each library should be organized as a single directory, with the library
+file itself stored under that directory in a file named "DIR", and all
+other object files in the library stored in the same directory.
+If the USE directive is implemented as suggested in the section on
+miscellaneous assembly directives, this will allow
+relative file names to be used in the library, so that the library
+as a whole can be copied using a tree copy operation without
+the need to modify any internal file names.
+.sh 2 "Library Macros"
+.pp
+The form of an object reference is complex enough that it is convenient
+to package it as a macro, thus introducing the following new form:
+.(l I
+<object reference> ::= LIB <quoted string> , <identifier> <line end>
+.)l
+The macro to do this should be included in the file "LINKMACS" used for
+linkage editor macros; this macro can be defined as follows:
+.(l I
+.ne 5
+MACRO LIB FILE,NAME
+  IF FWD(R'NAME)
+    USE FILE
+  ENDIF
+ENDMAC
+.)l
+Using this form, the above example library could be recoded as follows:
+.(l I
+.ne 9
+LIB "TRIGFUNC",SIN
+LIB "TRIGFUNC",COS
+LIB "TRIGFUNC",TAN
+LIB "EXPFUNC",EXP
+LIB "EXPFUNC",POWER
+LIB "LOGFUNC",LOG
+LIB "LOGFUNC",LN
+LIB "FLOATFUNC",FLOAT
+LIB "FIXFUNC",FIX
+.)l
+Note that this sequence of macro calls does not expand to the same
+sequence of directives as was used in the previous example,
+but that it expands to a sequence of directives with the same effect.
+.bp
+.sh 1 "THE SMAL LOADER AND OBJECT LANGUAGES"
+.pp
+SMAL32 load files contain text in the loader sublanguage.
+The loader sublanguage is a subset of the SMAL32 object sublanguage,
+which is, in turn, a subset of the entire language.
+These sublanguages are very small subsets of the entire SMAL32 language;
+they only contain the bare minimum of information needed to satisfy
+their purpose.
+.sh 2 "The Loader Sublanguage"
+.pp
+A SMAL32 load file consists of a fixed header followed by a sequence of
+load directives:
+.(l I
+.ne 3
+<load file> ::= R=.<end of line>
+              { <load directive><end of line> }
+                <end of file>
+.)l
+No blanks or blank lines are used within a load file unless they are
+specifically required by some particular load directive.
+.pp
+There are 3 basic load directives which control the setting of the loader
+location counter, the loading of words,
+and the setting of the starting address.
+.(l I
+.ne 4
+<load directive> ::= .=<load value>
+                   | W<load value>
+                   | S<load value>
+.)l
+The value on each load directive may be either an absolute (hexadecimal)
+integer, or a relocatable value, specified by the use of the
+symbol "R".
+.(l I
+.ne 4
+<load value> ::= <hexadecimal number>
+               | <hexadecimal number>+R
+               | <space>R
+<hexadecimal number> ::= #<extended number>
+.)l
+Every load file always ends with the location counter set just beyond the
+highest relocatable location used by that load file.
+.sh 2 "A SMAL32 Loader"
+.pp
+The following Pascal function will read and load one SMAL load file from
+the specified file and place it in the global array called "memory", relocated
+relative to the given relocation base.
+A global variable "start" is set to the starting address of the loaded program.
+The function returns the address of the first location beyond the last loaded
+relocatable location:
+.(l I
+.ne 9
+function load (f:textfile; loc:integer): integer;
+var temp: integer;
+    ch: char;
+    base: integer { the relocation base };
+
+    procedure value;
+    begin
+         read(f,ch);
+.ne 6
+         if ch = '#' then begin
+              temp := 0;
+              repeat
+                   read(f,ch);
+                   if ch in ['0'..'9'] then begin
+{precision}             temp := (16 * temp) + (ord(ch) - ord('0'));
+.ne 9
+                   end else if ch in ['A'..'F'] then begin
+{precision}             temp := (16 * temp) + (ord(ch) - ord('A')) + 10;
+                   end;
+              until (ch = '+') or eoln(f);
+              {assert ch in ['+','A'..'F','0'..'9']}
+              if ch = '+' then begin
+                   read(f,ch) {assert ch='R'};
+                   temp := temp + base;
+              end;
+.ne 7
+         end else begin
+              {assert ch=' '}
+              read(f,ch) {assert ch='R'};
+              temp := base;
+         end;
+         {assert eoln(f)}
+    end {value};
+
+.ne 10
+begin
+     reset(f);
+     while not(eof(f)) do begin
+          read(f,ch);
+          case ch of
+               ".": begin
+                         read(f,ch) {assert ch='='};
+                         value;
+                         loc := temp;
+                    end;
+.ne 6
+               "W": begin
+                         value;
+                         memory[loc] := temp;
+                         loc := loc + 1;
+                    end;
+.ne 4
+               "S": begin
+                         value;
+                         start := temp;
+                    end;
+.ne 11
+               "R": begin
+                         read(f,ch) {assert ch='='};
+                         read(f,ch) {assert ch='.'};
+                         base := loc;
+                    end
+          end {case};
+          {assert eoln(f)}
+          readln(f);
+     end {while};
+     load := loc;
+end {load};
+.)l
+The above code is not resiliant in the sense that it makes no effort to
+detect errors or make use of the redundancy inherent in the object language;
+if such resiliancy is desired, comments included in it give assertions
+about conditions which can be tested.
+.pp
+This code assumes that the arithmetic operations available to it support
+unsigned 32 bit integer values.  If it is to be used on
+a machine supporting an insufficient range of integers, the
+the arithmetic operators on the lines marked
+with a "precision" comment must be modified.
+If the code is rewritten in machine language, the multiply
+operators should be replaced with shift operators.
+.sh 2 "The Object Sublanguage"
+.pp
+A SMAL32 object file consists of a fixed header identical to that used
+on load files, followed by a sequence of object directives, followed
+by an optional sequence of internal definitions:
+.(l I
+.ne 4
+<object file> ::= R=.<end of line>
+                { <object directive><end of line> }
+                { <internal definition><end of line> }
+                  <end of file>
+.)l
+As in load files, spaces and blank lines are not included in object files
+unless they are explicitly needed.
+In the case of object files, however, this rule need not be strictly followed;
+spaces are allowed wherever the assembler will accept them.
+.pp
+There is a form of object directive which corresponds to each of the
+loader directives, but the forms of the allowed values are more complex,
+and a new compound directive is used to manage common declarations:
+.(l I
+.ne 5
+<object directive> ::= .=<object value>
+                     | W<object value>
+                     | S<object value>
+                     | <common definition>
+.)l
+The value specified on each basic object directive may be either an absolute
+integer or a relocatable value and a specification of the relocation base:
+.(l I
+.ne 4
+<object value> ::= <hexadecimal number>
+                 | <hexadecimal number>+<relocation base>
+                 | <space><relocation base>
+<relocation base> ::= R | R<identifier>
+.)l
+Note that "R" is the default relocation base, and that any other form
+of relocation base is a reference to an external symbol defined in the internal
+definition section of some other object file.
+.pp
+Common declarations in a SMAL32
+source program result in the following special
+form of object directive:
+.(l I
+.ne 10
+<common definition> ::= IF\\DEF(S<identifier>)<end of line>
+                         S<identifier>=#<extended number><end of line>
+                        ENDIF<end of line>
+                        IF\\DEF(R<identifier>)<end of line>
+                         R<identifier>=C<end of line>
+                         C=C+S<identifier><end of line>
+                         CT=.<end of line>
+                         .=C<end of line>
+                         .=CT<end of line>
+                        ENDIF
+.)l
+Each common directive in a SMAL32 source program will result in a sequence
+of object code patterned on the above, where all
+identifiers are replaced by the common name, and the extended number is
+replaced by the common size in hexadecimal.
+.pp
+If the source program contains any internal symbol definitions, these
+will be gathered together at the end of the object file and encoded
+in the following form:
+.(l I
+<internal definition> ::= R<identifier>=<object value>
+.)l
+.bp
+.sh 1 "SMAL INSTALLATION AND MAINTENANCE"
+.pp
+The SMAL32 assembler is written in Pascal with the intent that it be easily
+transportable.
+The following sections introduce the problems which will be encountered in
+installing it on a new machine, and in removing machine
+independence in order to
+improve efficiency.
+.sh 2 "Installation"
+.pp
+The interface between the assembler and the file system of the host
+machine will probably have to be changed when the assembler is moved to
+a new machine.  In order for the USE directive to be properly executed,
+the assembler must run in an environment where it has direct access to
+the file system; use in versions of Pascal where program parameters
+are the only way of connecting a Pascal file to an actual file will thus be
+somewhat inconvenient.
+.pp
+The global procedure "getfiles" is used to encapsulate the problem of getting
+the name of the source file from the user and using this to synthesize the
+names of the object and listing files.  These textual file names are stored
+in the global variables "infile[1]", "outfile", and "objfile", which are used,
+respectively, to open the text files "inp1", "output", and "obj".
+The text files "inp2" and "inp3" are opened by the procedure "insert", which
+is called whenever a USE directive is encountered.  The text files "inp1",
+"inp2", and "inp3" can thus be considered to be a short stack of files used
+for input.  If more levels of nested USE directives are to be allowed, this
+stack must be enlarged.
+Note that the operation of binding a Pascal text file to a file with
+a particular textual name is accomplished by the "reset" and "rewrite"
+procedures in some versions of Pascal and by a special "open" procedure
+in others.  In the latter cases, calls to "open" will have to be added before
+each call to "reset" or "rewrite".
+.pp
+All matters concerning listing generation are encapsulated within the
+procedures "listline" and "newpage"; these will require changes if the
+system being used does not respond to an ASCII FF character to initiate
+a formfeed.  Typical changes might include the introduction of FORTRAN
+style carriage control characters at the start of each listing line,
+or the printing of sequences of blank lines instead of special page
+feed characters.
+.pp
+In addition to converting the SMAL32 assembler to use the appropriate file
+system, the sizes of the various static data structures must be specified.
+These are all set with constant declarations in the main program, but the
+values of the constants in the machine independent version are all set
+low enough that the static data structures are easily filled for testing
+purposes.  The constants "symsize", "opcodes", and "linelen"
+may be set as large as desired with no change to other parts of the
+assembler.
+The constant "poolsize" is limited to 32767 by the code for "pushint" and
+"popint", which are used to push and pop pointers into the string pool on
+the stack within the pool.
+A number of other constants can be modified to do such things as change the
+listing format or change the number of allowed macro parameters.  Limits on the
+values of these constants are documented in comments on their declarations.
+.pp
+The global array "ascii" is used to associate internal Pascal characters
+with their ASCII representations.  On versions of Pascal supporting more than
+64 printing characters in their character set, the "initascii" procedure
+should be extended to initialize the additional characters.  On some ASCII
+implementations of Pascal, it may be possible to eliminate the
+"ascii" array and use the "ord" function (but beware of the default
+setting of the high bit; in SMAL32, this shoud be consistently set to zero!)
+It is certainly reasonable to build in an ASCII directive to pack a character
+string into a sequence of words,
+and in some environments, it may be reasonable to add an EBCDIC directive
+and a new supporting translation array in order to allow use of the
+EBCDIC character set.  When this is done,
+quoted strings should retain their ASCII interpretation as values
+unless some special new quote mark, such as `, is used to indicate an EBCDIC
+interpretation.
+.sh 2 "Efficiency"
+.pp
+The machine independent version of the SMAL32 assembler was written to be
+easily moved to a new machine, but this does not imply that it will run
+efficiently in that environment.  In fact, transportability and efficiency
+are in direct conflict, especially in the areas of bit packing and
+integer arithmetic.  If efficiency becomes an issue, the following steps
+outline the order in which different changes to the assembler should be made
+to remove machine independance and speed things up:
+.pp
+Many Pascal implementations generate a considerable amount of code to check
+such things as array bounds and subrange variables.  Turning off this checking
+is frequently easy, and has resulted in improvements of about 15% for the
+SMAL (16 bit) assembler under the Hull R-mode compiler for the Prime 750
+computer.
+The assembler is coded to be resiliant enough that turning off the
+run-time checking should not threaten its reliability, but
+if any changes are made, the checks should be turned back on
+until all is secure.
+.pp
+The routine "writehex" used for object code and listing generation uses
+some cumbersome code to guarantee consistent results on machines with different
+integer representations.  Since this routine is called three or more times
+for each line of code assembled, it may pay to recode it in machine code
+using shift and mask instructions to extract and convert hexadecimal digits.
+Things will be even better in versions of Pascal which directly support
+hexadecimal output.
+.pp
+The lexical analysis routine for parsing numeric constants has a significant
+amount of cumbersome code to allow it to handle unsigned 32 bit values on a
+machine using a signed 32 bit representation.  If the SMAL assembler is run
+on a machine with a larger word size, this code can be significantly
+simplified.
+.pp
+A key cause of inefficiency in the SMAL32 assembler is the implementation
+of 32 bit two's complement arithmetic in a manner which will run consistently
+on any machine which supports the desired range of integer values.
+The routines responsible for this are grouped at head of the assembler
+and may easily be changed to use external routines coded in machine code.
+On versions of Pascal implemented with 32 bit arithmetic,
+it may be sufficient to simply turn off run-time checking and use the built
+in operations; thus, a call to "add(a,b)" may be equivalent to "a+b" when
+run-time checking is disabled.  Although this change will have a significant
+effect on the speed of these operations, they may not be used frequently enough
+to justify the change.
+.sh 2 "Adding Operations"
+.pp
+To add additional directives or machine instruction symbolic opcodes
+to the assembler, note the following:
+.pp
+a) Each symbolic opcode or directive for which there is a distinct assembly
+rule has its own opcode type that must be included in the enumerated type
+optypes.
+.pp
+b) Each symbolic opcode or directive must be included in the opcode table;
+this is done by including a line in the procedure opinit calling the
+procedure op to make the definition and bind the symbolic name to an opcode
+type and an opcode value.
+.pp
+c) For each opcode type, there must be an entry in the case statement in
+procedure onepass to parse the operand field of opcodes of that type
+and generate appropriate object code.  The code generated may depend on
+values in the operand field and on the value associated with the opcode
+itself.
+.pp
+d) Operand field parsing is supported by the procedures
+expresbal to parse an expression and force balanced
+parentheses, getcomma to read an skip a required comma, and
+nextlex to read the next lexeme.
+.pp
+d) Object code is generated by calls to procedure
+putobj, specifying the format of the value being generated,
+the absolute value to be generated, and the
+relocation base to be used (both of the latter are provided by the
+expression parsing routines).  Currently only one format is supported,
+word.  If new formats are added, it will be necessary to modify
+both putobj and the listing routine listline to handle the new formats;
+in each case, there are case statements on the format.
+.pp
+A typical change might involve adding
+an instruction to assemble a word consisting of two half-words, each of which
+may be separately relocated.  This would involve adding a new directive,
+perhaps H with two comma separated expressions as operands.
+The object code generated by H would itself be an H directive (in the same
+way that the object code generated by W is a W directive), but with less
+symbolic content in the operands.  This would require adding a new format
+to putobj and listline, and it would require adding modifications to the
+loader to support the new directive.

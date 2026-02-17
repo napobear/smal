@@ -1,0 +1,1153 @@
+# This is a shell archive.  Save it in a file, remove anything before
+# this line, and then unpack it by entering "sh file".  Note, it may
+# create directories; files and directories will be owned by you and
+# have default permissions.
+#
+# This archive contains:
+#
+#	README
+#	Makefile
+#	io_ports.c
+#	io_ports.h
+#	snoppp.c
+#
+echo x - README
+sed 's/^X//' >README << 'END-of-README'
+XThis directory contains:
+X
+XMakefile   -- used to make the SNOPPP driver
+X
+XREADME     -- this file
+X
+Xio_ports.c -- C code for access to the IO ports
+Xio_ports.h -- interface to the above
+Xsnoppp.c   -- main program
+X
+XThis is a hacked version of Claus Fuetterer's Linux port of Covington's
+Xdriver for the NOPPP.  It is hacked to support UV EEPROM versions of the PIC
+Xand the control line for Vpp has been inverted to match the new drive logic
+Xin the NOPPP.
+X
+XThis software is provided as-is, free, with neither a warrantee nor any
+Xattempt at documenting the copyright.  You get what you pay for, but this
+Xcode worked with my SNOPPP programmer through the development of one
+XPIC-based commercial product.
+X
+X					Douglas W. Jones
+X					jones@cs.uiowa.edu
+END-of-README
+echo x - Makefile
+sed 's/^X//' >Makefile << 'END-of-Makefile'
+X#
+XVERSION=0.0
+X#
+XPROGS= snoppp
+XCC=gcc
+X
+Xsnoppp: snoppp.o io_ports.o
+X	$(CC) -o snoppp snoppp.o io_ports.o
+X
+X
+Xclean:
+X	- rm -f $(PROGS) *.o core
+X
+END-of-Makefile
+echo x - io_ports.c
+sed 's/^X//' >io_ports.c << 'END-of-io_ports.c'
+X/***
+X ***  convenience routines for doing simple I/O with linux' /dev/port
+X ***
+X ***  note that you have to have uid=root or gid=kmem to open /dev/port
+X *** written and copyright October 1994 by
+X ***		Wim Lewis, wiml@{netcom,omnigroup}.com
+X ***  distribute, modify, re-use freely!
+X ***/
+X#ifdef __FreeBSD__
+X#include <stdio.h>
+X#include <errno.h>
+X#include <fcntl.h>
+X#ifndef inb
+X#define inb(y) \
+X    ({ unsigned char _tmp__; \
+X    asm volatile("inb %1, %0" : "=a" (_tmp__) : "d" ((unsigned short)(y))); \
+X		_tmp__; })
+X#endif /* inb */
+X#ifndef outb
+X#define outb(x, y) \
+X    { asm volatile("outb %0, %1" : : "a" ((unsigned char)(y)) ,\
+X    "d" ((unsigned short)(x))); }
+X#endif
+Xstatic int portio_fd= -1;
+X
+Xvoid close_io()
+X{
+X    close(portio_fd);
+X}
+X
+Xvoid open_io()
+X{
+X    portio_fd=open("/dev/io",O_RDWR);
+X    if (portio_fd <0 ) {
+X       perror("cannot open /dev/io");
+X       exit(errno);
+X    }
+X}
+X
+Xvoid out_byte(int port, unsigned char byte)
+X{
+X    outb(port,byte);
+X}
+X
+Xunsigned char in_byte(int port)
+X{
+X    return inb(port);
+X}
+X#endif
+X#ifndef __MSDOS__
+X/* assume LINUX */
+X#include "io_ports.h"
+X
+X#include <stdio.h>
+X#include <unistd.h>
+X#include <stdlib.h>
+X#include <fcntl.h>
+X#include <errno.h>
+X
+Xint dev_port_fd = -1;
+X
+Xvoid open_io()
+X{
+X  dev_port_fd = open("/dev/port", O_RDWR);
+X  if(dev_port_fd < 0)
+X  {
+X    perror("/dev/port");
+X    exit(errno);
+X  }
+X}
+X
+Xvoid close_io()
+X{
+X  close(dev_port_fd);
+X  dev_port_fd = -1;
+X}
+X
+Xvoid out_byte(port, byte)
+X     int port;
+X     unsigned char byte;
+X{
+X  off_t s;
+X  int r;
+X
+X  s = lseek(dev_port_fd, port, 0);
+X  if(s < 0)
+X    perror("lseek");
+X  else if(s != port)
+X    fprintf(stderr, "out_byte: seeking to %d, went to %ld.\n", port, (long)s);
+X
+X  r = write(dev_port_fd, &byte, 1);
+X  if(r != 1)
+X  {
+X    fprintf(stderr, "out_byte: write returned %d\n", r);
+X    if(r < 0) perror("write");
+X  }
+X}
+X
+Xunsigned char in_byte(port)
+X     int port;
+X{
+X  off_t s;
+X  int r;
+X  unsigned char ch = 0;
+X
+X  s = lseek(dev_port_fd, port, 0);
+X  if(s < 0)
+X    perror("lseek");
+X  else if(s != port)
+X    fprintf(stderr, "in_byte: seeking to %d, went to %ld.\n", port, (long)s);
+X
+X  r = read(dev_port_fd, &ch, 1);
+X  if(r != 1)
+X  {
+X    fprintf(stderr, "in_byte: read returned %d\n", r);
+X    if(r < 0) perror("read");
+X  }
+X
+X  return ch;
+X}
+X#else
+X/* MSDOS - turbo C */
+X#include <dos.h>
+Xvoid close_io()
+X{
+X   return ; /* dummy - hardware always available to DOS */
+X}
+X
+Xvoid open_io()
+X{
+X   return ; /* dummy - hardware always available to DOS */
+X}
+X
+Xvoid out_byte(int port, unsigned char byte)
+X{
+X    outportb(port,byte);
+X}
+X
+Xunsigned char in_byte(int port)
+X{
+X    return inportb(port);
+X}
+X
+X
+X#endif
+END-of-io_ports.c
+echo x - io_ports.h
+sed 's/^X//' >io_ports.h << 'END-of-io_ports.h'
+X/***
+X   io_ports.h - defs & decls for lower level bit I/O routines
+X
+X   written and copyright October 1994 Wim Lewis, wiml@{netcom,omnigroup}.com
+X   distribution & re-use ok as long as you use this power wisely
+X   and only for good, never for evil
+X*/
+X
+X#ifndef IO_PORTS_H
+X#define IO_PORTS_H
+X
+X/***
+X *** Stuff in io_ports.c
+X ***/
+X
+Xvoid open_io(void);                    /* open /dev/port */
+Xvoid close_io(void);                   /* close /dev/port */
+Xunsigned char in_byte(int);            /* read one byte */
+Xvoid out_byte(int, unsigned char);     /* write one byte */
+X
+Xextern int dev_port_fd;                /* the fd used to talk to the kernel */
+X
+X/* Note: Bit masks for using the status (base+1) and ctl (base+2) ports can 
+X   be found in /usr/include/linux/lp.h under Linux. Be sure to use 
+X   the LP_Pwhatever constants and *not* the LP_whatever constants 
+X   (which are for the device driver's status word, not the hardware's). */
+X
+X/***
+X ***  Stuff in lp_io.c
+X ***/
+X
+X/* This allows simple buffering of the bit changes to a line printer port */
+Xstruct lp_io
+X{
+X  int  base;  /* base I/O address */
+X
+X  /* Most recently written/read values */
+X  unsigned last[7]; /* was 3 */
+X
+X  /* Desired values */
+X  unsigned wanted[7]; /* was 3 */
+X};
+X
+Xvoid lpb_flush(struct lp_io *);  	/* write out all buffered changes */
+Xvoid lpb_refresh(struct lp_io *);	/* read in current values */
+X
+X/* These two functions use "bit indicators" encoded into an int;
+X   see the bitmasks below. */
+Xint  lpb_test(struct lp_io *, int);
+Xvoid lpb_write(struct lp_io *, int, int);
+X
+X/* Bit indicators are encoded into ints and are passed to the
+X   set, reset, & test macros. Note that BI_TYPE is the offset from
+X   the parallel port base I/O address.
+X
+X   NOTE: the serial port uses three bits (8 registers).
+X*/
+X
+X#define BI_OFFSET    000007 /* Bit offset within the word         */
+X#define BI_DATA      000000 /* Data bit?                          */
+X#define BI_STAT      000010 /* Status bit?                        */
+X#define BI_CTL       000020 /* Control bit?                       */
+X#define BI_TYPE      000070 /* Mask for DATA/CTL/STAT etc.        */
+X#define BI_TYPE_SHIFT 3
+X#define BI_INVERSE   000100 /* Negative logic                     */
+X
+Xenum { lpc_eof=0, lpc_number=1, lpc_bits=2, lpc_abits=4 };
+X/* Associats a name with a bit indicator. */
+Xstruct lp_name { char *name; char lptype; int *value; };
+X
+X/* read a fileful of name-indicator pairs */
+Xint lpb_cfg_read(const char *, int, struct lp_name *);
+Xvoid lpb_dump_names(int, struct lp_name *);
+X
+X#endif /* IO_PORTS_H */
+END-of-io_ports.h
+echo x - snoppp.c
+sed 's/^X//' >snoppp.c << 'END-of-snoppp.c'
+X#define BANNER " SNOPPP - Son of \"No-Parts\" PIC Programmer"
+X#include <stdio.h>
+X#include <stdlib.h>
+X#include "io_ports.h"
+X#include <linux/lp.h>
+X#include <ctype.h>
+X#include <string.h>
+X#define IBUFLEN 128
+X#define LPT1_BASE  (0x378)             /* where LPT1: is on most h/w */
+X
+X/* These assume that 'base' == LPT1_BASE or equiv. */
+X#define lp_data   (base)               /* write to this to change D0-D7 */
+X#define lp_status (base+1)             /* read from this to get status */
+X#define lp_ctl    (base+2)             /* write to change the ctl lines */
+X
+Xint base = LPT1_BASE;
+X
+Xtypedef unsigned int  word;
+Xtypedef unsigned char byte, bit;
+X
+X#define PIC16C84 1
+X#define PIC16F84 2
+X#define PIC16F83 3
+X#define PIC16C76 4
+Xint     DEVICE = 0;          // which PIC we're programming
+X
+X#define PROGRAM 1
+X#define VERIFY  0            // desired action in main programming loop
+X
+Xchar    FNAME[80];           // name of file currently loaded
+X
+Xchar    CHOICE = 0;          // user's most recent menu choice
+X
+Xvoid errmsg(char *s) {
+X  puts(s);
+X  do {;} while (getchar() != '\n'); /* soak up rest of input line */
+X}
+X
+X// *********************************************************************
+X// I/O UTILITIES
+X// *********************************************************************
+X
+X#define KBUFSIZE 256
+X
+Xchar buf[KBUFSIZE];          // keyboard input buffer
+X
+Xchar* cleanctrl(char *s) {   // truncates string at first ctrl char,
+X  int i=0;                   // cleaning up ^M or ^J left behind by fgets
+X  while (s[i] >= ' ') i++;
+X  s[i] = 0;
+X  return s;
+X}
+X
+Xchar* getstring() {                              // read string
+X  fgets(buf,KBUFSIZE-1,stdin);
+X  cleanctrl(buf);
+X  return buf;
+X}
+X
+Xint getint()  { return atoi(getstring()); };     // read integer
+X
+Xchar getchoice(char *s)  {                       // read menu choice
+X  // prints prompt, then reads letters, uppercasing,
+X  // until a letter that is in s is found
+X  printf("\n\nYour choice (%s): ",s);
+X  do {
+X    CHOICE = getchar();
+X    CHOICE = toupper(CHOICE);
+X    // toupper evals arg twice, so arg can't be getch()
+X  } while ((CHOICE == ',') || (strchr(s,CHOICE) == NULL));
+X  do {;} while (getchar() != '\n'); /* soak up rest of input line */
+X  return CHOICE;
+X}
+X
+X
+X// *********************************************************************
+X// TIMING
+X// *********************************************************************
+X
+Xvoid delay(int k) {
+X  // Delay at least k microseconds, possibly a good bit more.
+X  // k must be less than 27304.
+X  // Minimum delay on a 25-MHz 386 is about 100 microseconds;
+X  // on a 133-MHz Pentium, about 18 microseconds.
+X
+X  // Uses system timer 2.
+X  // When running in a DOS box under OS/2, set HW_TIMER ON in DOS settings.
+X
+X#define IODELAY (in_byte(0x61))   // allow time for timer to respond
+X
+X  unsigned int w;
+X  unsigned char lo,hi;
+X
+X  out_byte(0x61, (in_byte(0x61) & 0xFD) | 1);  // spkr off, tmr 2 gate on
+X  w = (unsigned int)(k*1.2);
+X  out_byte(0x43, 0xB0);                   // tmr 2 mode 0 2-byte load
+X  IODELAY;
+X  out_byte(0x42, (unsigned char)w);       // low byte
+X  IODELAY;
+X  out_byte(0x42, (unsigned char)(w>>8));  // high byte
+X  IODELAY;
+X  do {
+X    out_byte(0x43,0x80);          // latch timer count
+X    IODELAY;
+X    lo = in_byte(0x42);           // discard low byte
+X    IODELAY;
+X    hi = in_byte(0x42);           // get high byte
+X    IODELAY;
+X  }
+X  while ((hi & 0x80) == 0);    // wait for a 1 there, signifying rollover
+X  return;
+X}
+X// *********************************************************************
+X// PARALLEL PORT HARDWARE INTERFACE
+X// *********************************************************************
+X
+X// Uses two-wire serial data communication through printer port.
+X// Pin  1, STROBE, is serial clock;
+X// Pin 14, AUTOFD, is serial data out to PIC;
+X// Pin 11, BUSY,   is serial data in from PIC;
+X// Pin 17, SLCTIN, is low when writing, high to provide pull-up when reading;
+X// Pin  2, D0,     is lowered to apply Vpp.
+X
+X// SLCTIN and BUSY are tied together for pull-up and for hardware detection.
+X// (In current versions this is done through diodes or gates.)
+X
+X// SLCTIN is an open-collector output with pull-up.
+X// If it is pulled down, some printer ports will latch it down.
+X// Accordingly, it and all the other control bits are asserted
+X// every time they are needed.
+X
+Xbyte BITS = 0x0F;
+X
+X// Procedures to set and clear the data lines
+X
+Xvoid datawritable() {                               // SLCTIN, AUTOFD down
+X  BITS |=  0x0A; out_byte(lp_ctl,BITS);
+X}
+Xvoid datareadable() {                               // SLCTIN, AUTOFD up
+X  BITS &= ~0x0A; out_byte(lp_ctl,BITS);
+X}
+X
+Xvoid datadown()     { BITS |=  0x02; out_byte(lp_ctl, BITS); } // AUTOFD down
+Xvoid dataup()       { BITS &= ~0x02; out_byte(lp_ctl, BITS); } // AUTOFD up
+X
+Xvoid clockdown()    { BITS |=  0x01; out_byte(lp_ctl, BITS); } // STROBE down
+Xvoid clockup()      { BITS &= ~0x01; out_byte(lp_ctl, BITS); } // STROBE up
+X
+Xvoid vppon() {
+X  BITS &= ~0x04;
+X  out_byte(lp_ctl, BITS);                           // INIT down, D0 down
+X  out_byte(lp_data,   1   );
+X}
+X
+Xvoid vppoff() {
+X  BITS |= 0x04;
+X  out_byte(lp_ctl, BITS);                           // INIT up,   D0 up
+X  out_byte(lp_data,   0   );
+X}
+X
+X
+Xbit  datain() { return(((~(byte)in_byte(lp_status)) & 0x80) >> 7); }
+X
+X
+Xvoid allpinslow() {
+X  vppoff();
+X  datawritable();
+X  datadown();
+X  clockdown();
+X  BITS = 0x0F;
+X  /* out_byte(lp_data, BITS); */  // This must be an error of some sort?
+X}
+X
+X
+Xbit  detecthardware() {           // True if BUSY and SLCTIN are tied together.
+X  datawritable(); // SLCTIN down
+X  dataup();       // AUTOFD up
+X  delay(10);
+X  if (datain() == 1) return(0);
+X  datareadable(); // SLCTIN up
+X  dataup();       // AUTOFD up
+X  delay(10);
+X  if (datain() == 0) return(0);
+X  return(1);
+X}
+X// *********************************************************************
+X// PIC COMMUNICATION ROUTINES
+X// *********************************************************************
+X
+Xvoid sendbit(bit b) {                  // Sends out 1 bit to PIC
+X  if (b) dataup(); else datadown();
+X  clockup();
+X  delay(1);                            // tset1
+X  clockdown();                         // data is clocked into PIC on this edge
+X  delay(1);                            // thld1
+X  datadown();                          // idle with data line low
+X}
+X
+Xbit recvbit() {                        // Receives a bit from PIC
+X  bit b;
+X  clockup();
+X  delay(1);                            // tdly3
+X  clockdown();                         // data is ready just before this
+X  b = datain();
+X  delay(1);                            // thld1
+X  return b;
+X}
+X
+Xvoid sendcmd(byte b) {                 // Sends 6-bit command from bottom of b
+X  int i;
+X  datawritable();
+X  delay(2);                            // thld0
+X  for (i=6; i>0; i--) {
+X    sendbit((bit)(b & 1));
+X    b = b >> 1;
+X  }
+X  delay(2);                            // tdly2
+X}
+X
+Xvoid senddata(word w) {                // Sends 14-bit word from bottom of w
+X  int i;
+X  datawritable();
+X  delay(2);                            // thld0
+X  sendbit(0);                          // one garbage bit
+X  for (i=14; i>0; i--) {
+X    sendbit((bit)(w & 1));             // 14 data bits
+X    w = w >> 1;
+X  }
+X  sendbit(0);                          // one garbage bit
+X  delay(2);                            // tdly2
+X}
+X
+Xword recvdata() {                      // Receives 14-bit word, lsb first
+X  int i;
+X  bit b;
+X  word w = 0;
+X  datareadable();                      // SLCTIN up for pull-up
+X  delay(2);                            // thld0
+X  recvbit();                           // one garbage bit
+X  for (i=0; i<14; i++) {
+X    b = recvbit();
+X    w = w | ((word)b << i);            // 14 data bits
+X  }
+X  recvbit();                           // another garbage bit;
+X  delay(2);                            // tdly2
+X  return w;
+X}
+X
+X// *********************************************************************
+X// PIC PROGRAMMING ALGORITHMS
+X// *********************************************************************
+X
+X// PIC MEMORY MAP
+X
+X// The PIC16F84 has four programmable memory areas
+X// (plus data RAM, which is not programmable).
+X// Config memory is only 1 byte, but is treated like the others.
+X
+X#define PBASE      0                   // Base address of each memory
+X#define IBASE      0x2000
+X#define CBASE      0x2007
+X#define DBASE      0x2100
+X
+X#define PSIZEMAX   8192                // Max size of each memory
+X#define ISIZEMAX   4
+X#define CSIZEMAX   1
+X#define DSIZEMAX   64
+X
+Xword    PSIZE      = PSIZEMAX;         // Actual size, can be set lower
+Xword    ISIZE      = ISIZEMAX;         // for particular CPUs
+Xword    CSIZE      = CSIZEMAX;
+Xword    DSIZE      = DSIZEMAX;
+Xword    PINS       = 0;
+X
+Xword    PMEM[PSIZEMAX];                // Arrays representing the memories
+Xword    IMEM[ISIZEMAX];
+Xword    CMEM[CSIZEMAX];
+Xword    DMEM[DSIZEMAX];
+X
+Xword    PUSED      = 0;                // Number of valid words in array
+Xword    CUSED      = 0;
+Xword    IUSED      = 0;
+Xword    DUSED      = 0;
+X
+Xword	EEPROM     = 0;		       // Does PIC have EEPROM or just PROM
+X
+X#define PMASK      0x3fff              // Which bits are used in each word
+Xword    CMASK      = 0x001f;           //  (CMASK depends on processor)
+X#define IMASK      0x3fff
+X#define DMASK      0x00ff
+X
+Xword    DEFAULTCONFIG  =  0x1B;        // Initialization for config word
+X
+Xvoid cleararrays () {
+X  int i;
+X  // Prefill memory arrays with all ones
+X  for (i=0; i<PSIZEMAX; i++) PMEM[i] = PMASK;
+X  for (i=0; i<CSIZEMAX; i++) CMEM[i] = CMASK;
+X  for (i=0; i<ISIZEMAX; i++) IMEM[i] = IMASK;
+X  for (i=0; i<DSIZEMAX; i++) DMEM[i] = DMASK;
+X  // Mark the memory arrays as empty
+X  PUSED =
+X  IUSED =
+X  CUSED =
+X  DUSED = 0;
+X}
+X
+Xbit  stuffarray (word address,         // Stuff data into a memory array.
+X                 word array[],         // Returns true if successful.
+X                 word base,
+X                 word size,
+X                 word *used,
+X                 word data[],
+X                 int  count) {
+X  int i;
+X  if (address-base+count-1 > size) {
+X    printf("Invalid address: %04XH\n",address+count-1);
+X    return 0;
+X  }
+X  for (i=0; i<count; i++) {
+X    array[i+address-base] = data[i];
+X    if (*used < address-base+count) *used = address-base+count;
+X  }
+X  return 1;
+X}
+X
+X// PIC PROGRAMMING COMMANDS
+X
+Xbyte LOADCONFIG        = 0;
+Xbyte LOADPROGRAM       = 2;
+Xbyte READPROGRAM       = 4;
+Xbyte INCREMENTADDRESS  = 6;
+Xbyte BEGINPROGRAMMING  = 8;
+Xbyte ENDPROGRAMMING    = 14;
+Xbyte LOADDATA          = 3;
+Xbyte READDATA          = 5;
+Xbyte ERASEPROGRAM      = 9;
+Xbyte ERASEDATA         = 11;
+X
+X// PROGRAMMING PROCEDURES
+X
+Xvoid vppreset() {                      // reset PIC, apply Vpp
+X  vppoff();
+X  datawritable();
+X  datadown();
+X  clockdown();
+X  delay(25000);
+X  vppon();
+X  delay(25000);
+X}
+X
+Xvoid progcycle(byte cmd, word arg) {   // send a command and an argument,
+X                                       // then program EPROM accordingly
+X  if (EEPROM) {
+X    sendcmd(cmd);
+X    senddata(arg);
+X    sendcmd(BEGINPROGRAMMING);
+X    delay(20000); // PIC errata sheet says 10ms is typical, not guaranteed
+X  } else {
+X    sendcmd(cmd);
+X    senddata(arg);
+X    sendcmd(BEGINPROGRAMMING);
+X    delay(100);
+X    sendcmd(ENDPROGRAMMING);
+X  }
+X}
+X
+Xbit programall(
+X// Program a memory from appropriate array.
+X// Returns true if successful.
+X             int  mode,                // program or verify
+X             word mask,                // to throw away irrelevant bits
+X             byte writecommand,        // command to write this memory
+X             byte readcommand,         // command to read this memory,
+X             word array[],             // which memory array we're using
+X             word base,                // its base address
+X             word used) {              // number of valid words in array
+X  word i,w;
+X  switch(mode) {
+X    case PROGRAM: puts("programming..."); break;
+X    case VERIFY:  puts("verifying..."); break;
+X  }
+X  for (i=0; i<used; i++) {
+X    printf("%04X\b\b\b\b",i+base);     // display addr and backspace
+X    fflush(stdout);                    // force display
+X    if (mode==PROGRAM) {
+X      if (EEPROM) {
+X        progcycle(writecommand,(array[i] & mask));
+X        sendcmd(readcommand);
+X        w = (recvdata() & mask);
+X        if (w != (array[i] & mask)) {
+X          printf("Failed at %04X: Expecting %04X, found %04X.\n",
+X                                           i+base, (array[i] & mask), w);
+X          return 0;
+X        }
+X      } else { // complex programming algorithm for no EEPROM
+X        int n = 0;
+X        for (;;) {
+X          progcycle(writecommand,(array[i] & mask));
+X          sendcmd(readcommand);
+X          w = (recvdata() & mask);
+X          if (w == (array[i] & mask)) break;
+X          n = n + 1;
+X          if (n > 25) {
+X            printf("Failed at %04X: Expecting %04X, found %04X.\n",
+X                                           i+base, (array[i] & mask), w);
+X            return 0;
+X          }
+X        }
+X        n = 3 * n;
+X        for (; n > 0; n--) {
+X          progcycle(writecommand,(array[i] & mask));
+X	}
+X      }
+X    } else { //mode==VERIFY
+X      sendcmd(readcommand);
+X      w = (recvdata() & mask);
+X      if (w != (array[i] & mask)) {
+X        printf("Failed at %04X: Expecting %04X, found %04X.\n",
+X                                           i+base, (array[i] & mask), w);
+X        return 0;
+X      }
+X    }
+X    sendcmd(INCREMENTADDRESS);
+X  }
+X  return 1;
+X}
+X
+X
+X// *********************************************************************
+X// HEX FILE LOADER
+X// *********************************************************************
+X
+X// This is for Intel INHX8M (8-bit merged) hex files only.
+X// These files use two bytes for each word (low, then high).
+X// All addresses are doubled, i.e., 0x2001 is encoded as 0x4002,
+X// so that addresses increment at the same rate as the byte count.
+X
+Xbit validhexline(char *s) {            // Gross syntax and checksum check.
+X  byte cksum = 0;                      // For all HEX formats, not just 8M.
+X  int bytecount;
+X  int i, b;
+X  if (s[0] != ':') return(0);          // Initial colon
+X  sscanf(s+1,"%2x",&bytecount);
+X  if (bytecount > 32) return(0);       // Valid byte count
+X  cksum = bytecount;
+X  i = 3;
+X  bytecount = bytecount+3;
+X  while (bytecount>0) {
+X    bytecount--;
+X    sscanf(s+i,"%2x",&b);
+X    cksum = cksum+b;                   // Compute checksum
+X    i = i+2;
+X  }
+X  sscanf(s+i,"%2x",&b);
+X  cksum = -cksum;
+X  if (cksum == b) return 1;            // Test checksum
+X  return 0;
+X}
+X
+Xvoid loadhexfile(FILE *f) {            // Loads a hex file into memory arrays
+X  char s[256];
+X  word i,lo,hi;
+X  word linetype = 0;   // 0 for data, 1 for end of file
+X  word wordcount;      // number of 16 bit words on this line
+X  word address;        // address where they begin
+X  word data[8];        // 16 bytes = 8 words max. per line of hex
+X
+X  cleararrays();
+X
+X  while((!feof(f)) && (linetype != 1)) {
+X    fgets(s,255,f);
+X    cleanctrl(s);
+X
+X    if (!validhexline(s)) {            // Syntax check
+X      s[40] = 0;                       // Truncate invalid line for display
+X      if (s[0] != ':') {
+X        printf("Invalid line (skipped): '%s'...\n",s);
+X        continue;
+X      }
+X      else {
+X        printf("Unable to decode line:  '%s'...\n",s);
+X        goto bailout;
+X      }
+X    }
+X
+X    sscanf(s+1,"%2x",&wordcount);      // Parse the line - Intel Hex8M
+X    wordcount = wordcount/2;           // (double bytes, addresses doubled)
+X    sscanf(s+3,"%4x",&address);
+X    address = address/2;
+X    sscanf(s+7,"%2x",&linetype);
+X
+X    if (linetype==1) goto finished;
+X
+X    for (i=0; i<wordcount; i++) {           // Grab the data
+X      sscanf(s+(9+4*i),"%2x%2x",&lo,&hi);
+X      data[i] = (hi << 8) | lo;
+X    }
+X
+X                                            // Place in appropriate array
+X    if (address >= DBASE) {
+X      if (!stuffarray(address,DMEM,DBASE,DSIZE,&DUSED,data,wordcount))
+X        goto bailout;
+X    }
+X    else if (address >= CBASE) {
+X      if (!stuffarray(address,CMEM,CBASE,CSIZE,&CUSED,data,wordcount))
+X        goto bailout;
+X    }
+X    else if (address >= IBASE) {
+X      if (!stuffarray(address,IMEM,IBASE,ISIZE,&IUSED,data,wordcount))
+X        goto bailout;
+X    }
+X    else {
+X      if (!stuffarray(address,PMEM,PBASE,PSIZE,&PUSED,data,wordcount))
+X        goto bailout;
+X    }
+X  } // while
+X
+Xfinished:
+X  printf("Program memory loaded: %5d word(s)\n",PUSED);
+X  printf("Configuration loaded:  %5d word(s)\n",CUSED);
+X  printf("ID memory loaded:      %5d word(s)\n",IUSED);
+X  printf("Data memory loaded:    %5d byte(s)\n",DUSED);
+X  return;
+X
+Xbailout:
+X  cleararrays();
+X  errmsg("Unable to load file.");
+X  FNAME[0] = 0;
+X  return;
+X}
+X
+X
+X// *********************************************************************
+X// USER INTERFACE
+X// *********************************************************************
+X
+Xvoid banner() {
+X  puts("---------------------------------------");
+X  puts(BANNER);
+X  puts(" originally by Michael A. Covington");
+X  puts(" converted to LINUX by Claus Fuetterer");
+X  puts(" major changes by Douglas W. Jones");
+X  puts(" Version 0.0 of " __DATE__ " " __TIME__);
+X  puts("---------------------------------------");
+X}
+X
+Xvoid statusline() {
+X  allpinslow(); // Clean up after aberrant stuff
+X  printf("-----------------------------------------------------\n");
+X  printf("status: ");
+X  switch (DEVICE) {
+X    case PIC16C84: printf("PIC16C84"); break;
+X    case PIC16F84: printf("PIC16F84"); break;
+X    case PIC16F83: printf("PIC16F83"); break;
+X    case PIC16C76: printf("PIC16C76"); break;
+X    default:       printf("No PIC chosen");
+X  }
+X  printf("; PSIZE = %1d, DSIZE = %1d, CMASK = %1d;  \n",PSIZE,DSIZE,CMASK);
+X  printf("HEX-PROGRAM: %s\n",FNAME);
+X  if (DEVICE != 0) {
+X    printf("It is safe to insert or remove a PIC from the %1d pin socket\n",
+X           PINS);
+X  }
+X  printf("-----------------------------------------------------\n");
+X}
+X
+X
+Xvoid selectport() {
+X  puts("Apply power to programmer now.\n");
+X  puts("If your programmer has adjustable Vcc,");
+X  errmsg("set it to 5.0 volts and press RETURN...");
+X
+X  if (!detecthardware()) {
+X    puts("Caution: Programmer hardware not found!\n\n");
+X    puts("With some versions of the circuit and some");
+X    puts("parallel ports, this may be normal.\n");
+X    puts("If you are sure you have chosen");
+X    puts("parallel port 1, press RETURN to proceed.");
+X    puts("To cancel program, press Ctrl-C.");
+X    errmsg(" ");
+X  }
+X}
+X
+Xvoid troubleshoot() {
+X  int GND, VCC, MCLR, RB6, RB7;
+X  if (PINS == 18) {
+X    GND = 5; VCC = 14; MCLR = 4; RB6 = 12; RB7 = 13;
+X  } else if (PINS == 28) {
+X    GND = 8; VCC = 20; MCLR = 1; RB6 = 27; RB7 = 28;
+X  }
+X  puts("Ensure programmer is powered up now, with Vcc set to 5.0 V");
+X  puts("and no PIC in the socket.  Also, check the cable from the");
+X  puts("parallel port to the programmer; it should be short (under 2");
+X  puts("feet) and have all necessary pins (serial cables don't).");
+X  puts("");
+X  for (;;) {
+X    allpinslow();
+X    puts("Tests supported:");
+X    puts("");
+X    puts("  A - static voltage test a");
+X    puts("  B - static voltage test b");
+X    puts("  C - static voltage test c");
+X    printf("  D - pin %d (MCLR) oscillate from 0 to VPP (~12V)\n",MCLR);
+X    printf("  E - pin %d (RB6, clk) oscillate from 0 to VCC (~5V)\n",RB6);
+X    printf("  F - pin %d (RB7, data) oscillate from 0 to VCC (~5V)\n",RB7);
+X    puts("");
+X    puts("  X - exit test menu (back to main menu)");
+X    puts("");
+X    puts("Tests D, E, F run forever (use control C to exit):");
+X
+X    CHOICE = getchoice("A,B,C,D,E,F,X");
+X    switch(CHOICE) {
+X      case 'A':
+X	clockup();
+X	puts("TEST A\n");
+X	printf("Connect negative voltmeter lead to pin %1d (GND)\n", GND);
+X	printf("of the %1d pin socket and check the following voltages:\n",
+X		PINS);
+X	printf("  pin %d (MCLR)     < 0.8 V\n",MCLR);
+X	printf("  pin %d (RB6/clk)  > 4.0 V\n",RB6);
+X	printf("  pin %d (RB7/data) < 0.8 V\n",RB7);
+X	printf("  pin %d (Vcc)      4.75 to 5.25 V\n",VCC);
+X  	errmsg(" ");
+X	break;
+X
+X      case 'B':
+X	vppon();
+X	dataup();
+X	puts("TEST B\n");
+X	printf("With the negative voltmeter lead still on pin %1d (GND)\n", GND);
+X	printf("of the %1d pin socket, check the following voltages:\n", PINS);
+X	printf("  pin %d (MCLR)     12.0 - 14.0\n",MCLR);
+X	printf("  pin %d (RB6/clk)  < 0.8 V\n",RB6);
+X	printf("  pin %d (RB7/data) > 4.0 V\n",RB7);
+X	printf("  pin %d (Vcc)      4.75 to 5.25 V\n",VCC);
+X	errmsg(" ");
+X	break;
+X
+X      case 'C':
+X	vppoff();
+X	clockdown();
+X	datareadable();  // AUTOFD, SLCTIN high
+X	puts("TEST 3\n");
+X	printf("Put a 470-ohm resistor between pin %1d (GND) to\n", GND);
+X	printf("pin %1d (RB7) of the %1d pin socket and press Enter.\n", RB7, PINS);
+X	errmsg(" ");
+X	if (datain() != 0) {
+X	  puts("ERROR, expected DATAIN = 0\n");
+X	} else {
+X	  puts("GOOD, got DATAIN = 0\n");
+X	}
+X	puts("Now, remove the resistor and press enter");
+X	errmsg(" ");
+X	if (datain() != 1) {
+X	  puts("ERROR, expected DATAIN = 1\n");
+X	} else {
+X	  puts("GOOD, got DATAIN = 1\n");
+X	}
+X	puts("Test complete, press enter");
+X	errmsg(" ");
+X	break;
+X
+X      case 'D':
+X	for (;;) { vppon(); sleep(1); vppoff(); sleep(1); }
+X      case 'E':
+X	for (;;) { clockup(); sleep(1); clockdown(); sleep(1); }
+X      case 'F':
+X	for (;;) { dataup(); sleep(1); datadown(); sleep(1); }
+X      case 'X':
+X	return;
+X    }
+X  }
+X}
+X
+X
+Xvoid load() {
+X  FILE *f;
+X  printf("File to load: ");
+X  strcpy(FNAME,getstring());
+X  f = fopen(FNAME,"r");
+X  if (f == NULL) {
+X    errmsg("Unable to open file.");
+X    FNAME[0] = 0;
+X    return;
+X  }
+X  loadhexfile(f);
+X  fclose(f);
+X  errmsg("Loading complete.");
+X
+X  if (CUSED == 0) {
+X    puts("Caution: HEX file did not contain a configuration word.\n");
+X    puts("The following settings will be used:\n");
+X    puts("  RC oscillator");
+X    puts("  Watchdog timer disabled");
+X    puts("  Power-up timer enabled");
+X    puts("  Code not read-protected\n");
+X    errmsg("You can specify other settings in the assembler.");
+X  }
+X  else if (CMEM[0] != (CMEM[0] & CMASK)) {
+X    puts("Caution: Configuration word appears to contain invalid bits.\n");
+X    puts("Your program may have been assembled for a different");
+X    puts("type of PIC.  Check device selection carefully.");
+X    errmsg("");
+X  }
+X
+X}
+X
+Xvoid selectdevice() {
+X  statusline();
+X  puts("Devices supported:\n");
+X  puts("  C   PIC16C84");
+X  puts("  F   PIC16F84");
+X  puts("  3   PIC16F83");
+X  puts("  6   PIC16C76\n");
+X
+X  CHOICE = getchoice("C,F,3,6");
+X  switch(CHOICE) {
+X    case 'C':
+X      DEVICE = PIC16C84;
+X      PSIZE  = 1024;
+X      DSIZE  = 64;
+X      CMASK  = 0x001F;
+X      DEFAULTCONFIG = 0x001B;
+X      EEPROM = 1;
+X      PINS = 18;
+X      break;
+X    case 'F':
+X      DEVICE = PIC16F84;
+X      PSIZE  = 1024;
+X      DSIZE  = 64;
+X      CMASK  = 0x3FF3;
+X      DEFAULTCONFIG = 0x3FF3;
+X      EEPROM = 1;
+X      PINS = 18;
+X      break;
+X    case '3':
+X      DEVICE = PIC16F83;
+X      PSIZE  = 512;
+X      DSIZE  = 64;
+X      CMASK  = 0x3FF3;
+X      DEFAULTCONFIG = 0x3FF3;
+X      EEPROM = 1;
+X      PINS = 18;
+X      break;
+X    case '6':
+X      DEVICE = PIC16C76;
+X      PSIZE  = 8192;
+X      DSIZE  = 0;
+X      CMASK  = 0x3F7F;
+X      DEFAULTCONFIG = 0x3F7F;
+X      EEPROM = 0;
+X      PINS = 28;
+X      break;
+X  }
+X}
+X
+Xvoid erase() {
+X  int i;
+X  if (EEPROM == 0) {
+X    printf("PIC does not support erase operation!\n");
+X    return;
+X  }
+X  vppreset();
+X  printf("Commanding PIC to erase ID, configuration, ");
+X    sendcmd(LOADCONFIG);
+X    senddata(0x3FFF);
+X    for (i=7; i>0; i--) sendcmd(INCREMENTADDRESS);
+X    sendcmd(1);
+X    sendcmd(7);
+X    sendcmd(BEGINPROGRAMMING);
+X    delay(20000);
+X    sendcmd(1);
+X    sendcmd(7);
+X  printf("program, ");
+X    progcycle(ERASEPROGRAM,0x3FFF);    // is the data word necessary?
+X  printf("data...");
+X    progcycle(ERASEDATA,0x3FFF);       // is the data word necessary?
+X  allpinslow();
+X  puts(" Done.");
+X//  waitkey();
+X}
+X
+Xvoid program(int mode) {
+X  word i;
+X  if (PUSED+IUSED+CUSED+DUSED == 0) {
+X    printf("Load a file first.\n");
+X    goto finish;
+X  }
+X
+X  vppreset();
+X
+X  printf("Program memory: ");
+X  if (!programall(mode,PMASK,LOADPROGRAM,READPROGRAM,PMEM,PBASE,PUSED))
+X    goto finish;
+X
+X  sendcmd(LOADCONFIG);      // from here on we're in config/ID memory
+X  senddata(DEFAULTCONFIG);  // loadconfig requires an arg, here it is
+X
+X  printf("ID memory: ");
+X  if (!programall(mode,IMASK,LOADPROGRAM,READPROGRAM,IMEM,IBASE,IUSED))
+X    goto finish;
+X
+X  for (i=0; i < CBASE-IBASE-IUSED; i++)
+X    sendcmd(INCREMENTADDRESS);      // get to config memory
+X
+X  printf("Configuration memory: ");
+X  if (!programall(mode,CMASK,LOADPROGRAM,READPROGRAM,CMEM,CBASE,CUSED))
+X    goto finish;
+X
+X  vppreset();   // Reset address counter in PIC to 0
+X
+X  printf("Data memory: ");
+X  if (!programall(mode,DMASK,LOADDATA,READDATA,DMEM,DBASE,DUSED))
+X    goto finish;
+X
+X  puts("Programming complete.\n\n");
+X  puts("For production-grade work, you should now verify");
+X  puts("the PIC at the maximum and minimum values of Vcc.");
+X
+Xfinish:
+X  allpinslow();
+X}
+X
+X
+X
+X
+X
+X
+Xvoid menu() {
+X  statusline();
+X  puts("  L  Load HEX file");
+X  puts("  S  Select type of PIC");
+X  puts("  E  Erase PIC");
+X  puts("  P  Program PIC");
+X  puts("  V  Verify PIC\n");
+X  puts("  T  Test Programmer\n");
+X  puts("  X  Exit program");
+X  CHOICE = getchoice("L,S,E,P,V,T,X");
+X  switch(CHOICE) {
+X    case 'L': getc(stdin);load(); break;
+X    case 'S': selectdevice(); break;
+X    case 'E': erase(); break;
+X    case 'P': program(PROGRAM); break;
+X    case 'V': program(VERIFY); break;
+X    case 'T': troubleshoot(); break;
+X    case 'X': exit(0);
+X  }
+X}
+X
+X
+X
+X//**************************************************
+X
+Xvoid main()
+X{
+X  banner();
+X  FNAME[0] = 0;   // no file is presently loaded
+X  open_io();
+X  selectport();
+X  allpinslow();
+X  selectdevice();  // mandatory
+X  puts("You may insert the PIC in the socket now.");
+X  errmsg("Be very careful not to insert it backward.");
+X  while (1) {menu();}
+X
+X  close_io();
+X}
+END-of-snoppp.c
+exit
+

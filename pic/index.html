@@ -1,0 +1,269 @@
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<HTML LANG="en">
+ <HEAD>
+  <TITLE>Douglas Jones's PIC support tools</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+  <META name="viewport" content="width=device-width, initial-scale=1">
+  <META name="Author" content="Douglas W. Jones">
+  <META name="Language" content="English">
+  <META name="editor" content="/usr/bin/vi">
+  
+  
+  
+  <STYLE TYPE="text/css">
+   BODY { margin-left: 3%; margin-right: 3%; }
+   H2.SQUAT { margin-top: 0.4em; margin-bottom: 0.25em; }
+   H3.SQUAT { margin-top: 0.3em; margin-bottom: 0.2em; }
+   H4.SQUAT { margin-top: 0.2em; margin-bottom: 0.15em; }
+   H5.SQUAT { margin-top: 0.17em; margin-bottom: 0.15em; }
+   * { line-height: 1.1 }
+   P.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   UL.SQUAT { margin-top: 0.25em; margin-bottom: 0.15em; }
+   EM.O { font-style: normal; text-decoration: overline; }
+   EM.U { font-style: normal; text-decoration: underline; }
+   EM.OU { font-style: normal; text-decoration: overline underline; }
+   EM.S { font-style: normal; text-decoration: line-through; }
+   A { text-decoration: none; }
+   A.I { font-style: italic; text-decoration: none; }
+   SUP { vertical-align: 0; position: relative; bottom: 1ex; }
+   SUB { vertical-align: 0; position: relative; top: 0.8ex; }
+   P { line-height: 1.3 }
+   TABLE.BOXY { border: 0; padding: 0; border-spacing: 0;
+                border-collapse: collapse; }
+   TD.BOX { border: solid; border-width: thin; border-color: DimGray;
+	      text-align: center; }
+   TD.BOXTT { border: solid; border-width: thin; border-color: DimGray;
+	      font-family: monospace; text-align: center; }
+   TD.TT { font-family: monospace; text-align: left; }
+   TD.TTSPACE { font-family: monospace; text-align: left; color: white }
+   TD.SHADE { background: Silver; text-align: center; }
+   CAPTION { padding-top: 6px; }
+   DIV.HEADBOX { border: groove; border-width: 2px; background: #F0F0E0; padding-top: 1%; padding-bottom: 1%; padding-left: 5px; }
+   DIV.HEADBOX P { margin-top: 0.8em; margin-bottom: 0.8em; }
+   DIV.HEADBOX H1 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.HEADBOX H2 { margin-top: 0.2em; margin-bottom: 0.4em; }
+   DIV.INDENT { border: none; padding-left: 1em }
+   DIV.INVISIBLE { font-size: 3px; letter-spacing: -5px; color: white; background: white; }
+   DIV.INVISIBLE A:link { color: white; }
+   DIV.INVISIBLE A:visited { color: white; }
+   DIV.INVISIBLE A:active { color: white; }
+   DIV.invisible A:active { color: white; background: white; }
+  </STYLE>
+ </HEAD>
+ <BODY BGCOLOR="#FFFFFF" TEXT="#000000" link="#0000CC" vlink="#880088" alink="#880088">
+  <DIV CLASS=HEADBOX>
+   
+   <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD>&nbsp;&nbsp;<TD>
+    
+     <H1>Pic Cross Development Support Tools</H1>
+    
+    
+    <P>
+    
+     Part of <A HREF="http://homepage.cs.uiowa.edu/~dwjones/cross/">
+      
+      the Cross Development Tool Collection
+      
+     </A>
+     <BR>
+     
+    
+    
+     by
+     <A HREF="https://homepage.cs.uiowa.edu/~dwjones/">Douglas W. Jones</A>
+     
+     <BR>
+    
+    
+    <A HREF="https://www.uiowa.edu/">
+     T<SMALL>HE</SMALL> U<SMALL>NIVERSITY</SMALL>
+    <SMALL>OF</SMALL> I<SMALL>OWA</SMALL></A>
+    <A HREF="https://homepage.cs.uiowa.edu/">Department&nbsp;of&nbsp;Computer&nbsp;Science</A>
+    
+    
+    
+   </TABLE>
+    
+  </DIV>
+ 
+
+
+
+<H2> Contents </H2>
+
+<UL>
+<LI><A HREF="index.html#SMAL">The SMALpic Assembler</A>
+<LI><A HREF="index.html#SNOPPP">The SNOPPP Pic Programmer</A>
+<LI><A HREF="index.html#incirc">In-Circuit Programming with the SNOPPP</A>
+<LI><A HREF="index.html#Driver">A Linux Driver for the SNOPPP</A>
+<LI><A HREF="index.html#Enhancements">Suggested Enhancements to the SNOPPP</A>
+<LI><A HREF="index.html#Other">Other PIC Material</A>
+</UL>
+
+<HR>
+
+<H2><A NAME="SMAL">The SMALpic Assembler</A></H2>
+
+<P>
+When I set out to do a large-scale PIC-based project (paid work!),
+I found that most of the PIC tools ran only under Windows, and I
+found that the Linux tools all seemed to demand that I spend several
+weeks upgrading my antiquated Linux system.  I had a decent assembler
+sitting around already (the machine-independent SMAL assembler), so I
+spent a few days hacking it into shape as a PIC assembler.
+<P>
+It's written in C, uses the command line interface, and has essentially
+no system dependencies, other than the requirement for a C compiler.
+(No need for up-to-date versions of lex, yacc, make or any of those
+other tools!)
+<P>
+It should assemble code for all of the 14-bit PIC microcontrollers, and
+include files are provided for the PIC16C72, PIC16C73, PIC16C74, PIC16C76,
+and PIC16C77.  (I happened to be developing code for the 16C76.)
+<P>
+The code distribution is in the form of a
+<A HREF="smalpic.txt">shell archive</A>
+that includes source code, header files and a very minimal manual.
+
+<H2><A NAME="SNOPPP">The SNOPPP Pic Programmer</A></H2>
+
+<P>
+The commercial PIC programmers all seem to be based on Windows, and I wanted
+to work under Linux, so I went shopping for a decent programmer.  The
+<A HREF="http://covingtoninnovations.com/noppp/index.html">NOPPP</A> from
+Covington Innovations looked good, so I built the NOPPP-2 (it uses a an IC
+where the original uses a handful of diodes).  This, however, didn't work
+with the UV EPROM based PICs I was working with, for several reasons:
+<P>
+First, it didn't include the marginal voltage check facility required for
+production quality PIC programmers (you program with a 5-volt supply, then
+read back the program with a 5.6-volt supply and a 3.8-volt supply in order
+to verify the quality of the programming).  So, I added an assortment of
+1N4003 diodes to generate these voltages.
+<P>
+Second, the programming voltage Vpp used for the UV EPROM-based PICs must sit
+in a narrower range than that required for the flash EEPROM PICs.  They want
+14.0 volts, and I found empirically that 13.8 works.  In addition, programming
+the UV EPROM versions seems to draw real power on the 14 volt programming
+supply, so a series resistor between the regulator and the chip wasn't
+acceptable.  Therefore, I added another transistor to the programming
+voltage supply.  This had the net effect of inverting the programming
+signal to the noppp, and this, in turn, required me to change the driver
+code.
+<P>
+I've called my modified NOPPP the Son of NOPPP, or SNOPPP.  Here's the
+schematic and a picture of the finished product:
+<P ALIGN=center>
+<IMG SRC="snoppp.gif" ALT="schematic" WIDTH=640 HEIGHT=480>
+<P ALIGN=center>
+<IMG SRC="snoppp.jpg" ALT="photo" WIDTH=640 HEIGHT=480>
+<P>
+In the spirit of the original NOPPP, my SNOPPP was made using junk parts.
+I happened to have a resistor network handy, so all the 3K resistors shown
+in the schematic are in the white dual-inline package on the upper left of
+the photo.  There were extras there, so I used one for a pilot-light, the
+LED shown in the photo.
+<P>
+<H2><A NAME="incirc">In-Circuit programming with the SNOPPP</A></H2>
+<P>
+I should note that I use this programmer for in-circuit programming, with
+a 3M DipClip on the end of an 8 inch ribbon cable to do the programming.
+I had to add a terminator to the clock line to the PIC -- it didn't work
+reliably without this!  I put the terminator in the SNOPPP, not on the cable
+assembly, so you just plug it into the socket on the SNOPPP and do your
+in-circuit programming.
+<P>
+The schematic for the clip I should have built for programming 28-pin
+PICs is shown here, along with the photo of the clip I actually used,
+clipped onto a PIC16C76 on the motor control board I was paid to develop.
+My programmer cable has a dedicated 14-pin socket, where I ought to have
+simply made it to plug into the programmer using a header with the same
+pinout as the PIC, as shown in the schematic.
+<P ALIGN=center>
+<IMG SRC="incirc.gif" ALT="schematic" WIDTH=340 HEIGHT=450>
+<P ALIGN=center>
+<IMG SRC="incirc.jpg" ALT="photo" WIDTH=550 HEIGHT=350>
+<P>
+Note that, with this approach to in-circuit programming, the programmer
+provides power not only to the PIC but to everything that's wired to the
+same +5 supply circuit as the PIC.  In designing the circuitry, you'd better
+be very sure that this won't cause problems!  In addition, you're applying
+power to the PIC with the crystal oscillator or ceramic resonator attached,
+and this will, naturally, resonate when you apply power!  Therefore, the
+programming clip grounds the O1 pin to prevent oscillation; this is also
+grounded on the programmer's socket, but it's better to ground it with a
+short local jumper (marked with an asterisk in the schematic) than with
+a long wire.
+<P>
+Note also that the cable is arranged so that every signal wire is surrounded
+on both sides with ground wires, providing at least a partial shield.
+<P>
+
+<H2><A NAME="Driver">A Linux Driver for the SNOPPP</A></H2>
+<P>
+The Linux driver software for the SNOPPP this is available as a UNIX
+<A HREF="snoppp.txt">shell archive</A>.  This driver must be installed
+with root privilege, because it bypasses the standard driver for the
+parallel port and goes straight to hardware.
+<P>
+This driver has only been tested with the 16C76, but it should also
+work with the other 14-bit Flash EEPROM PICs if you tell it that they
+are 16C76 chips.  In addition, it still contains Covington's code
+to support the 16C84, 16F84 and 16F83 chips, but this is untested.
+<P>
+In addition to changing the original NOPPP driver to invert the Vpp
+line, I also had to change it so that it used the adaptive burner
+logic Microchip recommends for the UV EPROM-based PICs.  This requires
+programming in a series of program steps, reading back the data after
+each step and repeating the process until the data read back matches
+the data being burnt in.
+<P>
+
+<H2><A NAME="Enhancements">Suggested Enhancements to the SNOPPP</A></H2>
+<P>
+Thinking about the above issue, I realized that some changes in the
+hardware would make it better.  For example, if it uses D0 and D1 instead
+of Autofd and D0 for output, if it uses PE for input instead of BSY, I
+could have modified the thing to run under the standard LINUX parallel
+port driver, so it wouldn't require peeking and poking to run the port.
+This would actually make it run faster!  I didn't make any of these changes
+because I wanted to spend my time earning money and not hacking with my
+support tools.
+<P>
+It would also be fun to use D2 and D3 to control the voltage, so that
+the software could do the marginal testing without requiring the
+user to flip the marginal test switch before each verification pass.
+<P>
+
+<H2><A NAME="Other">Other PIC Material</A></H2>
+<P>
+As I mentioned, I was doing this work for pay.  The PIC software
+I've developed is mostly proprietary, but I didn't charge them for
+the
+<A HREF="http://homepage.cs.uiowa.edu/~dwjones/bcd/decimalpic.html">
+binary to decimal conversion code</A>
+that I included in the project, so I've put it up on the web.  This
+is but one fragment of the large program I developed using the SMALpic
+assembler and the SNOPPP programmer.  Yes, it runs in the board shown
+in the picture of my in-circuit programming rig.  The board runs a pair
+of stepping motors inside a
+<A HREF="http://www.ivcco.com/products/index.html">
+tilt-pan-zoom webcam mount</A>
+that I had a large part in designing.
+<P>
+<A HREF="http://www.dontronics.com/piclinks.html">Don McKenzie</A> maintains
+a good index of PIC resources.
+<A HREF="http://www.brouhaha.com/~eric/pic/">Eric Raymond</A> also has a good
+list.
+<A HREF="http://www.programmersheaven.com/zone5/mh10.htm">Programmer's
+Heaven</A>
+maintains an index of PIC materials submitted by their readers.
+
+</BODY>
+</HTML>
